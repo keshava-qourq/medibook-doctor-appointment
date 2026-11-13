@@ -51,6 +51,44 @@ def test_ac006_ac007_login_generic_failure_and_logout_revokes_one(client):
     assert client.get("/api/auth/me", headers=h2).status_code == 200
 
 
+def test_ac005_login_landing_is_role_specific(client, db_session):
+    from app.models import User
+
+    email = f"{secrets.token_hex(4)}@example.com"
+    pw = secrets.token_urlsafe(10)
+    client.post("/api/auth/register", json=_body(email, pw))
+    patient = client.post("/api/auth/login", json={"email": email, "password": pw})
+    assert patient.status_code == 200
+    assert patient.json()["landing"] == "/search"
+
+    for role, landing in (("doctor", "/doctor-schedule"), ("admin", "/admin")):
+        staff_email = f"{role}-{secrets.token_hex(4)}@example.com"
+        staff_pw = secrets.token_urlsafe(10)
+        client.post("/api/auth/register", json=_body(staff_email, staff_pw))
+        u = db_session.query(User).filter(User.email == staff_email).first()
+        u.role = role
+        db_session.commit()
+        resp = client.post("/api/auth/login", json={"email": staff_email, "password": staff_pw})
+        assert resp.status_code == 200
+        assert resp.json()["landing"] == landing
+
+
+def test_ac_me_returns_profile_for_valid_token_and_401_without(client):
+    email = f"{secrets.token_hex(4)}@example.com"
+    pw = secrets.token_urlsafe(10)
+    reg = client.post("/api/auth/register", json=_body(email, pw))
+    token = reg.json()["token"]
+
+    ok = client.get("/api/auth/me", headers={"Authorization": f"Bearer {token}"})
+    assert ok.status_code == 200
+    body = ok.json()
+    assert set(body) == {"id", "full_name", "email", "phone", "role"}
+    assert body["role"] == "patient"
+    assert body["email"] == email
+
+    assert client.get("/api/auth/me").status_code == 401
+
+
 def test_ac009_inactive_login_refused(client, db_session):
     from app.models import User
 
