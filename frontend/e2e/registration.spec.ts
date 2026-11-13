@@ -10,9 +10,7 @@ import {
 } from "./support/api";
 import { adminCredentials } from "./support/admin";
 
-test("[AC-001] registers a new patient and lands on the doctor search screen", async ({
-  page,
-}) => {
+test("[AC-001] registers a new patient and lands on the doctor search screen", async ({ page }) => {
   await page.goto("/sign-in");
   await page.getByRole("tab", { name: /register as patient/i }).click();
 

@@ -27,9 +27,7 @@ class RegisterRequest(BaseModel):
         # test_environment=True so reserved domains (e.g. example.test used by the
         # e2e suite) validate; check_deliverability stays off for offline runs.
         try:
-            return validate_email(
-                v, check_deliverability=False, test_environment=True
-            ).normalized
+            return validate_email(v, check_deliverability=False, test_environment=True).normalized
         except EmailNotValidError as exc:
             raise ValueError("invalid_email") from exc
 

@@ -170,9 +170,7 @@ def test_ac011_password_reset_missing_user_is_404_empty_body_and_weak_is_422(
     assert weak.json()["password"] == "weak_password"
 
 
-def test_ac011_accepts_contract_new_password_field(
-    db_session: DBSession, app_client: TestClient
-):
+def test_ac011_accepts_contract_new_password_field(db_session: DBSession, app_client: TestClient):
     """The API contract and the e2e client send the reset password as
     `new_password`; the endpoint must accept it (AC-011)."""
     admin = _make_user(db_session)
