@@ -5,8 +5,6 @@ the app does (its own settings module when it has one, else the environment), an
 one JSON line per service: {"service": ..., "ok": true|false, "detail": "..."}.
 It never prints a setting's value. It always exits 0: the result is in the lines.
 
-This app uses only PostgreSQL and Redis; those are the only services checked.
-
 Run it from the repository root: backend/.venv/bin/python backend/scripts/check_connections.py
 """
 
@@ -19,7 +17,9 @@ import os
 import socket
 import ssl
 import sys
+import urllib.error
 import urllib.parse
+import urllib.request
 from pathlib import Path
 
 SERVICES = ["postgres", "redis"]
@@ -27,6 +27,7 @@ SERVICES = ["postgres", "redis"]
 TIMEOUT = 5.0
 BACKEND = Path(__file__).resolve().parent.parent
 SETTINGS_MODULES = ("app.config", "app.settings", "app.core.config", "app.core.settings")
+VECTOR_SQL = "SELECT 1 FROM pg_extension WHERE extname = 'vector'"
 
 
 def load_settings():
@@ -80,7 +81,7 @@ def sync_url(url):
     return ""
 
 
-def check_database():
+def check_database(vector):
     url = setting("DATABASE_URL")
     if not url:
         return False, "DATABASE_URL is not set"
@@ -105,6 +106,7 @@ def check_database():
         try:
             with engine.connect() as conn:
                 conn.execute(sqlalchemy.text("SELECT 1"))
+                has_vector = conn.execute(sqlalchemy.text(VECTOR_SQL)).scalar() if vector else 1
         finally:
             engine.dispose()
     else:
@@ -121,8 +123,16 @@ def check_database():
             cur = conn.cursor()
             cur.execute("SELECT 1")
             cur.fetchone()
+            has_vector = 1
+            if vector:
+                cur.execute(VECTOR_SQL)
+                has_vector = cur.fetchone()
         finally:
             conn.close()
+    if not has_vector:
+        return False, "connected, but the vector extension is not installed"
+    if vector:
+        return True, "SELECT 1 answered; vector extension present"
     return True, "SELECT 1 answered"
 
 
@@ -197,9 +207,94 @@ def check_redis():
     return redis_refusal(answer)
 
 
+def http_get(url, headers):
+    # No proxy: the sandbox's services are on its own network, not behind the egress proxy.
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+    request = urllib.request.Request(url, headers=headers)
+    try:
+        with opener.open(request, timeout=TIMEOUT) as response:
+            return response.status, response.read()
+    except urllib.error.HTTPError as exc:
+        return exc.code, b""
+
+
+def check_meilisearch():
+    url = setting("MEILI_URL")
+    if not url:
+        return False, "MEILI_URL is not set"
+    if urllib.parse.urlsplit(url).scheme not in ("http", "https"):
+        return False, "MEILI_URL is not an http(s) URL"
+    key = setting("MEILI_MASTER_KEY")
+    if not key:
+        return False, "MEILI_MASTER_KEY is not set"
+    base = url.rstrip("/")
+    status, body = http_get(base + "/health", {})
+    if status != 200 or b"available" not in body:
+        return False, "Meilisearch is not healthy"
+    status, _ = http_get(base + "/version", {"Authorization": "Bearer " + key})
+    if status in (401, 403):
+        return False, "Meilisearch refused the master key"
+    if status != 200:
+        return False, "Meilisearch did not answer"
+    return True, "health answered; key accepted"
+
+
+def check_bucket(needs_endpoint):
+    bucket = setting("S3_BUCKET")
+    if not bucket:
+        return False, "S3_BUCKET is not set"
+    endpoint = setting("S3_ENDPOINT_URL") or None
+    if needs_endpoint and not endpoint:
+        return False, "S3_ENDPOINT_URL is not set"
+    try:
+        import boto3
+        from botocore.config import Config
+        from botocore.exceptions import ClientError, NoCredentialsError
+    except ImportError:
+        return False, "boto3 is not installed in the app"
+    keys = {}
+    for name, arg in (
+        ("AWS_ACCESS_KEY_ID", "aws_access_key_id"),
+        ("AWS_SECRET_ACCESS_KEY", "aws_secret_access_key"),
+        ("AWS_SESSION_TOKEN", "aws_session_token"),
+    ):
+        value = setting(name)
+        if value:
+            keys[arg] = value
+    config = Config(
+        connect_timeout=TIMEOUT,
+        read_timeout=TIMEOUT,
+        retries={"max_attempts": 1},
+        s3={"addressing_style": "path"} if endpoint else {},
+    )
+    client = boto3.client(
+        "s3",
+        region_name=setting("AWS_REGION") or None,
+        endpoint_url=endpoint,
+        config=config,
+        **keys,
+    )
+    try:
+        client.head_bucket(Bucket=bucket)
+    except NoCredentialsError:
+        return False, "no AWS credentials found"
+    except ClientError as exc:
+        code = str(exc.response.get("Error", {}).get("Code", ""))
+        if code in ("403", "AccessDenied", "Forbidden"):
+            return False, "access to the bucket was refused"
+        if code in ("404", "NoSuchBucket", "NotFound"):
+            return False, "the bucket does not exist"
+        return failure(exc)
+    return True, "bucket reachable"
+
+
 CHECKS = {
-    "postgres": check_database,
+    "postgres": lambda: check_database(vector=False),
+    "pgvector": lambda: check_database(vector=True),
     "redis": check_redis,
+    "meilisearch": check_meilisearch,
+    "minio": lambda: check_bucket(needs_endpoint=True),
+    "s3": lambda: check_bucket(needs_endpoint=False),
 }
 
 
