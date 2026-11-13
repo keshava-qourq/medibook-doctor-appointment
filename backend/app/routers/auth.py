@@ -2,7 +2,7 @@
 
 from datetime import UTC, datetime
 
-from email_validator import EmailNotValidError, validate_email
+from email_validator import validate_email
 from fastapi import APIRouter, Depends, Header, HTTPException, Response
 from fastapi.responses import JSONResponse
 from sqlalchemy import func
@@ -15,7 +15,6 @@ from app.models import Session as SessionModel
 from app.models import User
 from app.schemas import LoginRequest, RegisterRequest
 from app.security import (
-    MIN_PASSWORD_LENGTH,
     create_session,
     find_session_by_token,
     hash_password,
@@ -49,29 +48,13 @@ def _user_payload(user: User) -> dict[str, object]:
 
 @router.post("/register", status_code=201)
 def register(body: RegisterRequest, db: DBSession = Depends(get_db)):  # noqa: B008
-    """Create a patient account and open its first session (AC-001)."""
-    errors: list[dict[str, str]] = []
+    """Create a patient account and open its first session (AC-001).
 
-    if not body.full_name or not body.full_name.strip():
-        errors.append({"field": "full_name", "message": "required"})
-
-    email = (body.email or "").strip()
-    if not email:
-        errors.append({"field": "email", "message": "required"})
-    else:
-        try:
-            email = validate_email(email, check_deliverability=False).normalized
-        except EmailNotValidError:
-            errors.append({"field": "email", "message": "invalid_email"})
-
-    if not body.phone or not body.phone.strip():
-        errors.append({"field": "phone", "message": "required"})
-
-    if not body.password or len(body.password) < MIN_PASSWORD_LENGTH:
-        errors.append({"field": "password", "message": "weak_password"})
-
-    if errors:
-        return JSONResponse(status_code=422, content={"detail": errors})
+    ``RegisterRequest``'s Pydantic validators already enforce full_name, email,
+    phone and password, so an invalid field is rejected with 422 before this
+    body runs. Here we only normalize the already-valid email for storage.
+    """
+    email = validate_email(body.email, check_deliverability=False).normalized
 
     existing = db.query(User).filter(func.lower(User.email) == email.lower()).first()
     if existing is not None:

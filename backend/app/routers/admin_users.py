@@ -8,6 +8,7 @@ from email_validator import EmailNotValidError, validate_email
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse, Response
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session as DBSession
 
 from app.auth import require_role
@@ -56,26 +57,26 @@ def _to_out(user: User) -> AdminUserOut:
 
 @router.post("/users", status_code=201, response_model=AdminUserCreateOut)
 def create_user(payload: AdminUserCreate, db: DBSession = Depends(get_db)):  # noqa: B008
-    errors: dict[str, str] = {}
+    errors: list[dict[str, str]] = []
 
     if not payload.full_name or not payload.full_name.strip():
-        errors["full_name"] = "required"
+        errors.append({"field": "full_name", "msg": "required"})
 
     email = payload.email
     try:
         validated = validate_email(payload.email, check_deliverability=False)
         email = validated.normalized
     except EmailNotValidError:
-        errors["email"] = "invalid_email"
+        errors.append({"field": "email", "msg": "invalid_email"})
 
     if payload.role not in ALLOWED_ROLES:
-        errors["role"] = "invalid_role"
+        errors.append({"field": "role", "msg": "invalid_role"})
 
     if len(payload.password) < MIN_PASSWORD_LENGTH:
-        errors["password"] = "weak_password"
+        errors.append({"field": "password", "msg": "weak_password"})
 
     if errors:
-        return JSONResponse(status_code=422, content=errors)
+        return JSONResponse(status_code=422, content={"detail": errors})
 
     existing = db.query(User).filter(func.lower(User.email) == email.lower()).first()
     if existing is not None:
@@ -89,7 +90,12 @@ def create_user(payload: AdminUserCreate, db: DBSession = Depends(get_db)):  # n
         password_hash=hash_password(payload.password),
     )
     db.add(user)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        # A concurrent create won the race on the unique email: nothing partial remains.
+        db.rollback()
+        return JSONResponse(status_code=409, content={"code": "email_in_use"})
     db.refresh(user)
 
     return AdminUserCreateOut(
