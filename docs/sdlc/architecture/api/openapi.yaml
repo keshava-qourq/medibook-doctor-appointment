@@ -2,6 +2,1245 @@
 openapi: 3.1.0
 info:
   title: MediBook – Doctor Appointment & Consultation Management System
-  version: architecture-v0
+  version: architecture-v1
   description: Designed API from the approved architecture (not extracted from code).
-paths: {}
+paths:
+  /api/admin/audit-log:
+    get:
+      summary: Read-only append-only audit log of consultation access. Shows actor,
+        action, record and patient identifiers and timestam
+      description: Read-only append-only audit log of consultation access. Shows actor,
+        action, record and patient identifiers and timestamp, never clinical content.
+        No write, edit or delete endpoint exists.
+      operationId: get_api_admin_audit_log
+      parameters: []
+      responses:
+        '200':
+          description: 200 {items:[{occurred_at, actor_user_id, actor_role, action,
+            resource_type, resource_id, subject_patient_user_id, outcome}], total}
+      security:
+      - bearerAuth: []
+  /api/admin/catalog-terms:
+    get:
+      summary: List catalogue entries with term, entry type and mapped specializations,
+        seeded and administrator-created alike.
+      description: List catalogue entries with term, entry type and mapped specializations,
+        seeded and administrator-created alike.
+      operationId: get_api_admin_catalog_terms
+      parameters: []
+      responses:
+        '200':
+          description: 200 {items:[{id, term, entry_type, specializations, is_seeded}],
+            total}
+      security:
+      - bearerAuth: []
+    post:
+      summary: Add a catalogue term mapped to one or more active specializations.
+      description: Add a catalogue term mapped to one or more active specializations.
+      operationId: post_api_admin_catalog_terms
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{term, entry_type, specialization_ids[]}'
+      responses:
+        '200':
+          description: 201 {id} | 422 specialization_required | 409 duplicate_term
+      security:
+      - bearerAuth: []
+  /api/admin/catalog-terms/{id}:
+    put:
+      summary: Edit a term or its mappings. At least one specialization is required.
+      description: Edit a term or its mappings. At least one specialization is required.
+      operationId: put_api_admin_catalog_terms_id
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{term, entry_type, specialization_ids[]}'
+      responses:
+        '200':
+          description: 200 {id} | 422 specialization_required
+      security:
+      - bearerAuth: []
+    delete:
+      summary: Soft-delete a term so it stops resolving while booked appointments
+        stay untouched and re-seeding will not recreate it.
+      description: Soft-delete a term so it stops resolving while booked appointments
+        stay untouched and re-seeding will not recreate it.
+      operationId: delete_api_admin_catalog_terms_id
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: '204'
+      security:
+      - bearerAuth: []
+  /api/admin/doctors/{doctor_id}:
+    put:
+      summary: Maintain a doctor profile. Requires at least one specialization and
+        reports the count of affected future appointments wh
+      description: Maintain a doctor profile. Requires at least one specialization
+        and reports the count of affected future appointments when deactivating.
+      operationId: put_api_admin_doctors_doctor_id
+      parameters:
+      - name: doctor_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{display_name, specialization_ids[], qualifications, biography,
+                room_location, consultation_fee, is_active}'
+      responses:
+        '200':
+          description: 200 {id, affected_future_appointments} | 422 specialization_required
+      security:
+      - bearerAuth: []
+  /api/admin/settings:
+    put:
+      summary: 'Set the single clinic timezone and the booking cutoff in hours, effective
+        immediately. A negative or non-numeric cutoff '
+      description: Set the single clinic timezone and the booking cutoff in hours,
+        effective immediately. A negative or non-numeric cutoff is rejected and the
+        previous value stays in force.
+      operationId: put_api_admin_settings
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{clinic_name, timezone, booking_cutoff_hours}'
+      responses:
+        '200':
+          description: 200 settings | 422 {field, message}
+      security:
+      - bearerAuth: []
+  /api/admin/specializations:
+    post:
+      summary: Create a specialization, rejecting a duplicate name.
+      description: Create a specialization, rejecting a duplicate name.
+      operationId: post_api_admin_specializations
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{name, description?}'
+      responses:
+        '200':
+          description: 201 {id} | 409 duplicate_name
+      security:
+      - bearerAuth: []
+  /api/admin/specializations/{id}:
+    patch:
+      summary: Rename, re-describe, activate or deactivate a specialization.
+      description: Rename, re-describe, activate or deactivate a specialization.
+      operationId: patch_api_admin_specializations_id
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{name?, description?, is_active?}'
+      responses:
+        '200':
+          description: 200 {id} | 409 duplicate_name
+      security:
+      - bearerAuth: []
+    delete:
+      summary: Refused while doctors or catalogue mappings reference it, returning
+        the reference counts and offering deactivation.
+      description: Refused while doctors or catalogue mappings reference it, returning
+        the reference counts and offering deactivation.
+      operationId: delete_api_admin_specializations_id
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: '204 | 409 {doctor_count, mapping_count, suggestion: ''deactivate''}'
+      security:
+      - bearerAuth: []
+  /api/admin/users:
+    get:
+      summary: List staff and patient accounts with role and active status. No clinical
+        content.
+      description: List staff and patient accounts with role and active status. No
+        clinical content.
+      operationId: get_api_admin_users
+      parameters: []
+      responses:
+        '200':
+          description: 200 {items:[{id, full_name, email, role, is_active}], total}
+      security:
+      - bearerAuth: []
+    post:
+      summary: Create a doctor or administrator account with an initial password returned
+        once for hand-off.
+      description: Create a doctor or administrator account with an initial password
+        returned once for hand-off.
+      operationId: post_api_admin_users
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{full_name, email, role: ''doctor''|''admin'', initial_password}'
+      responses:
+        '200':
+          description: 201 {id, role, initial_password_shown_once} | 409 email_in_use
+      security:
+      - bearerAuth: []
+  /api/admin/users/{user_id}:
+    patch:
+      summary: Activate or deactivate an account. Deactivation revokes every session
+        that account holds.
+      description: Activate or deactivate an account. Deactivation revokes every session
+        that account holds.
+      operationId: patch_api_admin_users_user_id
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{is_active}'
+      responses:
+        '200':
+          description: 200 {id, is_active} | 404
+      security:
+      - bearerAuth: []
+  /api/admin/users/{user_id}/password:
+    post:
+      summary: Issue a replacement password for a doctor or administrator. Old password
+        stops working and all their sessions are revoke
+      description: Issue a replacement password for a doctor or administrator. Old
+        password stops working and all their sessions are revoked.
+      operationId: post_api_admin_users_user_id_password
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{new_password}'
+      responses:
+        '200':
+          description: 200 {password_shown_once} | 403
+      security:
+      - bearerAuth: []
+  /api/appointments:
+    get:
+      summary: 'Appointments scoped to the caller: a patient sees only their own,
+        a doctor only those they treat. Supports upcoming/past'
+      description: 'Appointments scoped to the caller: a patient sees only their own,
+        a doctor only those they treat. Supports upcoming/past split, date range and
+        status filters.'
+      operationId: get_api_appointments
+      parameters: []
+      responses:
+        '200':
+          description: 200 {items:[{id, doctor, patient_name, specialization, slot_start,
+            timezone, room_location, status, reason_for_visit, consultation_id?}]}
+      security:
+      - bearerAuth: []
+    post:
+      summary: Book one slot inside a transaction guarded by the unique (doctor_id,
+        slot_start) constraint. The loser of a race receive
+      description: Book one slot inside a transaction guarded by the unique (doctor_id,
+        slot_start) constraint. The loser of a race receives slot_taken and no row
+        is written.
+      operationId: post_api_appointments
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{doctor_id, slot_start, reason_for_visit?}'
+      responses:
+        '200':
+          description: 201 {id, doctor, slot_start, timezone, room_location, consultation_fee,
+            fee_note, visit_type:'in_person'} | 409 slot_taken | 409 duplicate_booking
+      security:
+      - bearerAuth: []
+  /api/appointments/{id}:
+    get:
+      summary: 'One appointment, returned only to its patient or its treating doctor.
+        Administrators receive scheduling fields only and '
+      description: One appointment, returned only to its patient or its treating doctor.
+        Administrators receive scheduling fields only and never clinical content.
+      operationId: get_api_appointments_id
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: 200 appointment | 403 access_denied
+      security:
+      - bearerAuth: []
+  /api/appointments/{id}/cancel:
+    post:
+      summary: Patient cancellation outside the cutoff. Records canceller and time
+        and frees the slot at once.
+      description: Patient cancellation outside the cutoff. Records canceller and
+        time and frees the slot at once.
+      operationId: post_api_appointments_id_cancel
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{reason?}'
+      responses:
+        '200':
+          description: 200 {id, status:'cancelled'} | 403 cutoff_passed
+      security:
+      - bearerAuth: []
+  /api/appointments/{id}/consultation:
+    post:
+      summary: Treating doctor records notes, a required diagnosis, advice and zero
+        or more ordered prescription lines. Writes a create
+      description: Treating doctor records notes, a required diagnosis, advice and
+        zero or more ordered prescription lines. Writes a create audit entry.
+      operationId: post_api_appointments_id_consultation
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{diagnosis, notes?, advice?, prescription_lines:[{medicine,
+                dosage, duration}]}'
+      responses:
+        '200':
+          description: 201 {consultation_id} | 422 diagnosis_required | 422 incomplete_prescription_line
+            | 403 access_denied
+      security:
+      - bearerAuth: []
+  /api/appointments/{id}/reschedule:
+    post:
+      summary: Move the appointment to another open slot in one transaction, freeing
+        the old slot immediately. Refused inside the cutof
+      description: Move the appointment to another open slot in one transaction, freeing
+        the old slot immediately. Refused inside the cutoff or at a final status.
+      operationId: post_api_appointments_id_reschedule
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{new_slot_start}'
+      responses:
+        '200':
+          description: 200 {id, slot_start} | 409 slot_taken | 403 cutoff_passed |
+            409 final_status
+      security:
+      - bearerAuth: []
+  /api/appointments/{id}/status:
+    patch:
+      summary: Treating doctor moves the appointment to confirmed, completed, no_show
+        or cancelled with a reason. Records who and when,
+      description: Treating doctor moves the appointment to confirmed, completed,
+        no_show or cancelled with a reason. Records who and when, refuses final-status
+        changes and any doctor who is not the treating doctor.
+      operationId: patch_api_appointments_id_status
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{status, reason?}'
+      responses:
+        '200':
+          description: 200 {id, status} | 409 final_status | 403 access_denied
+      security:
+      - bearerAuth: []
+  /api/auth/login:
+    post:
+      summary: Authenticate any role and open a server-side session. One generic failure
+        message for unknown email or wrong password.
+      description: Authenticate any role and open a server-side session. One generic
+        failure message for unknown email or wrong password.
+      operationId: post_api_auth_login
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{email, password}'
+      responses:
+        '200':
+          description: '200 {token, user: {id, role}, landing} | 401 invalid_credentials
+            | 403 account_inactive'
+      security:
+      - bearerAuth: []
+  /api/auth/logout:
+    post:
+      summary: Revoke the bearer session immediately so protected pages cannot be
+        re-served.
+      description: Revoke the bearer session immediately so protected pages cannot
+        be re-served.
+      operationId: post_api_auth_logout
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '-'
+      responses:
+        '200':
+          description: '204'
+      security:
+      - bearerAuth: []
+  /api/auth/me:
+    get:
+      summary: Current user, role and session validity for client bootstrap.
+      description: Current user, role and session validity for client bootstrap.
+      operationId: get_api_auth_me
+      parameters: []
+      responses:
+        '200':
+          description: 200 {id, full_name, email, role} | 401 session_expired
+      security:
+      - bearerAuth: []
+  /api/auth/register:
+    post:
+      summary: Patient self-registration. Rejects a duplicate email and invalid fields
+        per-field with nothing partially written.
+      description: Patient self-registration. Rejects a duplicate email and invalid
+        fields per-field with nothing partially written.
+      operationId: post_api_auth_register
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{full_name, email, phone, password}'
+      responses:
+        '200':
+          description: '201 {token, user: {id, full_name, role: ''patient''}, landing:
+            ''/search''} | 409 email_in_use | 422 field errors'
+      security:
+      - bearerAuth: []
+  /api/catalog/suggest:
+    get:
+      summary: Deterministic text-match suggestions over stored disease, symptom and
+        specialization names. Minimum two characters, no A
+      description: Deterministic text-match suggestions over stored disease, symptom
+        and specialization names. Minimum two characters, no AI or ML.
+      operationId: get_api_catalog_suggest
+      parameters: []
+      responses:
+        '200':
+          description: 200 [{id, term, entry_type}]
+      security:
+      - bearerAuth: []
+  /api/consultations:
+    get:
+      summary: The signed-in patient's own consultation history, most recent first,
+        with date, doctor, specialization and diagnosis.
+      description: The signed-in patient's own consultation history, most recent first,
+        with date, doctor, specialization and diagnosis.
+      operationId: get_api_consultations
+      parameters: []
+      responses:
+        '200':
+          description: 200 {items:[{id, date, doctor_name, specialization, diagnosis}],
+            total}
+      security:
+      - bearerAuth: []
+  /api/consultations/{id}:
+    get:
+      summary: 'Returns the record only to the owning patient or the treating doctor,
+        including the print payload fields. Every success '
+      description: Returns the record only to the owning patient or the treating doctor,
+        including the print payload fields. Every success writes a view audit entry
+        and every refusal writes a denied entry.
+      operationId: get_api_consultations_id
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: 200 {date, clinic_name, patient_name, doctor_name, qualifications,
+            diagnosis, notes, advice, prescription_lines:[]} | 403 access_denied
+      security:
+      - bearerAuth: []
+    put:
+      summary: Treating doctor edits and re-saves a consultation and its prescription
+        lines. Writes an update audit entry.
+      description: Treating doctor edits and re-saves a consultation and its prescription
+        lines. Writes an update audit entry.
+      operationId: put_api_consultations_id
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{diagnosis, notes?, advice?, prescription_lines:[...]}'
+      responses:
+        '200':
+          description: 200 {consultation_id} | 403 access_denied
+      security:
+      - bearerAuth: []
+  /api/doctors:
+    get:
+      summary: Doctor directory with specialization and name filters. Active doctors
+        only for patients.
+      description: Doctor directory with specialization and name filters. Active doctors
+        only for patients.
+      operationId: get_api_doctors
+      parameters: []
+      responses:
+        '200':
+          description: 200 {items:[{id, display_name, specializations, qualifications,
+            consultation_fee, fee_note:'payable at the clinic'}], total}
+      security:
+      - bearerAuth: []
+  /api/doctors/me/exceptions:
+    get:
+      summary: List the doctor's one-off unavailable and extra-hours exceptions.
+      description: List the doctor's one-off unavailable and extra-hours exceptions.
+      operationId: get_api_doctors_me_exceptions
+      parameters: []
+      responses:
+        '200':
+          description: 200 [{id, exception_date, exception_type, start_time, end_time,
+            reason}]
+      security:
+      - bearerAuth: []
+    post:
+      summary: Record leave or extra one-off hours for today or a future date. When
+        bookings fall inside leave, returns them for explic
+      description: Record leave or extra one-off hours for today or a future date.
+        When bookings fall inside leave, returns them for explicit confirmation, then
+        cancels each with the reason recorded.
+      operationId: post_api_doctors_me_exceptions
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{exception_date, exception_type, start_time?, end_time?,
+                reason?, confirm_cancellations?}'
+      responses:
+        '200':
+          description: 201 {id, cancelled_appointments:[]} | 409 {affected_appointments:[...]}
+            | 422 past_date
+      security:
+      - bearerAuth: []
+  /api/doctors/me/exceptions/{id}:
+    delete:
+      summary: Remove an exception so the normal pattern applies again.
+      description: Remove an exception so the normal pattern applies again.
+      operationId: delete_api_doctors_me_exceptions_id
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: '204'
+      security:
+      - bearerAuth: []
+  /api/doctors/me/weekly-availability:
+    get:
+      summary: The signed-in doctor's weekly pattern with breaks as a week view.
+      description: The signed-in doctor's weekly pattern with breaks as a week view.
+      operationId: get_api_doctors_me_weekly_availability
+      parameters: []
+      responses:
+        '200':
+          description: 200 [{day_of_week, start_time, end_time, slot_minutes, breaks:[]}]
+      security:
+      - bearerAuth: []
+    put:
+      summary: Replace the weekly pattern. Validates times, slot length and non-overlapping
+        in-hours breaks per day, and warns with the
+      description: Replace the weekly pattern. Validates times, slot length and non-overlapping
+        in-hours breaks per day, and warns with the list of booked appointments that
+        fall outside the new pattern without deleting them.
+      operationId: put_api_doctors_me_weekly_availability
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{days:[{day_of_week, start_time, end_time, slot_minutes,
+                breaks:[{start_time, end_time}]}], acknowledge_affected?}'
+      responses:
+        '200':
+          description: 200 {saved:true} | 409 {affected_appointments:[...]} | 422
+            {day, field, message}
+      security:
+      - bearerAuth: []
+  /api/doctors/{doctor_id}:
+    get:
+      summary: Doctor profile for the booking page. Returns doctor_unavailable if
+        deactivated since the results were loaded.
+      description: Doctor profile for the booking page. Returns doctor_unavailable
+        if deactivated since the results were loaded.
+      operationId: get_api_doctors_doctor_id
+      parameters:
+      - name: doctor_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: 200 {id, display_name, specializations, qualifications, biography,
+            room_location, consultation_fee, is_active} | 410 doctor_unavailable
+      security:
+      - bearerAuth: []
+  /api/doctors/{doctor_id}/availability:
+    get:
+      summary: Freshly derived bookable slots for one date in the clinic timezone,
+        excluding breaks, exceptions, elapsed and taken slot
+      description: Freshly derived bookable slots for one date in the clinic timezone,
+        excluding breaks, exceptions, elapsed and taken slots.
+      operationId: get_api_doctors_doctor_id_availability
+      parameters:
+      - name: doctor_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: 200 {timezone, date, slots:[{start, end, available}]} | 503
+            availability_unavailable
+      security:
+      - bearerAuth: []
+  /api/patients/me:
+    get:
+      summary: The signed-in patient's own profile.
+      description: The signed-in patient's own profile.
+      operationId: get_api_patients_me
+      parameters: []
+      responses:
+        '200':
+          description: 200 {full_name, email, phone, date_of_birth, gender}
+      security:
+      - bearerAuth: []
+    patch:
+      summary: Update own name, phone, date of birth and gender.
+      description: Update own name, phone, date of birth and gender.
+      operationId: patch_api_patients_me
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{full_name?, phone?, date_of_birth?, gender?}'
+      responses:
+        '200':
+          description: 200 updated profile | 422 field errors
+      security:
+      - bearerAuth: []
+  /api/patients/me/password:
+    post:
+      summary: Change own password with the current password supplied.
+      description: Change own password with the current password supplied.
+      operationId: post_api_patients_me_password
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{current_password, new_password}'
+      responses:
+        '200':
+          description: 204 | 400 current_password_incorrect | 422 weak_password
+      security:
+      - bearerAuth: []
+  /api/search/doctors:
+    get:
+      summary: Resolve a catalogue term through the mapping to specializations and
+        list matching active doctors, with explicit no-match
+      description: Resolve a catalogue term through the mapping to specializations
+        and list matching active doctors, with explicit no-match and no-specialist
+        outcomes.
+      operationId: get_api_search_doctors
+      parameters: []
+      responses:
+        '200':
+          description: 200 {resolution:'matched'|'no_match'|'no_specialist_available',
+            specializations:[], doctors:[]}
+      security:
+      - bearerAuth: []
+  /api/settings:
+    get:
+      summary: Clinic timezone, its confirmation flag and the booking cutoff, needed
+        by every client to label and format times.
+      description: Clinic timezone, its confirmation flag and the booking cutoff,
+        needed by every client to label and format times.
+      operationId: get_api_settings
+      parameters: []
+      responses:
+        '200':
+          description: 200 {clinic_name, timezone, timezone_confirmed, booking_cutoff_hours}
+      security:
+      - bearerAuth: []
+  /api/specializations:
+    get:
+      summary: List specializations. Patients receive active ones only.
+      description: List specializations. Patients receive active ones only.
+      operationId: get_api_specializations
+      parameters: []
+      responses:
+        '200':
+          description: 200 [{id, name, description, is_active}]
+      security:
+      - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    users:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        full_name:
+          type: string
+        email:
+          type: string
+        password_hash:
+          type: string
+        role:
+          type: string
+        is_active:
+          type: boolean
+        password_changed_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - full_name
+      - email
+      - password_hash
+      - role
+      - is_active
+      - created_at
+      - updated_at
+    sessions:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        token_hash:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        last_seen_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+        revoked_at:
+          type: string
+          format: date-time
+        revoked_reason:
+          type: string
+      required:
+      - id
+      - user_id
+      - token_hash
+      - created_at
+      - last_seen_at
+      - expires_at
+    patient_profiles:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        phone:
+          type: string
+        date_of_birth:
+          type: string
+          format: date
+        gender:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - user_id
+      - phone
+      - updated_at
+    specializations:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - name
+      - is_active
+      - created_at
+    doctors:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        display_name:
+          type: string
+        qualifications:
+          type: string
+        biography:
+          type: string
+        room_location:
+          type: string
+        consultation_fee:
+          type: number
+        is_active:
+          type: boolean
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - user_id
+      - display_name
+      - is_active
+      - updated_at
+    doctor_specializations:
+      type: object
+      properties:
+        doctor_id:
+          type: string
+          format: uuid
+        specialization_id:
+          type: string
+          format: uuid
+      required:
+      - doctor_id
+      - specialization_id
+    catalog_terms:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        term:
+          type: string
+        entry_type:
+          type: string
+        seed_key:
+          type: string
+        admin_modified:
+          type: boolean
+        deleted_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - term
+      - entry_type
+      - admin_modified
+      - created_at
+    term_specializations:
+      type: object
+      properties:
+        term_id:
+          type: string
+          format: uuid
+        specialization_id:
+          type: string
+          format: uuid
+      required:
+      - term_id
+      - specialization_id
+    doctor_weekly_availability:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        doctor_id:
+          type: string
+          format: uuid
+        day_of_week:
+          type: string
+        start_time:
+          type: string
+        end_time:
+          type: string
+        slot_minutes:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - doctor_id
+      - day_of_week
+      - start_time
+      - end_time
+      - slot_minutes
+      - updated_at
+    availability_breaks:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        weekly_availability_id:
+          type: string
+          format: uuid
+        start_time:
+          type: string
+        end_time:
+          type: string
+      required:
+      - id
+      - weekly_availability_id
+      - start_time
+      - end_time
+    availability_exceptions:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        doctor_id:
+          type: string
+          format: uuid
+        exception_date:
+          type: string
+          format: date
+        exception_type:
+          type: string
+        start_time:
+          type: string
+        end_time:
+          type: string
+        reason:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - doctor_id
+      - exception_date
+      - exception_type
+      - created_at
+    appointments:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        doctor_id:
+          type: string
+          format: uuid
+        patient_user_id:
+          type: string
+          format: uuid
+        slot_start:
+          type: string
+          format: date-time
+        slot_end:
+          type: string
+          format: date-time
+        status:
+          type: string
+        reason_for_visit:
+          type: string
+        cancelled_by_user_id:
+          type: string
+          format: uuid
+        cancelled_by_role:
+          type: string
+        cancellation_reason:
+          type: string
+        cancelled_at:
+          type: string
+          format: date-time
+        rescheduled_from_slot_start:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - doctor_id
+      - patient_user_id
+      - slot_start
+      - slot_end
+      - status
+      - created_at
+      - updated_at
+    appointment_status_history:
+      type: object
+      properties:
+        id:
+          type: string
+        appointment_id:
+          type: string
+          format: uuid
+        from_status:
+          type: string
+        to_status:
+          type: string
+        changed_by_user_id:
+          type: string
+          format: uuid
+        reason:
+          type: string
+        changed_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - appointment_id
+      - to_status
+      - changed_by_user_id
+      - changed_at
+    consultations:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        appointment_id:
+          type: string
+          format: uuid
+        doctor_id:
+          type: string
+          format: uuid
+        patient_user_id:
+          type: string
+          format: uuid
+        diagnosis:
+          type: string
+        notes:
+          type: string
+        advice:
+          type: string
+        created_by_user_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - appointment_id
+      - doctor_id
+      - patient_user_id
+      - diagnosis
+      - created_by_user_id
+      - created_at
+      - updated_at
+    prescription_lines:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        consultation_id:
+          type: string
+          format: uuid
+        line_order:
+          type: string
+        medicine:
+          type: string
+        dosage:
+          type: string
+        duration:
+          type: string
+      required:
+      - id
+      - consultation_id
+      - line_order
+      - medicine
+      - dosage
+      - duration
+    audit_log:
+      type: object
+      properties:
+        id:
+          type: string
+        actor_user_id:
+          type: string
+          format: uuid
+        actor_role:
+          type: string
+        action:
+          type: string
+        resource_type:
+          type: string
+        resource_id:
+          type: string
+          format: uuid
+        subject_patient_user_id:
+          type: string
+          format: uuid
+        outcome:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - action
+      - resource_type
+      - outcome
+      - occurred_at
+    clinic_settings:
+      type: object
+      properties:
+        id:
+          type: string
+        clinic_name:
+          type: string
+        timezone:
+          type: string
+        timezone_confirmed:
+          type: boolean
+        booking_cutoff_hours:
+          type: string
+        session_idle_minutes:
+          type: string
+        updated_by_user_id:
+          type: string
+          format: uuid
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - clinic_name
+      - timezone
+      - timezone_confirmed
+      - booking_cutoff_hours
+      - session_idle_minutes
+      - updated_at
