@@ -3,7 +3,8 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 
 import { brand } from "@/lib/brand";
-import { apiRequest, setSessionToken } from "@/lib/api";
+import { apiRequest } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 
 type RegisterValues = {
   full_name: string;
@@ -38,6 +39,7 @@ const pill = {
  */
 export function RegisterForm({ className }: { className?: string }) {
   const navigate = useNavigate();
+  const auth = useAuth();
   const {
     register,
     handleSubmit,
@@ -64,7 +66,9 @@ export function RegisterForm({ className }: { className?: string }) {
 
     if (response.status === 201) {
       const body = (await response.json()) as RegisterSuccess;
-      setSessionToken(body.token);
+      // Through the auth context, not only storage: the guarded landing reads the
+      // context, which would still say "anonymous" and bounce back to /sign-in.
+      auth.signIn(body.token, body.user);
       navigate(body.landing || "/search");
       return;
     }
