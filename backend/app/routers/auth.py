@@ -54,7 +54,9 @@ def register(body: RegisterRequest, db: DBSession = Depends(get_db)):  # noqa: B
     phone and password, so an invalid field is rejected with 422 before this
     body runs. Here we only normalize the already-valid email for storage.
     """
-    email = validate_email(body.email, check_deliverability=False).normalized
+    email = validate_email(
+        body.email, check_deliverability=False, test_environment=True
+    ).normalized
 
     existing = db.query(User).filter(func.lower(User.email) == email.lower()).first()
     if existing is not None:

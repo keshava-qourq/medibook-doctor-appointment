@@ -64,7 +64,9 @@ def create_user(payload: AdminUserCreate, db: DBSession = Depends(get_db)):  # n
 
     email = payload.email
     try:
-        validated = validate_email(payload.email, check_deliverability=False)
+        validated = validate_email(
+            payload.email, check_deliverability=False, test_environment=True
+        )
         email = validated.normalized
     except EmailNotValidError:
         errors.append({"field": "email", "msg": "invalid_email"})

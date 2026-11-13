@@ -4,12 +4,13 @@ One pair per entity in the approved data model, plus the placeholder every
 generated route returns until it has been implemented.
 """
 
-from pydantic import AliasChoices, BaseModel, EmailStr, Field, field_validator
+from email_validator import EmailNotValidError, validate_email
+from pydantic import AliasChoices, BaseModel, Field, field_validator
 
 
 class RegisterRequest(BaseModel):
     full_name: str
-    email: EmailStr
+    email: str
     phone: str
     password: str
 
@@ -19,6 +20,18 @@ class RegisterRequest(BaseModel):
         if not v or not v.strip():
             raise ValueError("required")
         return v
+
+    @field_validator("email")
+    @classmethod
+    def _email_valid(cls, v: str) -> str:
+        # test_environment=True so reserved domains (e.g. example.test used by the
+        # e2e suite) validate; check_deliverability stays off for offline runs.
+        try:
+            return validate_email(
+                v, check_deliverability=False, test_environment=True
+            ).normalized
+        except EmailNotValidError as exc:
+            raise ValueError("invalid_email") from exc
 
     @field_validator("phone")
     @classmethod
