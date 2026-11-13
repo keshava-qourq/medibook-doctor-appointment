@@ -1,0 +1,165 @@
+// @ts-nocheck -- generated from the approved design under its JS runtime contract; not hand-written TypeScript.
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React from "react";
+
+import { Icons } from "@/lib/icons";
+import { brand } from "@/lib/brand";
+import { useNavigate } from "@/lib/navigate";
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const { ArrowLeft, ArrowRight } = Icons;
+
+const PRODUCT = "MediBook – Doctor Appointment & Consultation Management System";
+const SCREEN = "Sign In / Register";
+const tint = (pct) => `color-mix(in srgb, ${brand.primaryColor} ${pct}%, ${brand.backgroundColor})`;
+
+const TABS = [
+  { key: "signin", label: "Sign in", wf: "i-1-0-0" },
+  { key: "register", label: "Register as patient", wf: "i-1-0-1" },
+];
+
+export default function Screen() {
+  const navigate = useNavigate();
+  const [tab, setTab] = React.useState("signin");
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [fullName, setFullName] = React.useState("");
+  const [regEmail, setRegEmail] = React.useState("");
+  const [phone, setPhone] = React.useState("");
+  const [regPassword, setRegPassword] = React.useState("");
+  const pill = { borderRadius: 999, border: 0, backgroundColor: tint(8), color: brand.primaryColor };
+  const ring = { "--tw-ring-color": brand.accentColor };
+  const focusCls = "outline-none focus-visible:ring-2";
+
+  const onTabKey = (e) => {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    e.preventDefault();
+    const next = tab === "signin" ? "register" : "signin";
+    setTab(next);
+    const el = document.getElementById("at-tab-" + next);
+    if (el) el.focus();
+  };
+
+  return (
+    <div className="flex min-h-screen flex-col" style={{ color: brand.primaryColor, fontFamily: brand.fontBody }}>
+      <header className="px-10 py-5" style={{ backgroundColor: tint(10) }}>
+        <p className="text-lg italic" style={{ fontFamily: brand.fontHeading }}>{PRODUCT}</p>
+      </header>
+
+      <div className="flex flex-1 items-center justify-center px-6 py-12">
+        <main className="w-full max-w-md px-9 pb-9 pt-16 text-center" style={{ backgroundColor: tint(6), borderRadius: "170px 170px 24px 24px" }}>
+          <h1 data-wf="b-0-0" className="text-3xl italic" style={{ fontFamily: brand.fontHeading }}>Welcome to MediBook</h1>
+          <p className="mt-2 text-sm lowercase" style={{ color: brand.neutralColor }}>welcome back — it is good to see you</p>
+
+          <div
+            data-wf="b-1-0"
+            role="tablist"
+            aria-label="Sign in or register"
+            className="mt-8 flex gap-1 p-1"
+            style={{ borderRadius: 999, backgroundColor: tint(8) }}
+          >
+            {TABS.map((t) => {
+              const active = tab === t.key;
+              return (
+                <button
+                  key={t.key}
+                  id={"at-tab-" + t.key}
+                  data-wf={t.wf}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  aria-controls={"at-panel-" + t.key}
+                  tabIndex={active ? 0 : -1}
+                  onClick={() => setTab(t.key)}
+                  onKeyDown={onTabKey}
+                  className={"h-11 flex-1 px-3 text-sm font-semibold transition-colors " + focusCls}
+                  style={{
+                    ...ring,
+                    borderRadius: 999,
+                    backgroundColor: active ? brand.primaryColor : "transparent",
+                    color: active ? brand.backgroundColor : brand.primaryColor,
+                  }}
+                >
+                  {t.label}
+                </button>
+              );
+            })}
+          </div>
+
+          <form
+            data-wf="b-2-0"
+            id="at-panel-signin"
+            role="tabpanel"
+            aria-labelledby="at-tab-signin"
+            hidden={tab !== "signin"}
+            className="mt-8 space-y-4 text-left"
+            onSubmit={(e) => { e.preventDefault(); navigate('find-a-doctor'); }}
+          >
+            <h2 className="sr-only">Sign in</h2>
+            <div className="space-y-1">
+              <label htmlFor="at-email" className="block pl-4 text-xs lowercase" style={{ color: brand.neutralColor }}>email</label>
+              <input id="at-email" data-wf="i-2-0-0" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="h-12 w-full px-5 text-sm outline-none" style={pill} />
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="at-password" className="block pl-4 text-xs lowercase" style={{ color: brand.neutralColor }}>password</label>
+              <input id="at-password" data-wf="i-2-0-1" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="h-12 w-full px-5 text-sm outline-none" style={pill} />
+            </div>
+            <button data-wf="b-3-0" type="submit" className="h-12 w-full text-sm font-semibold transition-opacity hover:opacity-90" style={{ borderRadius: 999, backgroundColor: brand.accentColor, color: brand.backgroundColor }}>
+              Sign in
+            </button>
+          </form>
+
+          <form
+            data-wf="b-2-1"
+            id="at-panel-register"
+            role="tabpanel"
+            aria-labelledby="at-tab-register"
+            hidden={tab !== "register"}
+            className="mt-8 space-y-4 text-left"
+            onSubmit={(e) => { e.preventDefault(); navigate('find-a-doctor'); }}
+          >
+            <h2 className="sr-only">Create a patient account</h2>
+            <div className="space-y-1">
+              <label htmlFor="at-reg-name" className="block pl-4 text-xs lowercase" style={{ color: brand.neutralColor }}>full name</label>
+              <input id="at-reg-name" data-wf="i-2-1-0" type="text" autoComplete="name" required value={fullName} onChange={(e) => setFullName(e.target.value)} className={"h-12 w-full px-5 text-sm " + focusCls} style={{ ...pill, ...ring }} />
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="at-reg-email" className="block pl-4 text-xs lowercase" style={{ color: brand.neutralColor }}>email</label>
+              <input id="at-reg-email" data-wf="i-2-1-1" type="email" autoComplete="email" required value={regEmail} onChange={(e) => setRegEmail(e.target.value)} className={"h-12 w-full px-5 text-sm " + focusCls} style={{ ...pill, ...ring }} />
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="at-reg-phone" className="block pl-4 text-xs lowercase" style={{ color: brand.neutralColor }}>phone number</label>
+              <input id="at-reg-phone" data-wf="i-2-1-2" type="tel" autoComplete="tel" required value={phone} onChange={(e) => setPhone(e.target.value)} className={"h-12 w-full px-5 text-sm " + focusCls} style={{ ...pill, ...ring }} />
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="at-reg-password" className="block pl-4 text-xs lowercase" style={{ color: brand.neutralColor }}>password</label>
+              <input
+                id="at-reg-password"
+                data-wf="i-2-1-3"
+                type="password"
+                autoComplete="new-password"
+                required
+                minLength={8}
+                pattern="(?=.*[A-Za-z])(?=.*[0-9]).{8,}"
+                title="At least 8 characters, with letters and numbers"
+                aria-describedby="at-reg-password-hint"
+                value={regPassword}
+                onChange={(e) => setRegPassword(e.target.value)}
+                className={"h-12 w-full px-5 text-sm " + focusCls}
+                style={{ ...pill, ...ring }}
+              />
+              <p id="at-reg-password-hint" className="pl-4 text-xs" style={{ color: brand.neutralColor }}>min. 8 characters, letters and numbers</p>
+            </div>
+            <button data-wf="b-3-1" type="submit" className={"h-12 w-full text-sm font-semibold transition-opacity hover:opacity-90 " + focusCls} style={{ ...ring, borderRadius: 999, backgroundColor: brand.accentColor, color: brand.backgroundColor }}>
+              Create account
+            </button>
+          </form>
+
+          <p className="mt-7 text-xs lowercase" style={{ color: brand.neutralColor }}>
+            new here? <button type="button" className="italic underline underline-offset-4" style={{ color: brand.primaryColor, fontFamily: brand.fontHeading }}>plant an account</button>
+          </p>
+        </main>
+      </div>
+    </div>
+  );
+}
