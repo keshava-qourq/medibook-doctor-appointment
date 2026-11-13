@@ -10,11 +10,16 @@ import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, Response
 
 from app import models  # noqa: F401 -- imported so the tables register before create_all
-from app.database import Base, engine
+from app.database import Base, SessionLocal, engine
+from app.errors import EmptyBodyHTTPError
+from app.routers import admin_users, auth
+from app.seed import seed_startup_users
 from app.services import configured_services
 
 
@@ -29,13 +34,23 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     deployment whose `DATABASE_URL` names a server that is not up fails where you can
     read the error, not while pytest collects the files.
     """
+    if engine.dialect.name == "postgresql":
+        # The User.email column uses citext for case-insensitive uniqueness; the
+        # extension must exist before create_all issues CREATE TABLE ... CITEXT.
+        with engine.begin() as conn:
+            conn.exec_driver_sql("CREATE EXTENSION IF NOT EXISTS citext")
     Base.metadata.create_all(bind=engine)
+    db = SessionLocal()
+    try:
+        seed_startup_users(db)
+    finally:
+        db.close()
     yield
 
 
 app = FastAPI(
     title="MediBook \u2013 Doctor Appointment & Consultation Management System",
-    description="Develop a web-based healthcare appointment management application where patients can search for doctors based on their disease, symptoms, or medical specialization, view available doctors and their consultation time slots, and book, reschedule, or cancel appointments. Doctors can manage their availability, view scheduled appointments, maintain patient consultation records, and update consultation statuses. The system should support role-based access for patients, doctors, and administrators, with an admin dashboard to manage doctors, specializations, and appointments.\n\nThe application must use predefined disease-to-specialization mappings to help patients find relevant doctors, without using AI, LLMs, or machine learning. It should prevent double bookings and display real-time appointment availability. **No payment gateway or online payment functionality is required.**",
+    description="Develop a web-based healthcare appointment management application where patients can search for doctors based on their disease, symptoms, or medical specialization, view available doctors and their consultation time slots, and book, reschedule, or cancel appointments. Doctors can manage their availability, view scheduled appointments, maintain patient consultation records, and update consultation statuses. The system should support role-based access for patients, doctors, and administrators, with an admin dashboard to manage doctors, specializations, and appointments.\n\nThe application must use predefined disease-to-specialization mappings to help patients find relevant doctors, without using AI, LLMs, or machine learning. It should prevent double bookings and display real-time appointment availability. **No payment gateway or online payment functionality is required.**",  # noqa: E501
     version="0.1.0",
     lifespan=lifespan,
 )
@@ -53,6 +68,26 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+app.include_router(auth.router)
+app.include_router(admin_users.router, prefix="/api/admin", tags=["admin"])
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
+    """Invalid input returns 422 listing each offending field, keyed by field name."""
+    detail = [
+        {"field": str(err["loc"][-1]), "msg": err.get("msg", "invalid")} for err in exc.errors()
+    ]
+    return JSONResponse(status_code=422, content={"detail": detail})
+
+
+@app.exception_handler(EmptyBodyHTTPError)
+async def empty_body_error_handler(request: Request, exc: EmptyBodyHTTPError) -> Response:
+    """403/404 responses that must carry no body, so they cannot be told apart
+    from one another by anything in the payload."""
+    return Response(status_code=exc.status_code)
 
 
 @app.get("/health")

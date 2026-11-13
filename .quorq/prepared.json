@@ -1,0 +1,82 @@
+{
+  "key": {
+    "app_design_id": "93919b6e-d221-450f-86dd-7449b38f1476",
+    "app_design_version": 1,
+    "architecture_document_id": "b83ba589-e2ce-450c-a112-afe551e04378",
+    "architecture_version": 1
+  },
+  "outcome": "prepared",
+  "packages": [
+    {
+      "ecosystem": "pypi",
+      "installed_version": "5.0.0",
+      "name": "bcrypt",
+      "status": "installed",
+      "version": ">=4.1"
+    },
+    {
+      "ecosystem": "pypi",
+      "installed_version": "2.3.0",
+      "name": "email-validator",
+      "status": "installed",
+      "version": ">=2.1"
+    },
+    {
+      "ecosystem": "pypi",
+      "installed_version": "2026.6",
+      "name": "tzdata",
+      "status": "installed",
+      "version": ">=2024.1"
+    },
+    {
+      "ecosystem": "pypi",
+      "installed_version": "5.3.1",
+      "name": "redis",
+      "status": "installed",
+      "version": ">=5.0"
+    },
+    {
+      "ecosystem": "pypi",
+      "installed_version": "0.28.0",
+      "name": "arq",
+      "status": "installed",
+      "version": ">=0.26"
+    },
+    {
+      "ecosystem": "npm",
+      "error": "already provided by the scaffold",
+      "name": "react-router-dom",
+      "status": "skipped",
+      "version": ">=6.26"
+    },
+    {
+      "ecosystem": "npm",
+      "error": "already provided by the scaffold",
+      "name": "@tanstack/react-query",
+      "status": "skipped",
+      "version": ">=5.51"
+    },
+    {
+      "ecosystem": "npm",
+      "error": "already provided by the scaffold",
+      "name": "react-hook-form",
+      "status": "skipped",
+      "version": ">=7.52"
+    },
+    {
+      "ecosystem": "npm",
+      "error": "already provided by the scaffold",
+      "name": "date-fns-tz",
+      "status": "skipped",
+      "version": ">=3.1"
+    },
+    {
+      "ecosystem": "npm",
+      "error": "already provided by the scaffold",
+      "name": "tailwindcss",
+      "status": "skipped",
+      "version": ">=3.4"
+    }
+  ],
+  "prepared_by_run": "9bf0e65e-7a1e-463a-8c0e-51fd3da817d3"
+}

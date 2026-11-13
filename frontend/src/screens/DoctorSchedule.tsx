@@ -7,75 +7,215 @@ import { Icons } from "@/lib/icons";
 import { brand } from "@/lib/brand";
 import { useNavigate } from "@/lib/navigate";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { Label, Table, THead, TBody, TR, TH, TD, Empty } = UI;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 const { Home, Filter, ArrowLeft, ArrowRight } = Icons;
 
-const TODAY = '2026-11-13';
-const TZ_LABEL = 'Asia/Kolkata (IST)';
-const DOCTOR = { name: 'Dr. Ananya Sharma', spec: 'General Medicine', room: 'Room 4, ground floor' };
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const STATUS_FILTERS = ['All', 'Booked', 'Confirmed', 'Completed', 'No-show', 'Cancelled'];
+const TODAY = "2026-11-13";
+const TZ_LABEL = "Asia/Kolkata (IST)";
+const DOCTOR = {
+  name: "Dr. Ananya Sharma",
+  spec: "General Medicine",
+  room: "Room 4, ground floor",
+};
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const STATUS_FILTERS = ["All", "Booked", "Confirmed", "Completed", "No-show", "Cancelled"];
 const STATUS_TABS = [
-  { key: 'Confirmed', label: 'Confirmed' },
-  { key: 'Completed', label: 'Completed' },
-  { key: 'No-show', label: 'No-show' },
-  { key: 'Cancelled', label: 'Cancelled (reason required)' },
+  { key: "Confirmed", label: "Confirmed" },
+  { key: "Completed", label: "Completed" },
+  { key: "No-show", label: "No-show" },
+  { key: "Cancelled", label: "Cancelled (reason required)" },
 ];
-const TAB_WF = { Confirmed: 'i-3-1-0', Completed: 'i-3-1-1', 'No-show': 'i-3-1-2', Cancelled: 'i-3-1-3' };
+const TAB_WF = {
+  Confirmed: "i-3-1-0",
+  Completed: "i-3-1-1",
+  "No-show": "i-3-1-2",
+  Cancelled: "i-3-1-3",
+};
 
 const SEED_APPTS = [
-  { id: 'a-1101', date: '2026-11-12', time: '09:30', patient: 'Lakshmi Pillai', reason: 'Knee pain when climbing stairs', status: 'Completed', note: '' },
-  { id: 'a-1102', date: '2026-11-12', time: '10:00', patient: 'Vikram Singh', reason: 'Acid reflux after meals', status: 'Completed', note: '' },
-  { id: 'a-1103', date: '2026-11-12', time: '11:30', patient: 'Hannah Dsouza', reason: 'Trouble sleeping for three weeks', status: 'No-show', note: 'Did not arrive' },
-  { id: 'a-1001', date: TODAY, time: '09:00', patient: 'Meera Iyer', reason: 'Itchy eyes and sneezing for ten days', status: 'Completed', note: 'Completed by you at 09:41' },
-  { id: 'a-1002', date: TODAY, time: '09:30', patient: 'Faisal Khan', reason: 'Follow-up on blood pressure readings', status: 'No-show', note: 'Marked by you at 10:02' },
-  { id: 'a-1003', date: TODAY, time: '10:00', patient: 'Rahul Mehta', reason: 'Recurring headaches, mostly in the evening', status: 'Confirmed', note: 'Confirmed by you yesterday, 17:15' },
-  { id: 'a-1004', date: TODAY, time: '10:30', patient: 'Sunita Rao', reason: 'Persistent cough since last week', status: 'Booked', note: '' },
-  { id: 'a-1005', date: TODAY, time: '11:00', patient: 'Daniel Okafor', reason: 'Back pain after lifting at work', status: 'Booked', note: '' },
-  { id: 'a-1006', date: TODAY, time: '11:30', patient: 'Kavya Menon', reason: 'Annual check-up and cholesterol review', status: 'Confirmed', note: 'Confirmed by you at 08:20' },
-  { id: 'a-1007', date: TODAY, time: '14:00', patient: 'Priya Nair', reason: 'Daughter has had a fever for two days', status: 'Booked', note: '' },
-  { id: 'a-1008', date: TODAY, time: '14:30', patient: 'Arjun Bhatt', reason: 'Skin rash on both forearms', status: 'Cancelled', note: 'Cancelled by patient at 08:41' },
-  { id: 'a-1201', date: '2026-11-16', time: '09:00', patient: 'Omar Sheikh', reason: 'Diabetes review and HbA1c results', status: 'Booked', note: '' },
-  { id: 'a-1202', date: '2026-11-16', time: '09:30', patient: 'Neha Kulkarni', reason: 'Persistent tiredness, low appetite', status: 'Confirmed', note: 'Confirmed by you at 12:05' },
-  { id: 'a-1203', date: '2026-11-16', time: '10:30', patient: 'Rohan Joshi', reason: 'Ear ache since the weekend', status: 'Booked', note: '' },
-  { id: 'a-1301', date: '2026-11-17', time: '10:00', patient: 'Aditi Verma', reason: 'Recurring migraine, wants a plan', status: 'Booked', note: '' },
+  {
+    id: "a-1101",
+    date: "2026-11-12",
+    time: "09:30",
+    patient: "Lakshmi Pillai",
+    reason: "Knee pain when climbing stairs",
+    status: "Completed",
+    note: "",
+  },
+  {
+    id: "a-1102",
+    date: "2026-11-12",
+    time: "10:00",
+    patient: "Vikram Singh",
+    reason: "Acid reflux after meals",
+    status: "Completed",
+    note: "",
+  },
+  {
+    id: "a-1103",
+    date: "2026-11-12",
+    time: "11:30",
+    patient: "Hannah Dsouza",
+    reason: "Trouble sleeping for three weeks",
+    status: "No-show",
+    note: "Did not arrive",
+  },
+  {
+    id: "a-1001",
+    date: TODAY,
+    time: "09:00",
+    patient: "Meera Iyer",
+    reason: "Itchy eyes and sneezing for ten days",
+    status: "Completed",
+    note: "Completed by you at 09:41",
+  },
+  {
+    id: "a-1002",
+    date: TODAY,
+    time: "09:30",
+    patient: "Faisal Khan",
+    reason: "Follow-up on blood pressure readings",
+    status: "No-show",
+    note: "Marked by you at 10:02",
+  },
+  {
+    id: "a-1003",
+    date: TODAY,
+    time: "10:00",
+    patient: "Rahul Mehta",
+    reason: "Recurring headaches, mostly in the evening",
+    status: "Confirmed",
+    note: "Confirmed by you yesterday, 17:15",
+  },
+  {
+    id: "a-1004",
+    date: TODAY,
+    time: "10:30",
+    patient: "Sunita Rao",
+    reason: "Persistent cough since last week",
+    status: "Booked",
+    note: "",
+  },
+  {
+    id: "a-1005",
+    date: TODAY,
+    time: "11:00",
+    patient: "Daniel Okafor",
+    reason: "Back pain after lifting at work",
+    status: "Booked",
+    note: "",
+  },
+  {
+    id: "a-1006",
+    date: TODAY,
+    time: "11:30",
+    patient: "Kavya Menon",
+    reason: "Annual check-up and cholesterol review",
+    status: "Confirmed",
+    note: "Confirmed by you at 08:20",
+  },
+  {
+    id: "a-1007",
+    date: TODAY,
+    time: "14:00",
+    patient: "Priya Nair",
+    reason: "Daughter has had a fever for two days",
+    status: "Booked",
+    note: "",
+  },
+  {
+    id: "a-1008",
+    date: TODAY,
+    time: "14:30",
+    patient: "Arjun Bhatt",
+    reason: "Skin rash on both forearms",
+    status: "Cancelled",
+    note: "Cancelled by patient at 08:41",
+  },
+  {
+    id: "a-1201",
+    date: "2026-11-16",
+    time: "09:00",
+    patient: "Omar Sheikh",
+    reason: "Diabetes review and HbA1c results",
+    status: "Booked",
+    note: "",
+  },
+  {
+    id: "a-1202",
+    date: "2026-11-16",
+    time: "09:30",
+    patient: "Neha Kulkarni",
+    reason: "Persistent tiredness, low appetite",
+    status: "Confirmed",
+    note: "Confirmed by you at 12:05",
+  },
+  {
+    id: "a-1203",
+    date: "2026-11-16",
+    time: "10:30",
+    patient: "Rohan Joshi",
+    reason: "Ear ache since the weekend",
+    status: "Booked",
+    note: "",
+  },
+  {
+    id: "a-1301",
+    date: "2026-11-17",
+    time: "10:00",
+    patient: "Aditi Verma",
+    reason: "Recurring migraine, wants a plan",
+    status: "Booked",
+    note: "",
+  },
 ];
 
-const BLANK_REC = { diagnosis: '', notes: '', advice: '', lines: [], savedAt: null };
+const BLANK_REC = { diagnosis: "", notes: "", advice: "", lines: [], savedAt: null };
 const SEED_RECORDS = {
-  'a-1001': {
-    diagnosis: 'Seasonal allergic rhinitis',
-    notes: 'Itchy eyes and sneezing for about ten days, worse in the mornings. No fever. Throat mildly congested, lungs clear.',
-    advice: 'Avoid dust exposure, rinse nose with saline twice daily, and return in two weeks if symptoms persist.',
+  "a-1001": {
+    diagnosis: "Seasonal allergic rhinitis",
+    notes:
+      "Itchy eyes and sneezing for about ten days, worse in the mornings. No fever. Throat mildly congested, lungs clear.",
+    advice:
+      "Avoid dust exposure, rinse nose with saline twice daily, and return in two weeks if symptoms persist.",
     lines: [
-      { id: 'l-1', medicine: 'Cetirizine 10 mg', dosage: 'One tablet at night', duration: '10 days' },
-      { id: 'l-2', medicine: 'Fluticasone nasal spray', dosage: '2 sprays each nostril, once daily', duration: '14 days' },
+      {
+        id: "l-1",
+        medicine: "Cetirizine 10 mg",
+        dosage: "One tablet at night",
+        duration: "10 days",
+      },
+      {
+        id: "l-2",
+        medicine: "Fluticasone nasal spray",
+        dosage: "2 sprays each nostril, once daily",
+        duration: "14 days",
+      },
     ],
     savedAt: 588,
   },
 };
-const SEED_AUDIT = { 'a-1001': [{ t: '09:48', a: 'created' }] };
+const SEED_AUDIT = { "a-1001": [{ t: "09:48", a: "created" }] };
 
 function fmtDate(iso) {
-  const [y, m, d] = iso.split('-').map(Number);
+  const [y, m, d] = iso.split("-").map(Number);
   const dt = new Date(Date.UTC(y, m - 1, d));
-  return DAYS[dt.getUTCDay()] + ' ' + d + ' ' + MONTHS[m - 1] + ' ' + y;
+  return DAYS[dt.getUTCDay()] + " " + d + " " + MONTHS[m - 1] + " " + y;
 }
 function toMin(t) {
-  const [h, m] = t.split(':').map(Number);
+  const [h, m] = t.split(":").map(Number);
   return h * 60 + m;
 }
 function fmtTime(min) {
   const h = Math.floor(min / 60);
   const m = min % 60;
-  return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+  return String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0");
 }
 function joinList(items) {
-  if (items.length <= 1) return items.join('');
-  return items.slice(0, -1).join(', ') + ' and ' + items[items.length - 1];
+  if (items.length <= 1) return items.join("");
+  return items.slice(0, -1).join(", ") + " and " + items[items.length - 1];
 }
 
 const CSS = `
@@ -144,16 +284,49 @@ textarea.atr-field{border-radius:var(--atr-radius);padding:12px 16px;resize:vert
 
 function StatusPill({ status }) {
   const map = {
-    Booked: { Icon: Icons.Clock, bg: 'color-mix(in srgb, var(--ink) 9%, var(--cream))', fg: 'var(--ink)', ring: 'none', deco: 'none' },
-    Confirmed: { Icon: Icons.CheckCircle, bg: 'color-mix(in srgb, var(--gold) 40%, var(--cream))', fg: 'var(--ink)', ring: 'none', deco: 'none' },
-    Completed: { Icon: Icons.Check, bg: 'var(--ink)', fg: 'var(--cream)', ring: 'none', deco: 'none' },
-    'No-show': { Icon: Icons.AlertCircle, bg: 'transparent', fg: 'var(--ink)', ring: 'inset 0 0 0 1px var(--ink)', deco: 'none' },
-    Cancelled: { Icon: Icons.X, bg: 'color-mix(in srgb, var(--ink) 9%, var(--cream))', fg: 'var(--ink)', ring: 'none', deco: 'line-through' },
+    Booked: {
+      Icon: Icons.Clock,
+      bg: "color-mix(in srgb, var(--ink) 9%, var(--cream))",
+      fg: "var(--ink)",
+      ring: "none",
+      deco: "none",
+    },
+    Confirmed: {
+      Icon: Icons.CheckCircle,
+      bg: "color-mix(in srgb, var(--gold) 40%, var(--cream))",
+      fg: "var(--ink)",
+      ring: "none",
+      deco: "none",
+    },
+    Completed: {
+      Icon: Icons.Check,
+      bg: "var(--ink)",
+      fg: "var(--cream)",
+      ring: "none",
+      deco: "none",
+    },
+    "No-show": {
+      Icon: Icons.AlertCircle,
+      bg: "transparent",
+      fg: "var(--ink)",
+      ring: "inset 0 0 0 1px var(--ink)",
+      deco: "none",
+    },
+    Cancelled: {
+      Icon: Icons.X,
+      bg: "color-mix(in srgb, var(--ink) 9%, var(--cream))",
+      fg: "var(--ink)",
+      ring: "none",
+      deco: "line-through",
+    },
   };
   const s = map[status];
   const I = s.Icon;
   return (
-    <span className="atr-pill" style={{ background: s.bg, color: s.fg, boxShadow: s.ring, textDecoration: s.deco }}>
+    <span
+      className="atr-pill"
+      style={{ background: s.bg, color: s.fg, boxShadow: s.ring, textDecoration: s.deco }}
+    >
       <I aria-hidden="true" className="w-4 h-4" />
       {status}
     </span>
@@ -167,23 +340,26 @@ export default function Screen() {
   const [audit, setAudit] = React.useState(SEED_AUDIT);
   const [clock, setClock] = React.useState(620);
   const [from, setFrom] = React.useState(TODAY);
-  const [to, setTo] = React.useState('');
-  const [statusFilter, setStatusFilter] = React.useState('All');
+  const [to, setTo] = React.useState("");
+  const [statusFilter, setStatusFilter] = React.useState("All");
   const [loading, setLoading] = React.useState(false);
-  const [selectedId, setSelectedId] = React.useState('a-1003');
-  const [tab, setTab] = React.useState('Confirmed');
-  const [cancelReason, setCancelReason] = React.useState('');
-  const [cancelErr, setCancelErr] = React.useState('');
+  const [selectedId, setSelectedId] = React.useState("a-1003");
+  const [tab, setTab] = React.useState("Confirmed");
+  const [cancelReason, setCancelReason] = React.useState("");
+  const [cancelErr, setCancelErr] = React.useState("");
   const [cancelConfirming, setCancelConfirming] = React.useState(false);
   const [statusMsg, setStatusMsg] = React.useState(null);
-  const [errors, setErrors] = React.useState({ diagnosis: '', lines: {} });
+  const [errors, setErrors] = React.useState({ diagnosis: "", lines: {} });
   const [saveMsg, setSaveMsg] = React.useState(null);
   const [focusLineId, setFocusLineId] = React.useState(null);
   const nextLine = React.useRef(100);
   const firstRun = React.useRef(true);
 
   React.useEffect(() => {
-    if (firstRun.current) { firstRun.current = false; return undefined; }
+    if (firstRun.current) {
+      firstRun.current = false;
+      return undefined;
+    }
     setLoading(true);
     const id = setTimeout(() => setLoading(false), 450);
     return () => clearTimeout(id);
@@ -193,30 +369,39 @@ export default function Screen() {
   const end = to && !rangeInvalid ? to : from;
   const multiDay = from !== end;
   const visible = appts
-    .filter((a) => a.date >= from && a.date <= end && (statusFilter === 'All' || a.status === statusFilter))
+    .filter(
+      (a) =>
+        a.date >= from && a.date <= end && (statusFilter === "All" || a.status === statusFilter),
+    )
     .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
   const selected = visible.find((a) => a.id === selectedId) || null;
   const filterLabel =
-    (multiDay ? fmtDate(from) + ' – ' + fmtDate(end) : (from === TODAY ? 'Today · ' : '') + fmtDate(from)) + ' (clinic timezone)';
-  const filtersActive = from !== TODAY || to !== '' || statusFilter !== 'All';
+    (multiDay
+      ? fmtDate(from) + " – " + fmtDate(end)
+      : (from === TODAY ? "Today · " : "") + fmtDate(from)) + " (clinic timezone)";
+  const filtersActive = from !== TODAY || to !== "" || statusFilter !== "All";
 
   const passed = (a) => a.date < TODAY || (a.date === TODAY && toMin(a.time) <= clock);
-  const first = (a) => a.patient.split(' ')[0];
+  const first = (a) => a.patient.split(" ")[0];
 
   function blockReason(a, target) {
-    if (!a) return 'Open an appointment from the table first.';
-    if (['Completed', 'Cancelled', 'No-show'].includes(a.status))
-      return 'This appointment has reached a final status (' + a.status + '), so it can’t be changed again.';
-    if (target === 'Confirmed' && a.status === 'Confirmed')
-      return 'Already confirmed. You can still complete it, mark a no-show, or cancel.';
-    if ((target === 'Completed' || target === 'No-show') && !passed(a))
-      return 'Available once the slot time has passed (' + a.time + ', ' + fmtDate(a.date) + ').';
+    if (!a) return "Open an appointment from the table first.";
+    if (["Completed", "Cancelled", "No-show"].includes(a.status))
+      return (
+        "This appointment has reached a final status (" +
+        a.status +
+        "), so it can’t be changed again."
+      );
+    if (target === "Confirmed" && a.status === "Confirmed")
+      return "Already confirmed. You can still complete it, mark a no-show, or cancel.";
+    if ((target === "Completed" || target === "No-show") && !passed(a))
+      return "Available once the slot time has passed (" + a.time + ", " + fmtDate(a.date) + ").";
     return null;
   }
 
   function resetStatusUi() {
-    setCancelReason('');
-    setCancelErr('');
+    setCancelReason("");
+    setCancelErr("");
     setCancelConfirming(false);
     setStatusMsg(null);
   }
@@ -224,10 +409,10 @@ export default function Screen() {
   function openRow(a) {
     setSelectedId(a.id);
     resetStatusUi();
-    setErrors({ diagnosis: '', lines: {} });
+    setErrors({ diagnosis: "", lines: {} });
     setSaveMsg(null);
     if (records[a.id] && records[a.id].savedAt != null) {
-      setAudit((p) => ({ ...p, [a.id]: [...(p[a.id] || []), { t: fmtTime(clock), a: 'viewed' }] }));
+      setAudit((p) => ({ ...p, [a.id]: [...(p[a.id] || []), { t: fmtTime(clock), a: "viewed" }] }));
     }
   }
 
@@ -235,51 +420,64 @@ export default function Screen() {
     if (!selected || blockReason(selected, target)) return;
     const t = clock + 1;
     setClock(t);
-    const verb = { Confirmed: 'Confirmed', Completed: 'Completed', 'No-show': 'Marked no-show', Cancelled: 'Cancelled' }[target];
-    const note = target === 'Cancelled'
-      ? 'Cancelled by you at ' + fmtTime(t) + ' · “' + reason.trim() + '”'
-      : verb + ' by you at ' + fmtTime(t);
+    const verb = {
+      Confirmed: "Confirmed",
+      Completed: "Completed",
+      "No-show": "Marked no-show",
+      Cancelled: "Cancelled",
+    }[target];
+    const note =
+      target === "Cancelled"
+        ? "Cancelled by you at " + fmtTime(t) + " · “" + reason.trim() + "”"
+        : verb + " by you at " + fmtTime(t);
     setAppts((p) => p.map((a) => (a.id === selected.id ? { ...a, status: target, note } : a)));
     setStatusMsg(
-      target === 'Cancelled'
-        ? first(selected) + '’s ' + selected.time + ' visit is cancelled. The slot is open again and they can see your reason.'
-        : first(selected) + '’s visit is now ' + target + ' (saved ' + fmtTime(t) + ').'
+      target === "Cancelled"
+        ? first(selected) +
+            "’s " +
+            selected.time +
+            " visit is cancelled. The slot is open again and they can see your reason."
+        : first(selected) + "’s visit is now " + target + " (saved " + fmtTime(t) + ").",
     );
-    setCancelReason('');
-    setCancelErr('');
+    setCancelReason("");
+    setCancelErr("");
     setCancelConfirming(false);
   }
 
   function askCancel() {
     if (!cancelReason.trim()) {
-      setCancelErr('Add a reason — the patient will see it in their appointment list.');
+      setCancelErr("Add a reason — the patient will see it in their appointment list.");
       return;
     }
-    setCancelErr('');
+    setCancelErr("");
     setCancelConfirming(true);
   }
 
   function onTabKey(e, idx) {
     let n = null;
-    if (e.key === 'ArrowRight') n = (idx + 1) % STATUS_TABS.length;
-    if (e.key === 'ArrowLeft') n = (idx - 1 + STATUS_TABS.length) % STATUS_TABS.length;
-    if (e.key === 'Home') n = 0;
-    if (e.key === 'End') n = STATUS_TABS.length - 1;
+    if (e.key === "ArrowRight") n = (idx + 1) % STATUS_TABS.length;
+    if (e.key === "ArrowLeft") n = (idx - 1 + STATUS_TABS.length) % STATUS_TABS.length;
+    if (e.key === "Home") n = 0;
+    if (e.key === "End") n = STATUS_TABS.length - 1;
     if (n !== null) {
       e.preventDefault();
       setTab(STATUS_TABS[n].key);
       resetStatusUi();
-      const el = document.getElementById('st-tab-' + STATUS_TABS[n].key);
+      const el = document.getElementById("st-tab-" + STATUS_TABS[n].key);
       if (el) el.focus();
     }
   }
 
   // consultation form
   let lockReason = null;
-  if (!selected) lockReason = 'Open an appointment from the table above to write up its visit.';
-  else if (selected.status === 'Cancelled') lockReason = 'This visit was cancelled, so there is no consultation to record.';
-  else if (selected.status === 'No-show') lockReason = 'The patient did not attend, so there is no consultation to record.';
-  else if (!passed(selected)) lockReason = 'This visit starts at ' + selected.time + '. The record opens once the slot time has passed.';
+  if (!selected) lockReason = "Open an appointment from the table above to write up its visit.";
+  else if (selected.status === "Cancelled")
+    lockReason = "This visit was cancelled, so there is no consultation to record.";
+  else if (selected.status === "No-show")
+    lockReason = "The patient did not attend, so there is no consultation to record.";
+  else if (!passed(selected))
+    lockReason =
+      "This visit starts at " + selected.time + ". The record opens once the slot time has passed.";
   const locked = Boolean(lockReason);
   const rec = selected ? records[selected.id] || BLANK_REC : BLANK_REC;
   const recAudit = selected ? audit[selected.id] || [] : [];
@@ -290,16 +488,25 @@ export default function Screen() {
   }
   function patchLine(id, field, value) {
     patchRec({ lines: rec.lines.map((l) => (l.id === id ? { ...l, [field]: value } : l)) });
-    if (errors.lines[id]) setErrors((p) => { const n = { ...p.lines }; delete n[id]; return { ...p, lines: n }; });
+    if (errors.lines[id])
+      setErrors((p) => {
+        const n = { ...p.lines };
+        delete n[id];
+        return { ...p, lines: n };
+      });
   }
   function addLine() {
-    const id = 'l-' + nextLine.current++;
-    patchRec({ lines: [...rec.lines, { id, medicine: '', dosage: '', duration: '' }] });
+    const id = "l-" + nextLine.current++;
+    patchRec({ lines: [...rec.lines, { id, medicine: "", dosage: "", duration: "" }] });
     setFocusLineId(id);
   }
   function removeLine(id) {
     patchRec({ lines: rec.lines.filter((l) => l.id !== id) });
-    setErrors((p) => { const n = { ...p.lines }; delete n[id]; return { ...p, lines: n }; });
+    setErrors((p) => {
+      const n = { ...p.lines };
+      delete n[id];
+      return { ...p, lines: n };
+    });
   }
   function saveConsultation(e) {
     e.preventDefault();
@@ -307,12 +514,12 @@ export default function Screen() {
     const lineErrs = {};
     rec.lines.forEach((l, i) => {
       const miss = [];
-      if (!l.medicine.trim()) miss.push('a medicine');
-      if (!l.dosage.trim()) miss.push('a dosage');
-      if (!l.duration.trim()) miss.push('a duration');
-      if (miss.length) lineErrs[l.id] = 'Line ' + (i + 1) + ' needs ' + joinList(miss) + '.';
+      if (!l.medicine.trim()) miss.push("a medicine");
+      if (!l.dosage.trim()) miss.push("a dosage");
+      if (!l.duration.trim()) miss.push("a duration");
+      if (miss.length) lineErrs[l.id] = "Line " + (i + 1) + " needs " + joinList(miss) + ".";
     });
-    const dErr = rec.diagnosis.trim() ? '' : 'A diagnosis is required before this can be saved.';
+    const dErr = rec.diagnosis.trim() ? "" : "A diagnosis is required before this can be saved.";
     if (dErr || Object.keys(lineErrs).length) {
       setErrors({ diagnosis: dErr, lines: lineErrs });
       setSaveMsg(null);
@@ -320,30 +527,47 @@ export default function Screen() {
     }
     const t = clock + 1;
     setClock(t);
-    const action = rec.savedAt != null ? 'updated' : 'created';
+    const action = rec.savedAt != null ? "updated" : "created";
     patchRec({ savedAt: t });
-    setAudit((p) => ({ ...p, [selected.id]: [...(p[selected.id] || []), { t: fmtTime(t), a: action }] }));
-    setErrors({ diagnosis: '', lines: {} });
+    setAudit((p) => ({
+      ...p,
+      [selected.id]: [...(p[selected.id] || []), { t: fmtTime(t), a: action }],
+    }));
+    setErrors({ diagnosis: "", lines: {} });
     setSaveMsg({
       id: selected.id,
       text:
-        'Consultation saved at ' + fmtTime(t) + ' for ' + selected.patient + '. ' +
-        (rec.lines.length === 0 ? 'No medication prescribed.' : rec.lines.length + (rec.lines.length === 1 ? ' prescription line' : ' prescription lines') + ' stored.') +
-        (selected.status !== 'Completed' ? ' The visit is still ' + selected.status + ' — set it to Completed from the status tabs.' : ''),
+        "Consultation saved at " +
+        fmtTime(t) +
+        " for " +
+        selected.patient +
+        ". " +
+        (rec.lines.length === 0
+          ? "No medication prescribed."
+          : rec.lines.length +
+            (rec.lines.length === 1 ? " prescription line" : " prescription lines") +
+            " stored.") +
+        (selected.status !== "Completed"
+          ? " The visit is still " +
+            selected.status +
+            " — set it to Completed from the status tabs."
+          : ""),
     });
   }
 
   const lineErrorCount = Object.keys(errors.lines).length;
   const hasErrors = Boolean(errors.diagnosis) || lineErrorCount > 0;
-  const activeTabBlock = selected ? blockReason(selected, tab) : 'Open an appointment from the table to set its status.';
+  const activeTabBlock = selected
+    ? blockReason(selected, tab)
+    : "Open an appointment from the table to set its status.";
 
   const style = {
-    '--atr-ink': brand.primaryColor,
-    '--atr-cream': brand.backgroundColor,
-    '--atr-gold': brand.accentColor,
-    '--atr-muted': brand.neutralColor,
-    '--atr-radius': brand.radius,
-    '--atr-heading': brand.fontHeading,
+    "--atr-ink": brand.primaryColor,
+    "--atr-cream": brand.backgroundColor,
+    "--atr-gold": brand.accentColor,
+    "--atr-muted": brand.neutralColor,
+    "--atr-radius": brand.radius,
+    "--atr-heading": brand.fontHeading,
     fontFamily: brand.fontBody,
   };
   const heading = { fontFamily: brand.fontHeading };
@@ -351,19 +575,29 @@ export default function Screen() {
   return (
     <div className="atr-root" style={style}>
       <style>{CSS}</style>
-      <div className="mx-auto w-full" style={{ maxWidth: 1120, padding: '32px 16px 64px' }}>
+      <div className="mx-auto w-full" style={{ maxWidth: 1120, padding: "32px 16px 64px" }}>
         <div className="flex flex-col" style={{ gap: 48 }}>
-
           {/* Row 1 */}
           <div className="grid grid-cols-12 items-end" style={{ gap: 24 }}>
             <div className="col-span-12 md:col-span-9">
-              <h1 className="atr-serif" style={{ ...heading, fontSize: 40, lineHeight: 1.15, margin: 0 }} data-wf="b-0-0">My schedule</h1>
-              <p className="atr-cap" style={{ margin: '8px 0 0' }}>
+              <h1
+                className="atr-serif"
+                style={{ ...heading, fontSize: 40, lineHeight: 1.15, margin: 0 }}
+                data-wf="b-0-0"
+              >
+                My schedule
+              </h1>
+              <p className="atr-cap" style={{ margin: "8px 0 0" }}>
                 {DOCTOR.name} · {DOCTOR.spec} · {DOCTOR.room} · all times shown in {TZ_LABEL}
               </p>
             </div>
             <div className="col-span-12 md:col-span-3">
-              <button type="button" className="atr-btn atr-secondary w-full" data-wf="b-0-1" onClick={() => navigate('doctor-availability')}>
+              <button
+                type="button"
+                className="atr-btn atr-secondary w-full"
+                data-wf="b-0-1"
+                onClick={() => navigate("doctor-availability")}
+              >
                 <Icons.Settings aria-hidden="true" className="w-4 h-4" />
                 Manage availability
               </button>
@@ -372,30 +606,79 @@ export default function Screen() {
 
           {/* Row 2 */}
           <div className="atr-bar" data-wf="b-1-0" role="group" aria-label="Filter appointments">
-            <p style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 12, fontWeight: 700, fontSize: 16 }}>
-              <span className="atr-dot"><Icons.Filter aria-hidden="true" className="w-4 h-4" /></span>
+            <p
+              style={{
+                margin: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                fontWeight: 700,
+                fontSize: 16,
+              }}
+            >
+              <span className="atr-dot">
+                <Icons.Filter aria-hidden="true" className="w-4 h-4" />
+              </span>
               <span>{filterLabel}</span>
             </p>
             <div className="atr-bar-fields">
               <div>
-                <Label htmlFor="f-from" className="atr-label">Date or range</Label>
-                <input id="f-from" type="date" className="atr-field" data-wf="i-1-0-0" value={from}
-                  onChange={(e) => e.target.value && setFrom(e.target.value)} />
+                <Label htmlFor="f-from" className="atr-label">
+                  Date or range
+                </Label>
+                <input
+                  id="f-from"
+                  type="date"
+                  className="atr-field"
+                  data-wf="i-1-0-0"
+                  value={from}
+                  onChange={(e) => e.target.value && setFrom(e.target.value)}
+                />
               </div>
               <div>
-                <Label htmlFor="f-to" className="atr-label">Through (optional)</Label>
-                <input id="f-to" type="date" className="atr-field" value={to} min={from}
-                  onChange={(e) => setTo(e.target.value)} aria-describedby={rangeInvalid ? 'f-range-err' : undefined} aria-invalid={rangeInvalid ? 'true' : undefined} />
+                <Label htmlFor="f-to" className="atr-label">
+                  Through (optional)
+                </Label>
+                <input
+                  id="f-to"
+                  type="date"
+                  className="atr-field"
+                  value={to}
+                  min={from}
+                  onChange={(e) => setTo(e.target.value)}
+                  aria-describedby={rangeInvalid ? "f-range-err" : undefined}
+                  aria-invalid={rangeInvalid ? "true" : undefined}
+                />
               </div>
               <div>
-                <Label htmlFor="f-status" className="atr-label">Status</Label>
-                <select id="f-status" className="atr-field" data-wf="i-1-0-1" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                  {STATUS_FILTERS.map((s) => <option key={s} value={s}>{s}</option>)}
+                <Label htmlFor="f-status" className="atr-label">
+                  Status
+                </Label>
+                <select
+                  id="f-status"
+                  className="atr-field"
+                  data-wf="i-1-0-1"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  {STATUS_FILTERS.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
                 </select>
               </div>
               {filtersActive && (
                 <div>
-                  <button type="button" className="atr-btn atr-secondary w-full" onClick={() => { setFrom(TODAY); setTo(''); setStatusFilter('All'); }}>
+                  <button
+                    type="button"
+                    className="atr-btn atr-secondary w-full"
+                    onClick={() => {
+                      setFrom(TODAY);
+                      setTo("");
+                      setStatusFilter("All");
+                    }}
+                  >
                     <Icons.X aria-hidden="true" className="w-4 h-4" />
                     Back to today
                   </button>
@@ -404,21 +687,44 @@ export default function Screen() {
             </div>
             {rangeInvalid && (
               <p id="f-range-err" className="atr-err" style={{ margin: 0 }}>
-                <Icons.AlertCircle aria-hidden="true" className="w-4 h-4 shrink-0" style={{ marginTop: 3 }} />
+                <Icons.AlertCircle
+                  aria-hidden="true"
+                  className="w-4 h-4 shrink-0"
+                  style={{ marginTop: 3 }}
+                />
                 the end date is before the start, so only the start date is shown for now.
               </p>
             )}
           </div>
 
           {/* Row 3 */}
-          <section data-wf="b-2-0" aria-labelledby="appt-h" className="flex flex-col" style={{ gap: 16 }}>
+          <section
+            data-wf="b-2-0"
+            aria-labelledby="appt-h"
+            className="flex flex-col"
+            style={{ gap: 16 }}
+          >
             <div className="flex items-baseline justify-between flex-wrap" style={{ gap: 8 }}>
-              <h2 id="appt-h" className="atr-serif" style={{ ...heading, fontSize: 28, margin: 0 }}>Appointments</h2>
-              <p className="atr-cap" style={{ margin: 0, fontVariantNumeric: 'tabular-nums' }} aria-live="polite">
-                {loading ? 'refreshing your list…' : visible.length + (visible.length === 1 ? ' visit' : ' visits') + ' · only yours appear here'}
+              <h2 id="appt-h" className="atr-serif" style={{ ...heading, fontSize: 28, margin: 0 }}>
+                Appointments
+              </h2>
+              <p
+                className="atr-cap"
+                style={{ margin: 0, fontVariantNumeric: "tabular-nums" }}
+                aria-live="polite"
+              >
+                {loading
+                  ? "refreshing your list…"
+                  : visible.length +
+                    (visible.length === 1 ? " visit" : " visits") +
+                    " · only yours appear here"}
               </p>
             </div>
-            <div className="atr-panel atr-table" style={{ padding: '16px 8px' }} aria-busy={loading}>
+            <div
+              className="atr-panel atr-table"
+              style={{ padding: "16px 8px" }}
+              aria-busy={loading}
+            >
               <Table>
                 <THead>
                   <TR>
@@ -430,43 +736,71 @@ export default function Screen() {
                   </TR>
                 </THead>
                 <TBody>
-                  {loading && [0, 1, 2].map((i) => (
-                    <TR key={'sk' + i}>
-                      <TD colSpan={5}><div className="atr-skel" style={{ width: i === 1 ? '70%' : '90%' }} /><span className="sr-only">Loading appointments</span></TD>
-                    </TR>
-                  ))}
+                  {loading &&
+                    [0, 1, 2].map((i) => (
+                      <TR key={"sk" + i}>
+                        <TD colSpan={5}>
+                          <div className="atr-skel" style={{ width: i === 1 ? "70%" : "90%" }} />
+                          <span className="sr-only">Loading appointments</span>
+                        </TD>
+                      </TR>
+                    ))}
                   {!loading && visible.length === 0 && (
                     <TR>
-                      <TD colSpan={5}><span className="atr-cap">nothing matches this date and status — see below.</span></TD>
+                      <TD colSpan={5}>
+                        <span className="atr-cap">
+                          nothing matches this date and status — see below.
+                        </span>
+                      </TD>
                     </TR>
                   )}
-                  {!loading && visible.map((a) => (
-                    <TR key={a.id} className={a.id === (selected && selected.id) ? 'atr-row-sel atr-rise' : 'atr-rise'}>
-                      <TD data-label="Time">
-                        <div>
-                          <strong style={{ fontSize: 16 }}>{a.time}</strong>
-                          {multiDay && <div className="atr-cap">{fmtDate(a.date)}</div>}
-                        </div>
-                      </TD>
-                      <TD data-label="Patient"><span style={{ fontWeight: 600 }}>{a.patient}</span></TD>
-                      <TD data-label="Reason for visit"><span>{a.reason}</span></TD>
-                      <TD data-label="Status">
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-start' }}>
-                          <StatusPill status={a.status} />
-                          {a.note && <span className="atr-cap">{a.note}</span>}
-                        </div>
-                      </TD>
-                      <TD data-label="Actions">
-                        <button type="button" className="atr-btn atr-secondary atr-sm"
-                          aria-label={'Open record for ' + a.patient + ', ' + a.time}
-                          aria-current={selected && selected.id === a.id ? 'true' : undefined}
-                          onClick={() => openRow(a)}>
-                          {selected && selected.id === a.id ? 'Viewing' : 'Open record'}
-                          <Icons.ChevronRight aria-hidden="true" className="w-4 h-4" />
-                        </button>
-                      </TD>
-                    </TR>
-                  ))}
+                  {!loading &&
+                    visible.map((a) => (
+                      <TR
+                        key={a.id}
+                        className={
+                          a.id === (selected && selected.id) ? "atr-row-sel atr-rise" : "atr-rise"
+                        }
+                      >
+                        <TD data-label="Time">
+                          <div>
+                            <strong style={{ fontSize: 16 }}>{a.time}</strong>
+                            {multiDay && <div className="atr-cap">{fmtDate(a.date)}</div>}
+                          </div>
+                        </TD>
+                        <TD data-label="Patient">
+                          <span style={{ fontWeight: 600 }}>{a.patient}</span>
+                        </TD>
+                        <TD data-label="Reason for visit">
+                          <span>{a.reason}</span>
+                        </TD>
+                        <TD data-label="Status">
+                          <div
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 4,
+                              alignItems: "flex-start",
+                            }}
+                          >
+                            <StatusPill status={a.status} />
+                            {a.note && <span className="atr-cap">{a.note}</span>}
+                          </div>
+                        </TD>
+                        <TD data-label="Actions">
+                          <button
+                            type="button"
+                            className="atr-btn atr-secondary atr-sm"
+                            aria-label={"Open record for " + a.patient + ", " + a.time}
+                            aria-current={selected && selected.id === a.id ? "true" : undefined}
+                            onClick={() => openRow(a)}
+                          >
+                            {selected && selected.id === a.id ? "Viewing" : "Open record"}
+                            <Icons.ChevronRight aria-hidden="true" className="w-4 h-4" />
+                          </button>
+                        </TD>
+                      </TR>
+                    ))}
                 </TBody>
               </Table>
             </div>
@@ -479,93 +813,234 @@ export default function Screen() {
                 <div className="atr-panel atr-rise" style={{ padding: 24 }}>
                   <Empty
                     title="No appointments on this date."
-                    description={'Nothing is booked for ' + (multiDay ? 'these dates' : fmtDate(from)) + (statusFilter !== 'All' ? ' with the status ' + statusFilter : '') + '. Pick another day, or head back to today.'}
-                    action={<button type="button" className="atr-btn atr-secondary" onClick={() => { setFrom(TODAY); setTo(''); setStatusFilter('All'); }}>Back to today</button>}
+                    description={
+                      "Nothing is booked for " +
+                      (multiDay ? "these dates" : fmtDate(from)) +
+                      (statusFilter !== "All" ? " with the status " + statusFilter : "") +
+                      ". Pick another day, or head back to today."
+                    }
+                    action={
+                      <button
+                        type="button"
+                        className="atr-btn atr-secondary"
+                        onClick={() => {
+                          setFrom(TODAY);
+                          setTo("");
+                          setStatusFilter("All");
+                        }}
+                      >
+                        Back to today
+                      </button>
+                    }
                   />
                 </div>
               ) : selected ? (
-                <div className="atr-panel atr-rise" style={{ padding: 24, height: '100%' }} aria-live="polite">
-                  <p className="atr-cap" style={{ margin: 0 }}>now viewing</p>
-                  <p className="atr-serif" style={{ ...heading, fontSize: 28, margin: '4px 0 12px', lineHeight: 1.2 }}>{selected.patient}</p>
+                <div
+                  className="atr-panel atr-rise"
+                  style={{ padding: 24, height: "100%" }}
+                  aria-live="polite"
+                >
+                  <p className="atr-cap" style={{ margin: 0 }}>
+                    now viewing
+                  </p>
+                  <p
+                    className="atr-serif"
+                    style={{ ...heading, fontSize: 28, margin: "4px 0 12px", lineHeight: 1.2 }}
+                  >
+                    {selected.patient}
+                  </p>
                   <div className="flex flex-wrap items-center" style={{ gap: 12 }}>
-                    <span style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 700 }}>{selected.time} · {fmtDate(selected.date)}</span>
+                    <span style={{ fontVariantNumeric: "tabular-nums", fontWeight: 700 }}>
+                      {selected.time} · {fmtDate(selected.date)}
+                    </span>
                     <StatusPill status={selected.status} />
                   </div>
-                  <p style={{ margin: '16px 0 8px' }}>“{selected.reason}”</p>
+                  <p style={{ margin: "16px 0 8px" }}>“{selected.reason}”</p>
                   <p className="atr-cap" style={{ margin: 0 }}>
-                    {passed(selected) ? 'the slot time has passed' : 'this slot is still ahead of you'}
-                    {selected.note ? ' · ' + selected.note.toLowerCase().slice(0, 1) + selected.note.slice(1) : ''}
+                    {passed(selected)
+                      ? "the slot time has passed"
+                      : "this slot is still ahead of you"}
+                    {selected.note
+                      ? " · " + selected.note.toLowerCase().slice(0, 1) + selected.note.slice(1)
+                      : ""}
                   </p>
                 </div>
               ) : (
-                <div className="atr-panel" style={{ padding: 24, height: '100%' }}>
-                  <p className="atr-serif" style={{ ...heading, fontSize: 24, margin: '0 0 8px' }}>no appointment open</p>
-                  <p className="atr-cap" style={{ margin: 0 }}>choose “Open record” on a row to set its status and write up the visit.</p>
+                <div className="atr-panel" style={{ padding: 24, height: "100%" }}>
+                  <p className="atr-serif" style={{ ...heading, fontSize: 24, margin: "0 0 8px" }}>
+                    no appointment open
+                  </p>
+                  <p className="atr-cap" style={{ margin: 0 }}>
+                    choose “Open record” on a row to set its status and write up the visit.
+                  </p>
                 </div>
               )}
             </div>
 
             <div className="col-span-12 md:col-span-6">
-              <div className="atr-panel atr-arch-sm" data-wf="b-3-1" style={{ padding: '64px 24px 24px' }}>
-                <h2 className="atr-serif" style={{ ...heading, fontSize: 24, margin: 0, textAlign: 'center' }}>Set status</h2>
-                <p className="atr-cap" style={{ textAlign: 'center', margin: '4px 0 16px' }}>
-                  {selected ? 'for ' + selected.patient + ', ' + selected.time : 'choose an appointment first'}
+              <div
+                className="atr-panel atr-arch-sm"
+                data-wf="b-3-1"
+                style={{ padding: "64px 24px 24px" }}
+              >
+                <h2
+                  className="atr-serif"
+                  style={{ ...heading, fontSize: 24, margin: 0, textAlign: "center" }}
+                >
+                  Set status
+                </h2>
+                <p className="atr-cap" style={{ textAlign: "center", margin: "4px 0 16px" }}>
+                  {selected
+                    ? "for " + selected.patient + ", " + selected.time
+                    : "choose an appointment first"}
                 </p>
-                <div role="tablist" aria-label="Set status" className="flex flex-wrap justify-center" style={{ gap: 8 }}>
+                <div
+                  role="tablist"
+                  aria-label="Set status"
+                  className="flex flex-wrap justify-center"
+                  style={{ gap: 8 }}
+                >
                   {STATUS_TABS.map((t, i) => (
-                    <button key={t.key} type="button" role="tab" id={'st-tab-' + t.key} className="atr-tab" data-wf={TAB_WF[t.key]}
-                      aria-selected={tab === t.key} aria-controls="st-panel" tabIndex={tab === t.key ? 0 : -1}
-                      onClick={() => { setTab(t.key); resetStatusUi(); }} onKeyDown={(e) => onTabKey(e, i)}>
+                    <button
+                      key={t.key}
+                      type="button"
+                      role="tab"
+                      id={"st-tab-" + t.key}
+                      className="atr-tab"
+                      data-wf={TAB_WF[t.key]}
+                      aria-selected={tab === t.key}
+                      aria-controls="st-panel"
+                      tabIndex={tab === t.key ? 0 : -1}
+                      onClick={() => {
+                        setTab(t.key);
+                        resetStatusUi();
+                      }}
+                      onKeyDown={(e) => onTabKey(e, i)}
+                    >
                       {t.label}
                     </button>
                   ))}
                 </div>
-                <div role="tabpanel" id="st-panel" aria-labelledby={'st-tab-' + tab} style={{ marginTop: 24 }}>
-                  {tab !== 'Cancelled' ? (
-                    <div className="flex flex-col" style={{ gap: 12, alignItems: 'center', textAlign: 'center' }}>
+                <div
+                  role="tabpanel"
+                  id="st-panel"
+                  aria-labelledby={"st-tab-" + tab}
+                  style={{ marginTop: 24 }}
+                >
+                  {tab !== "Cancelled" ? (
+                    <div
+                      className="flex flex-col"
+                      style={{ gap: 12, alignItems: "center", textAlign: "center" }}
+                    >
                       <p style={{ margin: 0 }}>
-                        {tab === 'Confirmed' && 'let the patient know you’re expecting them.'}
-                        {tab === 'Completed' && 'the visit took place and you’re done with it.'}
-                        {tab === 'No-show' && 'the patient never arrived for their slot.'}
+                        {tab === "Confirmed" && "let the patient know you’re expecting them."}
+                        {tab === "Completed" && "the visit took place and you’re done with it."}
+                        {tab === "No-show" && "the patient never arrived for their slot."}
                       </p>
-                      <button type="button" className="atr-btn atr-primary" disabled={Boolean(activeTabBlock)} aria-describedby="st-why"
-                        onClick={() => applyStatus(tab, '')}>
-                        <span className="atr-dot" aria-hidden="true"><Icons.Check className="w-4 h-4" /></span>
-                        {tab === 'Confirmed' ? 'Confirm appointment' : tab === 'Completed' ? 'Mark as completed' : 'Mark as no-show'}
+                      <button
+                        type="button"
+                        className="atr-btn atr-primary"
+                        disabled={Boolean(activeTabBlock)}
+                        aria-describedby="st-why"
+                        onClick={() => applyStatus(tab, "")}
+                      >
+                        <span className="atr-dot" aria-hidden="true">
+                          <Icons.Check className="w-4 h-4" />
+                        </span>
+                        {tab === "Confirmed"
+                          ? "Confirm appointment"
+                          : tab === "Completed"
+                            ? "Mark as completed"
+                            : "Mark as no-show"}
                       </button>
-                      <p id="st-why" className="atr-cap" style={{ margin: 0 }}>{activeTabBlock || 'this change is recorded with the time and your name.'}</p>
+                      <p id="st-why" className="atr-cap" style={{ margin: 0 }}>
+                        {activeTabBlock || "this change is recorded with the time and your name."}
+                      </p>
                     </div>
                   ) : (
                     <div className="flex flex-col" style={{ gap: 12 }}>
                       <div>
-                        <Label htmlFor="cancel-reason" className="atr-label">Reason for cancelling</Label>
-                        <textarea id="cancel-reason" className="atr-field" value={cancelReason} disabled={Boolean(activeTabBlock)}
-                          aria-invalid={cancelErr ? 'true' : undefined} aria-describedby="cancel-help"
+                        <Label htmlFor="cancel-reason" className="atr-label">
+                          Reason for cancelling
+                        </Label>
+                        <textarea
+                          id="cancel-reason"
+                          className="atr-field"
+                          value={cancelReason}
+                          disabled={Boolean(activeTabBlock)}
+                          aria-invalid={cancelErr ? "true" : undefined}
+                          aria-describedby="cancel-help"
                           placeholder="e.g. I’m called to an emergency ward round"
-                          onChange={(e) => { setCancelReason(e.target.value); setCancelErr(''); setCancelConfirming(false); }} />
-                        <p id="cancel-help" className="atr-cap" style={{ margin: '4px 0 0 16px' }}>the patient sees this reason in their appointment list.</p>
+                          onChange={(e) => {
+                            setCancelReason(e.target.value);
+                            setCancelErr("");
+                            setCancelConfirming(false);
+                          }}
+                        />
+                        <p id="cancel-help" className="atr-cap" style={{ margin: "4px 0 0 16px" }}>
+                          the patient sees this reason in their appointment list.
+                        </p>
                         {cancelErr && (
                           <p className="atr-err" role="alert">
-                            <Icons.AlertCircle aria-hidden="true" className="w-4 h-4 shrink-0" style={{ marginTop: 3 }} />{cancelErr}
+                            <Icons.AlertCircle
+                              aria-hidden="true"
+                              className="w-4 h-4 shrink-0"
+                              style={{ marginTop: 3 }}
+                            />
+                            {cancelErr}
                           </p>
                         )}
                       </div>
                       {!cancelConfirming ? (
                         <div className="flex flex-col items-center" style={{ gap: 8 }}>
-                          <button type="button" className="atr-btn atr-primary" disabled={Boolean(activeTabBlock)} onClick={askCancel}>
-                            <span className="atr-dot" aria-hidden="true"><Icons.X className="w-4 h-4" /></span>
+                          <button
+                            type="button"
+                            className="atr-btn atr-primary"
+                            disabled={Boolean(activeTabBlock)}
+                            onClick={askCancel}
+                          >
+                            <span className="atr-dot" aria-hidden="true">
+                              <Icons.X className="w-4 h-4" />
+                            </span>
                             Cancel appointment
                           </button>
-                          {activeTabBlock && <p className="atr-cap" style={{ margin: 0, textAlign: 'center' }}>{activeTabBlock}</p>}
+                          {activeTabBlock && (
+                            <p className="atr-cap" style={{ margin: 0, textAlign: "center" }}>
+                              {activeTabBlock}
+                            </p>
+                          )}
                         </div>
                       ) : (
-                        <div className="atr-rise" role="alertdialog" aria-label="Confirm cancellation" style={{ background: 'var(--cream)', borderRadius: brand.radius, padding: 16 }}>
-                          <p style={{ margin: '0 0 12px', fontWeight: 600 }}>
-                            cancel {selected && first(selected)}’s {selected && selected.time} visit? the slot opens up again straight away.
+                        <div
+                          className="atr-rise"
+                          role="alertdialog"
+                          aria-label="Confirm cancellation"
+                          style={{
+                            background: "var(--cream)",
+                            borderRadius: brand.radius,
+                            padding: 16,
+                          }}
+                        >
+                          <p style={{ margin: "0 0 12px", fontWeight: 600 }}>
+                            cancel {selected && first(selected)}’s {selected && selected.time}{" "}
+                            visit? the slot opens up again straight away.
                           </p>
                           <div className="flex flex-wrap" style={{ gap: 8 }}>
-                            <button type="button" className="atr-btn atr-primary atr-sm" autoFocus onClick={() => applyStatus('Cancelled', cancelReason)}>Yes, cancel appointment</button>
-                            <button type="button" className="atr-btn atr-secondary atr-sm" onClick={() => setCancelConfirming(false)}>Keep appointment</button>
+                            <button
+                              type="button"
+                              className="atr-btn atr-primary atr-sm"
+                              autoFocus
+                              onClick={() => applyStatus("Cancelled", cancelReason)}
+                            >
+                              Yes, cancel appointment
+                            </button>
+                            <button
+                              type="button"
+                              className="atr-btn atr-secondary atr-sm"
+                              onClick={() => setCancelConfirming(false)}
+                            >
+                              Keep appointment
+                            </button>
                           </div>
                         </div>
                       )}
@@ -573,8 +1048,20 @@ export default function Screen() {
                   )}
                   <div role="status" aria-live="polite">
                     {statusMsg && (
-                      <p className="atr-rise" style={{ margin: '16px 0 0', display: 'flex', gap: 8, fontWeight: 600, background: 'color-mix(in srgb, var(--gold) 30%, var(--cream))', borderRadius: brand.radius, padding: '12px 16px' }}>
-                        <Icons.CheckCircle aria-hidden="true" className="w-5 h-5 shrink-0" />{statusMsg}
+                      <p
+                        className="atr-rise"
+                        style={{
+                          margin: "16px 0 0",
+                          display: "flex",
+                          gap: 8,
+                          fontWeight: 600,
+                          background: "color-mix(in srgb, var(--gold) 30%, var(--cream))",
+                          borderRadius: brand.radius,
+                          padding: "12px 16px",
+                        }}
+                      >
+                        <Icons.CheckCircle aria-hidden="true" className="w-5 h-5 shrink-0" />
+                        {statusMsg}
                       </p>
                     )}
                   </div>
@@ -584,59 +1071,159 @@ export default function Screen() {
           </div>
 
           {/* Rows 5-7: one form */}
-          <form onSubmit={saveConsultation} noValidate className="flex flex-col" style={{ gap: 32 }} aria-label="Consultation record">
+          <form
+            onSubmit={saveConsultation}
+            noValidate
+            className="flex flex-col"
+            style={{ gap: 32 }}
+            aria-label="Consultation record"
+          >
             {/* Row 5 */}
-            <div data-wf="b-4-0" className="atr-panel atr-arch" style={{ padding: '96px 32px 32px' }}>
-              <div style={{ maxWidth: 720, margin: '0 auto' }}>
-                <h2 className="atr-serif" style={{ ...heading, fontSize: 28, margin: 0, textAlign: 'center' }}>
-                  {selected ? 'Consultation record – ' + selected.patient + ', ' + selected.time : 'Consultation record'}
+            <div
+              data-wf="b-4-0"
+              className="atr-panel atr-arch"
+              style={{ padding: "96px 32px 32px" }}
+            >
+              <div style={{ maxWidth: 720, margin: "0 auto" }}>
+                <h2
+                  className="atr-serif"
+                  style={{ ...heading, fontSize: 28, margin: 0, textAlign: "center" }}
+                >
+                  {selected
+                    ? "Consultation record – " + selected.patient + ", " + selected.time
+                    : "Consultation record"}
                 </h2>
-                <p className="atr-cap" style={{ textAlign: 'center', margin: '8px auto 24px', maxWidth: 520 }}>
-                  only you and {selected ? first(selected) : 'the patient'} can read this. administrators see who, when and status — never what’s written here.
-                  {rec.savedAt != null && ' last saved ' + fmtTime(rec.savedAt) + ' by you.'}
+                <p
+                  className="atr-cap"
+                  style={{ textAlign: "center", margin: "8px auto 24px", maxWidth: 520 }}
+                >
+                  only you and {selected ? first(selected) : "the patient"} can read this.
+                  administrators see who, when and status — never what’s written here.
+                  {rec.savedAt != null && " last saved " + fmtTime(rec.savedAt) + " by you."}
                 </p>
                 {lockReason && (
-                  <p className="atr-rise" role="note" style={{ display: 'flex', gap: 8, margin: '0 0 24px', padding: '12px 16px', borderRadius: brand.radius, background: 'var(--cream)', fontWeight: 600 }}>
-                    <Icons.Clock aria-hidden="true" className="w-5 h-5 shrink-0" />{lockReason}
+                  <p
+                    className="atr-rise"
+                    role="note"
+                    style={{
+                      display: "flex",
+                      gap: 8,
+                      margin: "0 0 24px",
+                      padding: "12px 16px",
+                      borderRadius: brand.radius,
+                      background: "var(--cream)",
+                      fontWeight: 600,
+                    }}
+                  >
+                    <Icons.Clock aria-hidden="true" className="w-5 h-5 shrink-0" />
+                    {lockReason}
                   </p>
                 )}
                 {hasErrors && (
-                  <p role="alert" className="atr-rise" style={{ display: 'flex', gap: 8, margin: '0 0 24px', padding: '12px 16px', borderRadius: brand.radius, background: 'color-mix(in srgb, var(--gold) 30%, var(--cream))', fontWeight: 600 }}>
+                  <p
+                    role="alert"
+                    className="atr-rise"
+                    style={{
+                      display: "flex",
+                      gap: 8,
+                      margin: "0 0 24px",
+                      padding: "12px 16px",
+                      borderRadius: brand.radius,
+                      background: "color-mix(in srgb, var(--gold) 30%, var(--cream))",
+                      fontWeight: 600,
+                    }}
+                  >
                     <Icons.AlertCircle aria-hidden="true" className="w-5 h-5 shrink-0" />
-                    Not saved yet. {errors.diagnosis ? 'Add a diagnosis. ' : ''}{lineErrorCount > 0 ? 'Complete the prescription lines marked below. ' : ''}Everything you typed is still here.
+                    Not saved yet. {errors.diagnosis ? "Add a diagnosis. " : ""}
+                    {lineErrorCount > 0 ? "Complete the prescription lines marked below. " : ""}
+                    Everything you typed is still here.
                   </p>
                 )}
                 <div className="flex flex-col" style={{ gap: 24 }}>
                   <div>
-                    <Label htmlFor="c-diagnosis" className="atr-label">Diagnosis (required)</Label>
-                    <input id="c-diagnosis" type="text" className="atr-field" data-wf="i-4-0-0" value={rec.diagnosis} disabled={locked}
-                      aria-required="true" aria-invalid={errors.diagnosis ? 'true' : undefined} aria-describedby={errors.diagnosis ? 'c-diagnosis-err' : undefined}
+                    <Label htmlFor="c-diagnosis" className="atr-label">
+                      Diagnosis (required)
+                    </Label>
+                    <input
+                      id="c-diagnosis"
+                      type="text"
+                      className="atr-field"
+                      data-wf="i-4-0-0"
+                      value={rec.diagnosis}
+                      disabled={locked}
+                      aria-required="true"
+                      aria-invalid={errors.diagnosis ? "true" : undefined}
+                      aria-describedby={errors.diagnosis ? "c-diagnosis-err" : undefined}
                       placeholder="e.g. Tension-type headache"
-                      onChange={(e) => { patchRec({ diagnosis: e.target.value }); if (errors.diagnosis) setErrors((p) => ({ ...p, diagnosis: '' })); }} />
+                      onChange={(e) => {
+                        patchRec({ diagnosis: e.target.value });
+                        if (errors.diagnosis) setErrors((p) => ({ ...p, diagnosis: "" }));
+                      }}
+                    />
                     {errors.diagnosis && (
                       <p id="c-diagnosis-err" className="atr-err">
-                        <Icons.AlertCircle aria-hidden="true" className="w-4 h-4 shrink-0" style={{ marginTop: 3 }} />{errors.diagnosis}
+                        <Icons.AlertCircle
+                          aria-hidden="true"
+                          className="w-4 h-4 shrink-0"
+                          style={{ marginTop: 3 }}
+                        />
+                        {errors.diagnosis}
                       </p>
                     )}
                   </div>
                   <div>
-                    <Label htmlFor="c-notes" className="atr-label">Notes</Label>
-                    <textarea id="c-notes" className="atr-field" data-wf="i-4-0-1" value={rec.notes} disabled={locked}
-                      placeholder="what the patient described and what you found" onChange={(e) => patchRec({ notes: e.target.value })} />
+                    <Label htmlFor="c-notes" className="atr-label">
+                      Notes
+                    </Label>
+                    <textarea
+                      id="c-notes"
+                      className="atr-field"
+                      data-wf="i-4-0-1"
+                      value={rec.notes}
+                      disabled={locked}
+                      placeholder="what the patient described and what you found"
+                      onChange={(e) => patchRec({ notes: e.target.value })}
+                    />
                   </div>
                   <div>
-                    <Label htmlFor="c-advice" className="atr-label">Advice</Label>
-                    <textarea id="c-advice" className="atr-field" data-wf="i-4-0-2" value={rec.advice} disabled={locked}
-                      placeholder="what the patient should do next, and when to come back" onChange={(e) => patchRec({ advice: e.target.value })} />
+                    <Label htmlFor="c-advice" className="atr-label">
+                      Advice
+                    </Label>
+                    <textarea
+                      id="c-advice"
+                      className="atr-field"
+                      data-wf="i-4-0-2"
+                      value={rec.advice}
+                      disabled={locked}
+                      placeholder="what the patient should do next, and when to come back"
+                      onChange={(e) => patchRec({ advice: e.target.value })}
+                    />
                   </div>
                 </div>
                 {recAudit.length > 0 && (
                   <div style={{ marginTop: 24 }}>
-                    <p className="atr-cap" style={{ margin: '0 0 4px', fontWeight: 700 }}>record activity</p>
-                    <ul className="atr-cap" style={{ margin: 0, padding: 0, listStyle: 'none', fontVariantNumeric: 'tabular-nums' }}>
-                      {recAudit.slice(-4).map((e, i) => <li key={i}>{e.t} · {e.a} by you</li>)}
+                    <p className="atr-cap" style={{ margin: "0 0 4px", fontWeight: 700 }}>
+                      record activity
+                    </p>
+                    <ul
+                      className="atr-cap"
+                      style={{
+                        margin: 0,
+                        padding: 0,
+                        listStyle: "none",
+                        fontVariantNumeric: "tabular-nums",
+                      }}
+                    >
+                      {recAudit.slice(-4).map((e, i) => (
+                        <li key={i}>
+                          {e.t} · {e.a} by you
+                        </li>
+                      ))}
                     </ul>
-                    <p className="atr-cap" style={{ margin: '4px 0 0' }}>the audit log keeps who, which record and what action — never the content — and can’t be edited.</p>
+                    <p className="atr-cap" style={{ margin: "4px 0 0" }}>
+                      the audit log keeps who, which record and what action — never the content —
+                      and can’t be edited.
+                    </p>
                   </div>
                 )}
               </div>
@@ -644,8 +1231,19 @@ export default function Screen() {
 
             {/* Row 6 */}
             <div className="grid grid-cols-12" style={{ gap: 24 }}>
-              <section data-wf="b-5-0" aria-labelledby="rx-h" className="col-span-12 md:col-span-9 atr-panel atr-table" style={{ padding: '24px 8px 16px' }}>
-                <h2 id="rx-h" className="atr-serif" style={{ ...heading, fontSize: 24, margin: '0 0 8px 16px' }}>Prescription</h2>
+              <section
+                data-wf="b-5-0"
+                aria-labelledby="rx-h"
+                className="col-span-12 md:col-span-9 atr-panel atr-table"
+                style={{ padding: "24px 8px 16px" }}
+              >
+                <h2
+                  id="rx-h"
+                  className="atr-serif"
+                  style={{ ...heading, fontSize: 24, margin: "0 0 8px 16px" }}
+                >
+                  Prescription
+                </h2>
                 <Table>
                   <THead>
                     <TR>
@@ -659,8 +1257,11 @@ export default function Screen() {
                     {rec.lines.length === 0 && (
                       <TR>
                         <TD colSpan={4}>
-                          <span style={{ fontWeight: 600 }}>No medication prescribed.</span>{' '}
-                          <span className="atr-cap">add a line if the patient needs a medicine, or save as it is — the patient will see “no medication prescribed”.</span>
+                          <span style={{ fontWeight: 600 }}>No medication prescribed.</span>{" "}
+                          <span className="atr-cap">
+                            add a line if the patient needs a medicine, or save as it is — the
+                            patient will see “no medication prescribed”.
+                          </span>
                         </TD>
                       </TR>
                     )}
@@ -669,31 +1270,66 @@ export default function Screen() {
                       return (
                         <TR key={l.id} className="atr-rise">
                           <TD data-label="Medicine">
-                            <div style={{ width: '100%' }}>
-                              <input type="text" className="atr-field" value={l.medicine} disabled={locked} autoFocus={l.id === focusLineId}
-                                aria-label={'Medicine, line ' + (i + 1)} aria-invalid={bad && !l.medicine.trim() ? 'true' : undefined}
-                                aria-describedby={bad ? 'rx-err-' + l.id : undefined}
-                                onChange={(e) => patchLine(l.id, 'medicine', e.target.value)} />
+                            <div style={{ width: "100%" }}>
+                              <input
+                                type="text"
+                                className="atr-field"
+                                value={l.medicine}
+                                disabled={locked}
+                                autoFocus={l.id === focusLineId}
+                                aria-label={"Medicine, line " + (i + 1)}
+                                aria-invalid={bad && !l.medicine.trim() ? "true" : undefined}
+                                aria-describedby={bad ? "rx-err-" + l.id : undefined}
+                                onChange={(e) => patchLine(l.id, "medicine", e.target.value)}
+                              />
                               {bad && (
-                                <p id={'rx-err-' + l.id} className="atr-err" style={{ textAlign: 'left' }}>
-                                  <Icons.AlertCircle aria-hidden="true" className="w-4 h-4 shrink-0" style={{ marginTop: 3 }} />{errors.lines[l.id]}
+                                <p
+                                  id={"rx-err-" + l.id}
+                                  className="atr-err"
+                                  style={{ textAlign: "left" }}
+                                >
+                                  <Icons.AlertCircle
+                                    aria-hidden="true"
+                                    className="w-4 h-4 shrink-0"
+                                    style={{ marginTop: 3 }}
+                                  />
+                                  {errors.lines[l.id]}
                                 </p>
                               )}
                             </div>
                           </TD>
                           <TD data-label="Dosage">
-                            <input type="text" className="atr-field" value={l.dosage} disabled={locked}
-                              aria-label={'Dosage, line ' + (i + 1)} aria-invalid={bad && !l.dosage.trim() ? 'true' : undefined}
-                              onChange={(e) => patchLine(l.id, 'dosage', e.target.value)} />
+                            <input
+                              type="text"
+                              className="atr-field"
+                              value={l.dosage}
+                              disabled={locked}
+                              aria-label={"Dosage, line " + (i + 1)}
+                              aria-invalid={bad && !l.dosage.trim() ? "true" : undefined}
+                              onChange={(e) => patchLine(l.id, "dosage", e.target.value)}
+                            />
                           </TD>
                           <TD data-label="Duration">
-                            <input type="text" className="atr-field" value={l.duration} disabled={locked}
-                              aria-label={'Duration, line ' + (i + 1)} aria-invalid={bad && !l.duration.trim() ? 'true' : undefined}
-                              onChange={(e) => patchLine(l.id, 'duration', e.target.value)} />
+                            <input
+                              type="text"
+                              className="atr-field"
+                              value={l.duration}
+                              disabled={locked}
+                              aria-label={"Duration, line " + (i + 1)}
+                              aria-invalid={bad && !l.duration.trim() ? "true" : undefined}
+                              onChange={(e) => patchLine(l.id, "duration", e.target.value)}
+                            />
                           </TD>
                           <TD data-label="Remove">
-                            <button type="button" className="atr-btn atr-secondary atr-sm" disabled={locked}
-                              aria-label={'Remove line ' + (i + 1) + (l.medicine ? ', ' + l.medicine : '')} onClick={() => removeLine(l.id)}>
+                            <button
+                              type="button"
+                              className="atr-btn atr-secondary atr-sm"
+                              disabled={locked}
+                              aria-label={
+                                "Remove line " + (i + 1) + (l.medicine ? ", " + l.medicine : "")
+                              }
+                              onClick={() => removeLine(l.id)}
+                            >
                               <Icons.Trash aria-hidden="true" className="w-4 h-4" />
                               Remove
                             </button>
@@ -705,7 +1341,13 @@ export default function Screen() {
                 </Table>
               </section>
               <div className="col-span-12 md:col-span-3">
-                <button type="button" className="atr-btn atr-secondary w-full" data-wf="b-5-1" disabled={locked} onClick={addLine}>
+                <button
+                  type="button"
+                  className="atr-btn atr-secondary w-full"
+                  data-wf="b-5-1"
+                  disabled={locked}
+                  onClick={addLine}
+                >
                   <Icons.Plus aria-hidden="true" className="w-4 h-4" />
                   Add line
                 </button>
@@ -715,15 +1357,35 @@ export default function Screen() {
             {/* Row 7 */}
             <div className="grid grid-cols-12 items-center" style={{ gap: 24 }}>
               <div className="col-span-12 md:col-span-4">
-                <button type="submit" className="atr-btn atr-primary w-full" data-wf="b-6-0" disabled={locked} style={{ minHeight: 52 }}>
-                  <span className="atr-dot" aria-hidden="true"><Icons.Check className="w-4 h-4" /></span>
+                <button
+                  type="submit"
+                  className="atr-btn atr-primary w-full"
+                  data-wf="b-6-0"
+                  disabled={locked}
+                  style={{ minHeight: 52 }}
+                >
+                  <span className="atr-dot" aria-hidden="true">
+                    <Icons.Check className="w-4 h-4" />
+                  </span>
                   Save consultation
                 </button>
               </div>
               <div className="col-span-12 md:col-span-8" role="status" aria-live="polite">
                 {saveMsg && selected && saveMsg.id === selected.id && (
-                  <p className="atr-rise" style={{ margin: 0, display: 'flex', gap: 8, fontWeight: 600, background: 'color-mix(in srgb, var(--gold) 30%, var(--cream))', borderRadius: brand.radius, padding: '12px 16px' }}>
-                    <Icons.CheckCircle aria-hidden="true" className="w-5 h-5 shrink-0" />{saveMsg.text}
+                  <p
+                    className="atr-rise"
+                    style={{
+                      margin: 0,
+                      display: "flex",
+                      gap: 8,
+                      fontWeight: 600,
+                      background: "color-mix(in srgb, var(--gold) 30%, var(--cream))",
+                      borderRadius: brand.radius,
+                      padding: "12px 16px",
+                    }}
+                  >
+                    <Icons.CheckCircle aria-hidden="true" className="w-5 h-5 shrink-0" />
+                    {saveMsg.text}
                   </p>
                 )}
               </div>

@@ -39,7 +39,7 @@ env:
   IMAGE: 497511975196.dkr.ecr.us-east-1.amazonaws.com/aisdlc-050247095334
   AMPLIFY_APP: d13el1ykvx8z63
   BRANCH: p050247095334
-  # false for a frontend-only project: there is no backend/ to build and no image to push.
+  # true for a full-stack project: there is a backend/ to build and an image to push.
   HAS_API: "true"
 
 jobs:
