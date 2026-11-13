@@ -1,0 +1,9 @@
+{
+  "name": "MediBook \u2013 Doctor Appointment & Consultation Management System",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+  "forwardPorts": [
+    5173,
+    8000
+  ],
+  "postCreateCommand": "cd frontend && npm install --no-audit --no-fund && npx playwright install --with-deps chromium"
+}
