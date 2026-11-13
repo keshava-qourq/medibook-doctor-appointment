@@ -91,6 +91,33 @@ def test_ac010_creates_active_account_hashed_password_and_echoes_initial_passwor
     assert verify_password(password, created.password_hash)
 
 
+def test_ac010_accepts_contract_initial_password_field(
+    db_session: DBSession, app_client: TestClient
+):
+    """The API contract and the e2e client send the create password as
+    `initial_password`; the endpoint must accept it (AC-010)."""
+    admin = _make_user(db_session)
+    password = _password()
+    email = _email("contract")
+
+    resp = app_client.post(
+        "/api/admin/users",
+        headers=_auth(db_session, admin),
+        json={
+            "full_name": "Contract Staff",
+            "email": email,
+            "role": "doctor",
+            "initial_password": password,
+        },
+    )
+
+    assert resp.status_code == 201
+    body = resp.json()
+    assert body["initial_password"] == password
+    created = db_session.get(User, body["id"])
+    assert verify_password(password, created.password_hash)
+
+
 # -- AC-011 -------------------------------------------------------------------
 
 
@@ -141,6 +168,26 @@ def test_ac011_password_reset_missing_user_is_404_empty_body_and_weak_is_422(
     )
     assert weak.status_code == 422
     assert weak.json()["password"] == "weak_password"
+
+
+def test_ac011_accepts_contract_new_password_field(
+    db_session: DBSession, app_client: TestClient
+):
+    """The API contract and the e2e client send the reset password as
+    `new_password`; the endpoint must accept it (AC-011)."""
+    admin = _make_user(db_session)
+    target = _make_user(db_session, role="doctor")
+
+    new_password = _password()
+    resp = app_client.post(
+        f"/api/admin/users/{target.id}/password",
+        headers=_auth(db_session, admin),
+        json={"new_password": new_password},
+    )
+
+    assert resp.status_code == 204
+    db_session.refresh(target)
+    assert verify_password(new_password, target.password_hash)
 
 
 # -- AC-012 -------------------------------------------------------------------

@@ -7,6 +7,7 @@ import { brand } from "@/lib/brand";
 import { useNavigate } from "@/lib/navigate";
 import { ApiError, apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { RegisterForm } from "@/screens/Register";
 
 const { ArrowLeft, ArrowRight } = Icons;
 
@@ -193,126 +194,16 @@ export default function Screen() {
             </button>
           </form>
 
-          <form
+          <div
             data-wf="b-2-1"
             id="at-panel-register"
             role="tabpanel"
             aria-labelledby="at-tab-register"
             hidden={tab !== "register"}
-            className="mt-8 space-y-4 text-left"
-            onSubmit={(e) => {
-              e.preventDefault();
-              navigate("find-a-doctor");
-            }}
+            className="mt-8"
           >
-            <h2 className="sr-only">Create a patient account</h2>
-            <div className="space-y-1">
-              <label
-                htmlFor="at-reg-name"
-                className="block pl-4 text-xs lowercase"
-                style={{ color: brand.neutralColor }}
-              >
-                full name
-              </label>
-              <input
-                id="at-reg-name"
-                data-wf="i-2-1-0"
-                type="text"
-                autoComplete="name"
-                required
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className={"h-12 w-full px-5 text-sm " + focusCls}
-                style={{ ...pill, ...ring }}
-              />
-            </div>
-            <div className="space-y-1">
-              <label
-                htmlFor="at-reg-email"
-                className="block pl-4 text-xs lowercase"
-                style={{ color: brand.neutralColor }}
-              >
-                email
-              </label>
-              <input
-                id="at-reg-email"
-                data-wf="i-2-1-1"
-                type="email"
-                autoComplete="email"
-                required
-                value={regEmail}
-                onChange={(e) => setRegEmail(e.target.value)}
-                className={"h-12 w-full px-5 text-sm " + focusCls}
-                style={{ ...pill, ...ring }}
-              />
-            </div>
-            <div className="space-y-1">
-              <label
-                htmlFor="at-reg-phone"
-                className="block pl-4 text-xs lowercase"
-                style={{ color: brand.neutralColor }}
-              >
-                phone number
-              </label>
-              <input
-                id="at-reg-phone"
-                data-wf="i-2-1-2"
-                type="tel"
-                autoComplete="tel"
-                required
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className={"h-12 w-full px-5 text-sm " + focusCls}
-                style={{ ...pill, ...ring }}
-              />
-            </div>
-            <div className="space-y-1">
-              <label
-                htmlFor="at-reg-password"
-                className="block pl-4 text-xs lowercase"
-                style={{ color: brand.neutralColor }}
-              >
-                password
-              </label>
-              <input
-                id="at-reg-password"
-                data-wf="i-2-1-3"
-                type="password"
-                autoComplete="new-password"
-                required
-                minLength={8}
-                pattern="(?=.*[A-Za-z])(?=.*[0-9]).{8,}"
-                title="At least 8 characters, with letters and numbers"
-                aria-describedby="at-reg-password-hint"
-                value={regPassword}
-                onChange={(e) => setRegPassword(e.target.value)}
-                className={"h-12 w-full px-5 text-sm " + focusCls}
-                style={{ ...pill, ...ring }}
-              />
-              <p
-                id="at-reg-password-hint"
-                className="pl-4 text-xs"
-                style={{ color: brand.neutralColor }}
-              >
-                min. 8 characters, letters and numbers
-              </p>
-            </div>
-            <button
-              data-wf="b-3-1"
-              type="submit"
-              className={
-                "h-12 w-full text-sm font-semibold transition-opacity hover:opacity-90 " + focusCls
-              }
-              style={{
-                ...ring,
-                borderRadius: 999,
-                backgroundColor: brand.accentColor,
-                color: brand.backgroundColor,
-              }}
-            >
-              Create account
-            </button>
-          </form>
+            <RegisterForm />
+          </div>
 
           <p className="mt-7 text-xs lowercase" style={{ color: brand.neutralColor }}>
             new here?{" "}

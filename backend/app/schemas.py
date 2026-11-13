@@ -4,7 +4,7 @@ One pair per entity in the approved data model, plus the placeholder every
 generated route returns until it has been implemented.
 """
 
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import AliasChoices, BaseModel, EmailStr, Field, field_validator
 
 
 class RegisterRequest(BaseModel):
@@ -57,7 +57,9 @@ class AdminUserCreate(BaseModel):
     full_name: str
     email: str
     role: str
-    password: str
+    # The API contract (and the e2e client) send this as `initial_password`;
+    # `password` is accepted too for backward compatibility.
+    password: str = Field(validation_alias=AliasChoices("password", "initial_password"))
 
 
 class AdminUserOut(BaseModel):
@@ -87,4 +89,6 @@ class AdminUserUpdate(BaseModel):
 
 
 class AdminPasswordReset(BaseModel):
-    password: str
+    # The API contract (and the e2e client) send this as `new_password`;
+    # `password` is accepted too for backward compatibility.
+    password: str = Field(validation_alias=AliasChoices("password", "new_password"))

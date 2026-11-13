@@ -59,7 +59,12 @@ app = FastAPI(
 # unless that origin is allowed here. In development that is the Vite dev server; when
 # deployed, the platform injects the frontend's real URL as ALLOWED_ORIGINS (comma
 # separated). Point ALLOWED_ORIGINS at the real thing and nothing else has to change.
-_dev_origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+_dev_origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:4173",
+    "http://127.0.0.1:4173",
+]
 _allowed_origins = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
