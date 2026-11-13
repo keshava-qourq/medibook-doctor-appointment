@@ -3,11 +3,88 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-0 tests · Passed 0 · Failed 0 · Skipped 0 · Not run 0
+67 tests · Passed 57 · Failed 5 · Skipped 5 · Not run 0
 
-Acceptance criteria covered: 0/129 · passing: 0/129
+Acceptance criteria covered: 14/129 · passing: 8/129
 <!-- sdlc:auto:end summary -->
 
 <!-- sdlc:auto:start tests -->
-_Tests appear here when a development sprint is delivered, or after "Validate unit tests"._
+## Sprint 1
+
+### US-001: Patient self-registration with email and password
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-005 | auth wiring > [AC-005] sign-in stores the token and goes to the landing from the API | Unit | Passed | `frontend/src/App.test.tsx` |
+| AC-006 | auth wiring > [AC-006] a failed sign-in shows the API message and stores no token | Unit | Passed | `frontend/src/App.test.tsx` |
+| AC-007 | auth wiring > [AC-007] sign out calls logout, clears the token and returns to sign-in | Unit | Passed | `frontend/src/App.test.tsx` |
+| AC-008 | auth wiring > [AC-008] a 401 from the API clears the token and routes to sign-in | Unit | Passed | `frontend/src/App.test.tsx` |
+| AC-014 | auth wiring > [AC-014] a doctor is redirected away from a patient-only route | Unit | Passed | `frontend/src/App.test.tsx` |
+| AC-014 | auth wiring > [AC-014] a patient is redirected away from the admin console | Unit | Passed | `frontend/src/App.test.tsx` |
+| AC-017 | auth wiring > [AC-017] an unauthenticated visitor to a protected route is sent to sign-in | Unit | Passed | `frontend/src/App.test.tsx` |
+| AC-010 | AdminUsers > [AC-010] a 403 shows an access message | Unit | Passed | `frontend/src/screens/AdminUsers.test.tsx` |
+| AC-010 | AdminUsers > [AC-010] deactivate toggle sends PATCH | Unit | Passed | `frontend/src/screens/AdminUsers.test.tsx` |
+| AC-010 | AdminUsers > [AC-010] lists users and shows the initial password once after create | Unit | Passed | `frontend/src/screens/AdminUsers.test.tsx` |
+| AC-011 | AdminUsers > [AC-011] reset password confirms sessions are invalid | Unit | Passed | `frontend/src/screens/AdminUsers.test.tsx` |
+| AC-012 | AdminUsers > [AC-012] 409 shows inline message and keeps typed values | Unit | Passed | `frontend/src/screens/AdminUsers.test.tsx` |
+| AC-012 | AdminUsers > [AC-012] 422 field errors render inline | Unit | Passed | `frontend/src/screens/AdminUsers.test.tsx` |
+| AC-001 | Register > [AC-001] stores the token and navigates to the landing path | Unit | Passed | `frontend/src/screens/Register.test.tsx` |
+| AC-002 | Register > [AC-002] shows email already registered on 409 and keeps the form | Unit | Passed | `frontend/src/screens/Register.test.tsx` |
+| AC-003 | Register > [AC-003] flags empty, malformed and short fields client-side without calling the API | Unit | Passed | `frontend/src/screens/Register.test.tsx` |
+| AC-003 | Register > [AC-003] shows server 422 field errors inline and preserves values | Unit | Passed | `frontend/src/screens/Register.test.tsx` |
+| AC-010 | test_ac010_creates_active_account_hashed_password_and_echoes_initial_password[admin] | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
+| AC-010 | test_ac010_creates_active_account_hashed_password_and_echoes_initial_password[doctor] | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
+| AC-011 | test_ac011_new_password_replaces_old_and_revokes_every_session | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
+| AC-011 | test_ac011_password_reset_missing_user_is_404_empty_body_and_weak_is_422 | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
+| AC-012 | test_ac012_duplicate_email_case_insensitive_is_409_and_creates_nothing | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
+| AC-013 | test_ac013_non_admin_caller_gets_403_empty_body_and_creates_nothing | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
+| AC-013 | test_ac013_unauthenticated_caller_gets_401 | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
+| — | test_ac_list_users_paginates_and_never_returns_passwords | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
+| — | test_ac_list_users_rejects_non_admin_with_403_empty_body | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
+| — | test_ac_patch_deactivation_revokes_all_sessions_and_returns_user | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
+| — | test_ac_patch_missing_user_returns_404_empty_body | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
+| — | test_ac_deactivated_user_rejected_401 | Integration | Passed | `backend/tests/unit/test_auth_core.py` |
+| — | test_ac_expired_session_rejected_401_no_www_authenticate | Integration | Passed | `backend/tests/unit/test_auth_core.py` |
+| — | test_ac_hashing_round_trip_verifies_correct_and_rejects_wrong | Integration | Passed | `backend/tests/unit/test_auth_core.py` |
+| — | test_ac_idle_window_slides_forward_on_each_authenticated_call | Integration | Passed | `backend/tests/unit/test_auth_core.py` |
+| — | test_ac_malformed_or_missing_token_rejected_401 | Integration | Passed | `backend/tests/unit/test_auth_core.py` |
+| — | test_ac_ownership_guard_allows_owner | Integration | Passed | `backend/tests/unit/test_auth_core.py` |
+| — | test_ac_ownership_guard_rejects_nonexistent_resource_same_as_other_owner | Integration | Passed | `backend/tests/unit/test_auth_core.py` |
+| — | test_ac_ownership_guard_rejects_other_owner_with_empty_body | Integration | Passed | `backend/tests/unit/test_auth_core.py` |
+| — | test_ac_require_role_allows_matching_role | Integration | Passed | `backend/tests/unit/test_auth_core.py` |
+| — | test_ac_require_role_rejects_mismatch_with_empty_body | Integration | Passed | `backend/tests/unit/test_auth_core.py` |
+| — | test_ac_revoked_session_rejected_401 | Integration | Passed | `backend/tests/unit/test_auth_core.py` |
+| — | test_ac_seed_startup_users_creates_admin_and_patient_when_configured | Integration | Passed | `backend/tests/unit/test_auth_core.py` |
+| — | test_ac_seed_startup_users_idempotent_and_seeds_nothing_when_unset | Integration | Passed | `backend/tests/unit/test_auth_core.py` |
+| — | test_ac_session_stores_only_token_hash_not_raw_token | Integration | Passed | `backend/tests/unit/test_auth_core.py` |
+| — | test_ac_weak_password_rejected_under_eight_chars | Integration | Passed | `backend/tests/unit/test_auth_core.py` |
+| AC-001, AC-002 | test_ac001_ac002_register_then_duplicate_case_insensitive | Integration | Passed | `backend/tests/unit/test_auth_endpoints.py` |
+| AC-003 | test_ac003_invalid_fields_listed_by_name | Integration | Passed | `backend/tests/unit/test_auth_endpoints.py` |
+| AC-005 | test_ac005_login_landing_is_role_specific | Integration | Passed | `backend/tests/unit/test_auth_endpoints.py` |
+| AC-006, AC-007 | test_ac006_ac007_login_generic_failure_and_logout_revokes_one | Integration | Passed | `backend/tests/unit/test_auth_endpoints.py` |
+| AC-009 | test_ac009_inactive_login_refused | Integration | Passed | `backend/tests/unit/test_auth_endpoints.py` |
+| — | test_ac_me_returns_profile_for_valid_token_and_401_without | Integration | Passed | `backend/tests/unit/test_auth_endpoints.py` |
+| AC-001 | [AC-001] registers a new patient and lands on the doctor search screen | E2E | Failed | `frontend/e2e/registration.spec.ts` |
+| AC-002 | [AC-002] duplicate email registration shows the already-registered message and creates no second account | E2E | Failed | `frontend/e2e/registration.spec.ts` |
+| AC-003, NFR-022 | [AC-003][NFR-022] invalid registration input is flagged inline per field and preserves typed values | E2E | Passed | `frontend/e2e/registration.spec.ts` |
+| AC-007 | [AC-007] sign-out ends the session and the back button does not show cached protected content | E2E | Skipped | `frontend/e2e/session.spec.ts` |
+| AC-009 | [AC-009] a deactivated account is forced back to sign-in and refused re-login with an inactive message | E2E | Skipped | `frontend/e2e/session.spec.ts` |
+| NFR-002 | [NFR-002] an administrator password reset revokes the user's current session | E2E | Skipped | `frontend/e2e/session.spec.ts` |
+| NFR-003 | [NFR-003] a patient cannot reach the admin console | E2E | Skipped | `frontend/e2e/session.spec.ts` |
+| NFR-003 | [NFR-003] an unauthenticated visitor to a protected route is sent to sign-in | E2E | Skipped | `frontend/e2e/session.spec.ts` |
+| AC-005 | [AC-005] admin sign-in reaches the admin dashboard | E2E | Passed | `frontend/e2e/sign-in.spec.ts` |
+| AC-005 | [AC-005] doctor sign-in reaches their schedule | E2E | Failed | `frontend/e2e/sign-in.spec.ts` |
+| AC-005 | [AC-005] patient sign-in reaches the doctor search screen | E2E | Failed | `frontend/e2e/sign-in.spec.ts` |
+| AC-006, NFR-004 | [AC-006][NFR-004] a wrong password shows one generic message and creates no session | E2E | Failed | `frontend/e2e/sign-in.spec.ts` |
+| — | [seed] the seeded admin and smoke patient can sign in with their fixed credentials | E2E | Passed | `frontend/e2e/sign-in.spec.ts` |
+
+## Project setup
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-001 | SignIn register tab > [AC-001] posts the register tab to /api/auth/register and lands the patient | Unit | Passed | `frontend/src/screens/SignIn.test.tsx` |
+| AC-003 | SignIn register tab > [AC-003] flags invalid register-tab fields inline without calling the API | Unit | Passed | `frontend/src/screens/SignIn.test.tsx` |
+| — | test_health_reports_ok | Integration | Passed | `backend/tests/integration/test_health.py` |
+| — | test_the_openapi_document_builds | Integration | Passed | `backend/tests/integration/test_health.py` |
+| — | the app loads | E2E | Passed | `frontend/e2e/example.spec.ts` |
 <!-- sdlc:auto:end tests -->
