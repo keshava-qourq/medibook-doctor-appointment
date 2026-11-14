@@ -12,6 +12,7 @@ import MyAppointments from "@/screens/MyAppointments";
 import DoctorSchedule from "@/screens/DoctorSchedule";
 import DoctorAvailability from "@/screens/DoctorAvailability";
 import Admin from "@/screens/Admin";
+import Profile from "@/screens/Profile";
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   [
@@ -49,6 +50,10 @@ function AppShellLayout() {
                 </NavLink>
                 <NavLink to="/my-appointments" className={navLinkClass}>
                   {"My Appointments"}
+                </NavLink>
+                <NavLink to="/profile" className={navLinkClass}>
+                  <Icons.User size={16} />
+                  {"My Profile"}
                 </NavLink>
               </>
             )}
@@ -102,6 +107,8 @@ export default function App() {
           <Route path="/search" element={guarded(["patient"], <FindADoctor />)} />
           <Route path="/find-a-doctor" element={guarded(["patient"], <FindADoctor />)} />
           <Route path="/my-appointments" element={guarded(["patient"], <MyAppointments />)} />
+          <Route path="/profile" element={guarded(["patient"], <Profile />)} />
+          <Route path="/my-profile" element={guarded(["patient"], <Profile />)} />
           <Route path="/doctor-schedule" element={guarded(["doctor"], <DoctorSchedule />)} />
           <Route
             path="/doctor-availability"
