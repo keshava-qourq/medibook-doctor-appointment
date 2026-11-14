@@ -6,20 +6,18 @@ import * as UI from "@/lib/ui";
 import { Icons } from "@/lib/icons";
 import { brand } from "@/lib/brand";
 import { useNavigate } from "@/lib/navigate";
+import { formatClinicDate, useClinicTimezone } from "@/lib/clinicTime";
 
 const { Label, Table, THead, TBody, TR, TH, TD, Empty } = UI;
 
 const { Home, Filter, ArrowLeft, ArrowRight } = Icons;
 
 const TODAY = "2026-11-13";
-const TZ_LABEL = "Asia/Kolkata (IST)";
 const DOCTOR = {
   name: "Dr. Ananya Sharma",
   spec: "General Medicine",
   room: "Room 4, ground floor",
 };
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const STATUS_FILTERS = ["All", "Booked", "Confirmed", "Completed", "No-show", "Cancelled"];
 const STATUS_TABS = [
   { key: "Confirmed", label: "Confirmed" },
@@ -199,11 +197,8 @@ const SEED_RECORDS = {
 };
 const SEED_AUDIT = { "a-1001": [{ t: "09:48", a: "created" }] };
 
-function fmtDate(iso) {
-  const [y, m, d] = iso.split("-").map(Number);
-  const dt = new Date(Date.UTC(y, m - 1, d));
-  return DAYS[dt.getUTCDay()] + " " + d + " " + MONTHS[m - 1] + " " + y;
-}
+// Every date on this screen goes through the one shared clinic-timezone formatter.
+const fmtDate = (iso) => formatClinicDate(iso);
 function toMin(t) {
   const [h, m] = t.split(":").map(Number);
   return h * 60 + m;
@@ -335,6 +330,7 @@ function StatusPill({ status }) {
 
 export default function Screen() {
   const navigate = useNavigate();
+  const clinicTz = useClinicTimezone();
   const [appts, setAppts] = React.useState(SEED_APPTS);
   const [records, setRecords] = React.useState(SEED_RECORDS);
   const [audit, setAudit] = React.useState(SEED_AUDIT);
@@ -588,7 +584,8 @@ export default function Screen() {
                 My schedule
               </h1>
               <p className="atr-cap" style={{ margin: "8px 0 0" }}>
-                {DOCTOR.name} · {DOCTOR.spec} · {DOCTOR.room} · all times shown in {TZ_LABEL}
+                {DOCTOR.name} · {DOCTOR.spec} · {DOCTOR.room} · all times shown in the clinic
+                timezone, {clinicTz}
               </p>
             </div>
             <div className="col-span-12 md:col-span-3">
@@ -764,7 +761,9 @@ export default function Screen() {
                       >
                         <TD data-label="Time">
                           <div>
-                            <strong style={{ fontSize: 16 }}>{a.time}</strong>
+                            <strong style={{ fontSize: 16 }}>
+                              {a.time} {clinicTz}
+                            </strong>
                             {multiDay && <div className="atr-cap">{fmtDate(a.date)}</div>}
                           </div>
                         </TD>
@@ -851,7 +850,7 @@ export default function Screen() {
                   </p>
                   <div className="flex flex-wrap items-center" style={{ gap: 12 }}>
                     <span style={{ fontVariantNumeric: "tabular-nums", fontWeight: 700 }}>
-                      {selected.time} · {fmtDate(selected.date)}
+                      {fmtDate(selected.date)} {selected.time} {clinicTz}
                     </span>
                     <StatusPill status={selected.status} />
                   </div>

@@ -6,16 +6,21 @@ import * as UI from "@/lib/ui";
 import { Icons } from "@/lib/icons";
 import { brand } from "@/lib/brand";
 import { useNavigate } from "@/lib/navigate";
+import {
+  clinicTimezone,
+  formatClinicDate,
+  formatClinicDateTime,
+  formatClinicTime,
+  useClinicTimezone,
+} from "@/lib/clinicTime";
 
 const { Button, Input, Label, Select, Table, THead, TBody, TR, TH, TD, Empty } = UI;
 
 const { Check, X, Home, Calendar, ArrowLeft, ArrowRight, AlertCircle, CheckCircle } = Icons;
 
-const CLINIC = { name: "Greenhaven Family Clinic", tz: "Asia/Kolkata", tzLabel: "IST", cutoff: 24 };
+const CLINIC = { name: "Greenhaven Family Clinic", cutoff: 24 };
 const NOW = "2026-11-13T10:00";
 const TODAY = "2026-11-13";
-const DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const DAY_SLOTS = ["09:00", "09:30", "10:00", "11:00", "11:30", "12:00", "12:30"];
 
 const DOCTORS = {
@@ -153,26 +158,13 @@ const STATUS_STYLE = {
   "No-show": { icon: "AlertCircle", mix: 12 },
 };
 
-const pad = (n) => String(n).padStart(2, "0");
 const P = (s) => new Date(s.length === 10 ? s + "T00:00:00Z" : s + ":00Z");
-const fmtDate = (s) => {
-  const d = P(s);
-  return (
-    DOW[d.getUTCDay()] +
-    " " +
-    pad(d.getUTCDate()) +
-    " " +
-    MON[d.getUTCMonth()] +
-    " " +
-    d.getUTCFullYear()
-  );
-};
-const fmtShort = (s) => {
-  const d = P(s);
-  return pad(d.getUTCDate()) + " " + MON[d.getUTCMonth()] + " " + d.getUTCFullYear();
-};
-const fmtTime = (s) => s.slice(11, 16);
-const fmtDT = (s) => fmtDate(s) + " · " + fmtTime(s) + " " + CLINIC.tzLabel;
+// Every date and time on this screen goes through the one shared clinic-timezone
+// formatter: date "d MMM yyyy", time "HH:mm", combined "d MMM yyyy HH:mm".
+const fmtDate = (s) => formatClinicDate(s);
+const fmtShort = (s) => formatClinicDate(s);
+const fmtTime = (s) => formatClinicTime(s);
+const fmtDT = (s) => formatClinicDateTime(s) + " " + clinicTimezone();
 const hoursUntil = (s) => (P(s) - P(NOW)) / 36e5;
 const dur = (h) => {
   const m = Math.round(h * 60);
@@ -345,7 +337,7 @@ function RescheduleModal({ appt, onClose, onConfirm }) {
           aria-describedby="resched-date-help"
         />
         <p id="resched-date-help" className="mb-muted mb-small" style={{ margin: "8px 0 0" }}>
-          dates are in clinic time ({CLINIC.tzLabel}). the clinic is closed on sundays.
+          dates are in the clinic timezone ({clinicTimezone()}). the clinic is closed on sundays.
         </p>
       </div>
 
@@ -451,6 +443,7 @@ function RescheduleModal({ appt, onClose, onConfirm }) {
 
 export default function Screen() {
   const navigate = useNavigate();
+  const clinicTz = useClinicTimezone();
   const ink = brand.primaryColor;
   const accent = brand.accentColor;
   const bg = brand.backgroundColor;
@@ -753,7 +746,7 @@ export default function Screen() {
             <span className="mb-cell">
               <strong>{fmtDate(a.slot)}</strong>
               <span className="mb-sub">
-                {fmtTime(a.slot)} {CLINIC.tzLabel}
+                {fmtTime(a.slot)} {clinicTz}
               </span>
               {a.movedFrom && (
                 <span className="mb-sub mb-muted">rescheduled from {fmtDT(a.movedFrom)}</span>
@@ -803,7 +796,7 @@ export default function Screen() {
           <div>
             <strong>{fmtDate(a.slot)}</strong>
             <span className="mb-sub">
-              {fmtTime(a.slot)} {CLINIC.tzLabel}
+              {fmtTime(a.slot)} {clinicTz}
             </span>
           </div>
           <div>
@@ -881,7 +874,7 @@ export default function Screen() {
       <div className="w-full max-w-6xl mx-auto px-4 md:px-8 py-8 md:py-12">
         <header>
           <p className="mb-muted mb-small" style={{ margin: "0 0 8px" }}>
-            today is {fmtDate(TODAY)} · all times in clinic time ({CLINIC.tz}, {CLINIC.tzLabel})
+            today is {fmtDate(TODAY)} · all times in the clinic timezone ({clinicTz})
           </p>
           <h1 data-wf="b-0-0" className="mb-h1">
             My appointments &amp; records
@@ -951,7 +944,7 @@ export default function Screen() {
                         fontWeight: 400,
                       }}
                     >
-                      (times in clinic timezone)
+                      (times in the clinic timezone, {clinicTz})
                     </span>
                   </h2>
                   <Table>
@@ -1054,7 +1047,7 @@ export default function Screen() {
                   fontWeight: 400,
                 }}
               >
-                (most recent first, clinic time)
+                {"(most recent first, clinic timezone " + clinicTz + ")"}
               </span>
             </h2>
             {past.length > 0 ? (
