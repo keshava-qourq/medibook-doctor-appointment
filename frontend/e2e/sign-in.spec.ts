@@ -123,8 +123,11 @@ test("[AC-006][NFR-004] a wrong password shows one generic message and creates n
     page.getByRole("button", { name: /^sign in$/i }).click(),
   ]);
   expect(wrongPasswordResponse.status()).toBe(401);
-  const wrongPasswordMessage = (await page.getByRole("alert").textContent().catch(() => null)) ??
-    (await page.locator("body").innerText());
+  const wrongPasswordMessage =
+    (await page
+      .getByRole("alert")
+      .textContent()
+      .catch(() => null)) ?? (await page.locator("body").innerText());
 
   await page.reload();
   await page.locator("#at-email").fill(uniqueEmail("unknown"));
@@ -134,9 +137,20 @@ test("[AC-006][NFR-004] a wrong password shows one generic message and creates n
     page.getByRole("button", { name: /^sign in$/i }).click(),
   ]);
   expect(unknownEmailResponse.status()).toBe(401);
+  const unknownEmailMessage =
+    (await page
+      .getByRole("alert")
+      .textContent()
+      .catch(() => null)) ?? (await page.locator("body").innerText());
 
   const token = await page.evaluate(() => localStorage.getItem("session_token"));
   expect(token, "a failed sign-in must not create a session").toBeFalsy();
-  expect(wrongPasswordMessage).toBeTruthy();
+  expect(wrongPasswordMessage?.trim(), "a wrong password must show a message").toBeTruthy();
+  // NFR-004: the message must not reveal whether the email is registered, so a wrong
+  // password and an unknown email must show the identical generic failure.
+  expect(
+    (unknownEmailMessage ?? "").trim(),
+    "wrong password and unknown email must show the same generic message",
+  ).toBe((wrongPasswordMessage ?? "").trim());
   await api.dispose();
 });

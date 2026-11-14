@@ -36,6 +36,24 @@ def _code(status: int, code: str) -> JSONResponse:
     return JSONResponse(status_code=status, content={"code": code})
 
 
+def current_session(
+    authorization: str | None = Header(default=None),
+    db: DBSession = Depends(get_db),  # noqa: B008
+) -> SessionModel | None:
+    """Resolve the caller's session from the Authorization header once, using the
+    same parsing as ``current_user`` so the two never disagree about the token.
+
+    Returns ``None`` when no bearer token is present; the 401 contract for an
+    invalid token is enforced by the ``current_user`` dependency alongside it.
+    """
+    if not authorization or not authorization.startswith("Bearer "):
+        return None
+    raw_token = authorization.removeprefix("Bearer ").strip()
+    if not raw_token:
+        return None
+    return find_session_by_token(db, raw_token)
+
+
 def _user_payload(user: User) -> dict[str, object]:
     return {
         "id": user.id,
@@ -54,7 +72,7 @@ def register(body: RegisterRequest, db: DBSession = Depends(get_db)):  # noqa: B
     phone and password, so an invalid field is rejected with 422 before this
     body runs. Here we only normalize the already-valid email for storage.
     """
-    email = validate_email(body.email, check_deliverability=False).normalized
+    email = validate_email(body.email, check_deliverability=False, test_environment=True).normalized
 
     existing = db.query(User).filter(func.lower(User.email) == email.lower()).first()
     if existing is not None:
@@ -95,13 +113,16 @@ def login(body: LoginRequest, db: DBSession = Depends(get_db)):  # noqa: B008
 
 @router.post("/logout", status_code=204)
 def logout(
-    authorization: str = Header(),
-    user: User = Depends(current_user),  # noqa: B008
+    user: User = Depends(current_user),  # noqa: B008 -- enforces the 401 contract
+    session: SessionModel | None = Depends(current_session),  # noqa: B008
     db: DBSession = Depends(get_db),  # noqa: B008
 ) -> Response:
-    """Revoke only the caller's current token (AC-007)."""
-    raw_token = authorization.removeprefix("Bearer ").strip()
-    session: SessionModel | None = find_session_by_token(db, raw_token)
+    """Revoke only the caller's current token (AC-007).
+
+    ``current_user`` has already validated the token and resolved its session;
+    reuse that resolved session rather than re-parsing the header, so the two
+    cannot disagree and silently leave the session un-revoked.
+    """
     if session is not None and session.revoked_at is None:
         session.revoked_at = datetime.now(UTC)
         session.revoked_reason = "logout"

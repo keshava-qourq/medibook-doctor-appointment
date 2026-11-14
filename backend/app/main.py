@@ -1,9 +1,9 @@
 """Application entrypoint.
 
 Generated from the approved architecture: one router per component that owns
-endpoints, one route per endpoint the API spec declares. Every generated route
-is a stub that returns a typed placeholder, so the service starts, serves its
-OpenAPI document and passes its tests before a single handler is implemented.
+endpoints, one route per endpoint the API spec declares. The auth, admin and
+clinical routers return real responses; this module wires them together, sets
+up CORS and the shared error handlers, and creates the schema on startup.
 """
 
 import os
@@ -18,7 +18,8 @@ from fastapi.responses import JSONResponse, Response
 from app import models  # noqa: F401 -- imported so the tables register before create_all
 from app.database import Base, SessionLocal, engine
 from app.errors import EmptyBodyHTTPError
-from app.routers import admin_users, auth
+from app.routers import admin_users, appointments, auth
+from app.security import validate_session_idle_minutes
 from app.seed import seed_startup_users
 from app.services import configured_services
 
@@ -33,7 +34,12 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     connection. A test can therefore point `get_db` at a database of its own, and a
     deployment whose `DATABASE_URL` names a server that is not up fails where you can
     read the error, not while pytest collects the files.
+
+    A misconfigured `SESSION_IDLE_MINUTES` is rejected here, at startup, so a bad
+    value fails loudly where an operator can read it rather than turning every
+    authenticated request into a 500 on the hot path.
     """
+    validate_session_idle_minutes()
     if engine.dialect.name == "postgresql":
         # The User.email column uses citext for case-insensitive uniqueness; the
         # extension must exist before create_all issues CREATE TABLE ... CITEXT.
@@ -59,7 +65,12 @@ app = FastAPI(
 # unless that origin is allowed here. In development that is the Vite dev server; when
 # deployed, the platform injects the frontend's real URL as ALLOWED_ORIGINS (comma
 # separated). Point ALLOWED_ORIGINS at the real thing and nothing else has to change.
-_dev_origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+_dev_origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:4173",
+    "http://127.0.0.1:4173",
+]
 _allowed_origins = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
@@ -72,6 +83,7 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(admin_users.router, prefix="/api/admin", tags=["admin"])
+app.include_router(appointments.router)
 
 
 @app.exception_handler(RequestValidationError)
@@ -92,5 +104,5 @@ async def empty_body_error_handler(request: Request, exc: EmptyBodyHTTPError) ->
 
 @app.get("/health")
 async def health() -> dict[str, object]:
-    """Liveness probe, and the only route here that is not a stub."""
+    """Liveness probe reporting the configured backing services."""
     return {"status": "ok", "services": configured_services()}
