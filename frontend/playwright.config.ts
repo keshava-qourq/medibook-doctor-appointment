@@ -44,10 +44,15 @@ export default defineConfig({
           // The generated backend defaults to a local SQLite database (see
           // backend/app/database.py), so the API runs end to end with no database
           // server to stand up. Its packages are in backend/.venv (installed before the run).
+          // The run gets its own freshly created database file: specs that count accounts
+          // through the paginated admin list (limit max 100) are only meaningful against a
+          // clean database, and the default ./app.db accumulates users across runs.
           command:
-            "cd ../backend && .venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000",
+            "cd ../backend && rm -f ./e2e.db && DATABASE_URL=sqlite:///./e2e.db .venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000",
           url: "http://127.0.0.1:8000/health",
-          reuseExistingServer: !process.env.CI,
+          // Never reuse a backend left over from an earlier run: it would still be
+          // serving that run's accumulated database.
+          reuseExistingServer: false,
           timeout: 180_000,
         },
         {
