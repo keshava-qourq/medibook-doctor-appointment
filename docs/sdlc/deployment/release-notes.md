@@ -9,7 +9,6 @@
 
 **Delivered:**
 - US-001: Patient self-registration with email and password
-- US-002: Sign in, sign out and session expiry
 - US-003: Administrator creates doctor and administrator accounts
 - US-004: Role-based access enforcement across every screen and API call
 - US-FIX-1: Fix the scaffold's failing checks

@@ -6,6 +6,7 @@
 | Method | Path | Handler | Source | Summary |
 |---|---|---|---|---|
 | GET | /admin-only | admin_only | `backend/tests/unit/test_auth_core.py:64` | — |
+| PUT | /api/admin/doctors/{doctor_id} | update_doctor | `backend/app/routers/doctors.py:32` | — |
 | GET | /api/admin/users | list_users | `backend/app/routers/admin_users.py:123` | — |
 | POST | /api/admin/users | create_user | `backend/app/routers/admin_users.py:64` | — |
 | PATCH | /api/admin/users/{user_id} | update_user | `backend/app/routers/admin_users.py:135` | — |
@@ -16,7 +17,11 @@
 | GET | /api/auth/me | me | `backend/app/routers/auth.py:134` | The signed-in user's own profile. |
 | POST | /api/auth/register | register | `backend/app/routers/auth.py:67` | Create a patient account and open its first session (AC-001). |
 | GET | /api/consultations/{id} | read_consultation | `backend/app/routers/appointments.py:29` | Read one consultation the caller owns; 403 empty body otherwise. |
-| GET | /health | health | `backend/app/main.py:105` | Liveness probe reporting the configured backing services. |
+| GET | /api/patients/me | read_me | `backend/app/routers/patients.py:34` | — |
+| PATCH | /api/patients/me | update_me | `backend/app/routers/patients.py:39` | — |
+| POST | /api/patients/me/password | change_password | `backend/app/routers/patients.py:54` | — |
+| GET | /api/search/doctors | search_doctors | `backend/app/routers/search.py:35` | — |
+| GET | /health | health | `backend/app/main.py:143` | Liveness probe reporting the configured backing services. |
 | GET | /owned-missing | owned_missing | `backend/tests/unit/test_auth_core.py:73` | — |
 | GET | /owned/{owner_id} | owned | `backend/tests/unit/test_auth_core.py:68` | — |
 | GET | /whoami | whoami | `backend/tests/unit/test_auth_core.py:58` | — |
@@ -39,13 +44,10 @@
 - GET /api/doctors/me/weekly-availability
 - GET /api/doctors/{doctor_id}
 - GET /api/doctors/{doctor_id}/availability
-- GET /api/patients/me
-- GET /api/search/doctors
 - GET /api/settings
 - GET /api/specializations
 - PATCH /api/admin/specializations/{id}
 - PATCH /api/appointments/{id}/status
-- PATCH /api/patients/me
 - POST /api/admin/catalog-terms
 - POST /api/admin/specializations
 - POST /api/appointments
@@ -53,9 +55,7 @@
 - POST /api/appointments/{id}/consultation
 - POST /api/appointments/{id}/reschedule
 - POST /api/doctors/me/exceptions
-- POST /api/patients/me/password
 - PUT /api/admin/catalog-terms/{id}
-- PUT /api/admin/doctors/{doctor_id}
 - PUT /api/admin/settings
 - PUT /api/consultations/{id}
 - PUT /api/doctors/me/weekly-availability
@@ -69,5 +69,5 @@
 <!-- sdlc:auto:end drift -->
 
 <!-- sdlc:auto:start source -->
-Generated from commit `805092a`
+Generated from commit `73e2af9`
 <!-- sdlc:auto:end source -->

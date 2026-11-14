@@ -3,9 +3,9 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-231 tests · Passed 209 · Failed 0 · Skipped 22 · Not run 0
+324 tests · Passed 290 · Failed 0 · Skipped 34 · Not run 0
 
-Acceptance criteria covered: 37/129 · passing: 32/129
+Acceptance criteria covered: 48/129 · passing: 42/129
 <!-- sdlc:auto:end summary -->
 
 <!-- sdlc:auto:start tests -->
@@ -74,11 +74,8 @@ Acceptance criteria covered: 37/129 · passing: 32/129
 | AC-002 | [AC-002] duplicate email registration shows the already-registered message and creates no second account | E2E | Passed | `frontend/e2e/registration.spec.ts` |
 | AC-003, NFR-022 | [AC-003][NFR-022] invalid registration input is flagged inline per field and preserves typed values | E2E | Passed | `frontend/e2e/registration.spec.ts` |
 | AC-004, NFR-014 | [AC-004][NFR-014] a rejected registration leaves no usable account, so the same email can be newly registered once the details are valid | E2E | Passed | `frontend/e2e/registration.spec.ts` |
-| AC-007 | [AC-007] sign-out ends the session and the back button does not show cached protected content | E2E | Skipped | `frontend/e2e/session.spec.ts` |
-| AC-009 | [AC-009] a deactivated account is forced back to sign-in and refused re-login with an inactive message | E2E | Skipped | `frontend/e2e/session.spec.ts` |
-| NFR-002 | [NFR-002] an administrator password reset revokes the user's current session | E2E | Skipped | `frontend/e2e/session.spec.ts` |
-| NFR-003 | [NFR-003] a patient cannot reach the admin console | E2E | Skipped | `frontend/e2e/session.spec.ts` |
-| NFR-003 | [NFR-003] an unauthenticated visitor to a protected route is sent to sign-in | E2E | Skipped | `frontend/e2e/session.spec.ts` |
+| NFR-003 | [NFR-003] a patient cannot reach the admin console | E2E | Passed | `frontend/e2e/session.spec.ts` |
+| NFR-003 | [NFR-003] an unauthenticated visitor to a protected route is sent to sign-in | E2E | Passed | `frontend/e2e/session.spec.ts` |
 | AC-005 | [AC-005] admin sign-in reaches the admin dashboard | E2E | Passed | `frontend/e2e/sign-in.spec.ts` |
 | AC-005 | [AC-005] doctor sign-in reaches their schedule | E2E | Passed | `frontend/e2e/sign-in.spec.ts` |
 | AC-005 | [AC-005] patient sign-in reaches the doctor search screen | E2E | Passed | `frontend/e2e/sign-in.spec.ts` |
@@ -285,6 +282,124 @@ Acceptance criteria covered: 37/129 · passing: 32/129
 | AC-125, NFR-007 | [AC-125][NFR-007] a refused API call returns no credential or clinical content in its body | E2E | Passed | `frontend/e2e/health-data-protection.spec.ts` |
 | NFR-016 | [NFR-016] clinic data is held in a managed database with automated backups and point-in-time recovery | E2E | Skipped | `frontend/e2e/health-data-protection.spec.ts` |
 | NFR-017 | [NFR-017] the system is sized for one small clinic (10-50 doctors, a few thousand patients) | E2E | Skipped | `frontend/e2e/health-data-protection.spec.ts` |
+
+## Sprint 3
+
+### US-002: Sign in, sign out and session expiry
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-005 | test_ac005_each_role_logs_in_and_gets_its_role_specific_landing | Integration | Passed | `backend/tests/integration/test_session_auth_acceptance.py` |
+| AC-006, NFR-004 | test_ac006_nfr004_wrong_password_and_unknown_email_are_byte_identical_401 | Integration | Passed | `backend/tests/integration/test_session_auth_acceptance.py` |
+| AC-007, NFR-002 | test_ac007_nfr002_logout_revokes_only_the_callers_token | Integration | Passed | `backend/tests/integration/test_session_auth_acceptance.py` |
+| AC-008 | test_ac008_each_authenticated_call_slides_the_idle_window_forward | Integration | Passed | `backend/tests/integration/test_session_auth_acceptance.py` |
+| AC-008, NFR-002 | test_ac008_nfr002_session_past_idle_window_is_401_and_relogin_is_required | Integration | Passed | `backend/tests/integration/test_session_auth_acceptance.py` |
+| AC-009, NFR-002 | test_ac009_nfr002_deactivated_user_token_is_rejected_and_relogin_is_refused | Integration | Passed | `backend/tests/integration/test_session_auth_acceptance.py` |
+| NFR-002 | test_nfr002_admin_password_reset_ends_every_session_the_account_holds | Integration | Passed | `backend/tests/integration/test_session_auth_acceptance.py` |
+| NFR-016 | test_nfr016_backups_and_pitr_are_infrastructure | Integration | Skipped | `backend/tests/integration/test_session_auth_acceptance.py` |
+| NFR-017 | test_nfr017_sizing_is_infrastructure | Integration | Skipped | `backend/tests/integration/test_session_auth_acceptance.py` |
+
+### US-005: Patient manages their own profile
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-018 | My Profile routing > [AC-018] /my-profile renders My Profile for a signed-in patient | Unit | Passed | `frontend/src/AppProfileRoute.test.tsx` |
+| AC-018 | My Profile routing > [AC-018] /profile renders My Profile for a signed-in patient | Unit | Passed | `frontend/src/AppProfileRoute.test.tsx` |
+| AC-018 | Profile > [AC-018] shows an error state when the profile cannot be loaded | Unit | Passed | `frontend/src/screens/Profile.test.tsx` |
+| AC-018 | Profile > [AC-018] shows the loading state then the stored profile with a read-only email | Unit | Passed | `frontend/src/screens/Profile.test.tsx` |
+| AC-019 | Profile > [AC-019] a 422 naming no known field falls back to a general message | Unit | Passed | `frontend/src/screens/Profile.test.tsx` |
+| AC-019 | Profile > [AC-019] saving PATCHes the profile and confirms on screen | Unit | Passed | `frontend/src/screens/Profile.test.tsx` |
+| AC-020 | Profile > [AC-020] a successful password change posts both fields and confirms on screen | Unit | Passed | `frontend/src/screens/Profile.test.tsx` |
+| AC-021 | Profile > [AC-021] a 422 shows the message against current_password and keeps what was typed | Unit | Passed | `frontend/src/screens/Profile.test.tsx` |
+| AC-018 | [AC-018] a signed-in patient opens My Profile and sees their stored name, email, phone, date of birth and gender | E2E | Passed | `frontend/e2e/patient-profile-ui.spec.ts` |
+| AC-019 | [AC-019] editing name, phone, date of birth and gender and saving shows a confirmation, and re-navigating shows the new values | E2E | Passed | `frontend/e2e/patient-profile-ui.spec.ts` |
+| AC-020 | [AC-020] a patient changes their password on screen; the old one no longer signs in and the new one does | E2E | Passed | `frontend/e2e/patient-profile-ui.spec.ts` |
+| AC-021, NFR-022 | [AC-021][NFR-022] a wrong current password is rejected inline on current_password, the typed values stay, and the original password still signs in | E2E | Passed | `frontend/e2e/patient-profile-ui.spec.ts` |
+| NFR-001 | [NFR-001] a password typed on My Profile is never echoed back by the API or shown on screen | E2E | Passed | `frontend/e2e/patient-profile-ui.spec.ts` |
+| NFR-016 | [NFR-016] clinic data is held in a managed database with automated backups and point-in-time recovery | E2E | Skipped | `frontend/e2e/patient-profile-ui.spec.ts` |
+| NFR-017 | [NFR-017] the system is sized for one small clinic (10-50 doctors, a few thousand patients) | E2E | Skipped | `frontend/e2e/patient-profile-ui.spec.ts` |
+
+### US-009: Seeded disease and symptom catalogue available at launch
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-010 | Admin catalogue > [AC-010] the accounts panel is the live one only, with a single create-account form | Unit | Passed | `frontend/src/screens/Admin.test.tsx` |
+| AC-010 | Admin catalogue > [AC-010] the section tabs still select and the doctor profile form still edits | Unit | Passed | `frontend/src/screens/Admin.test.tsx` |
+| AC-034 | Admin catalogue > [AC-034] a failing catalogue load shows a load error | Unit | Passed | `frontend/src/screens/Admin.test.tsx` |
+| AC-034 | Admin catalogue > [AC-034] lists the catalogue terms the API returns, not sample rows | Unit | Passed | `frontend/src/screens/Admin.test.tsx` |
+| AC-035 | Admin catalogue > [AC-035] editing a term loads it into the form and saves it with PUT | Unit | Passed | `frontend/src/screens/Admin.test.tsx` |
+| AC-037 | Admin catalogue > [AC-037] a duplicate term is reported as already in the catalogue | Unit | Passed | `frontend/src/screens/Admin.test.tsx` |
+| AC-037 | Admin catalogue > [AC-037] adding a term posts it and reloads the catalogue | Unit | Passed | `frontend/src/screens/Admin.test.tsx` |
+| AC-038 | Admin catalogue > [AC-038] a term with no specialization is refused before any request | Unit | Passed | `frontend/src/screens/Admin.test.tsx` |
+| AC-040 | Admin catalogue > [AC-040] a failed delete says nothing was changed | Unit | Passed | `frontend/src/screens/Admin.test.tsx` |
+| AC-040 | Admin catalogue > [AC-040] cancelling a delete leaves the term alone | Unit | Passed | `frontend/src/screens/Admin.test.tsx` |
+| AC-040 | Admin catalogue > [AC-040] deleting a term confirms, calls DELETE and reloads | Unit | Passed | `frontend/src/screens/Admin.test.tsx` |
+| AC-034 | test_ac034_every_documented_seed_term_suggests_and_resolves_to_a_specialization | Integration | Skipped | `backend/tests/integration/test_seed_catalog_acceptance.py` |
+| AC-034 | test_ac034_seeded_terms_are_marked_seeded_and_carry_an_entry_type | Integration | Skipped | `backend/tests/integration/test_seed_catalog_acceptance.py` |
+| AC-035 | test_ac035_a_seeded_entry_is_editable_and_deletable_like_any_other | Integration | Skipped | `backend/tests/integration/test_seed_catalog_acceptance.py` |
+| AC-036, NFR-024 | test_ac036_nfr024_reseeding_preserves_an_edit_and_never_recreates_a_deleted_term | Integration | Skipped | `backend/tests/integration/test_seed_catalog_acceptance.py` |
+| NFR-012 | test_nfr012_unknown_term_returns_the_no_match_response_never_an_invented_match | Integration | Skipped | `backend/tests/integration/test_seed_catalog_acceptance.py` |
+| NFR-016 | test_nfr016_backups_and_pitr_are_infrastructure | Integration | Skipped | `backend/tests/integration/test_seed_catalog_acceptance.py` |
+| NFR-017 | test_nfr017_sizing_is_infrastructure | Integration | Skipped | `backend/tests/integration/test_seed_catalog_acceptance.py` |
+| AC-034 | test_ac034_clean_database_seeding_creates_every_documented_term_and_specialization | Integration | Passed | `backend/tests/unit/test_seed_catalog.py` |
+| AC-034 | test_ac034_every_seeded_term_resolves_to_at_least_one_specialization_in_search | Integration | Passed | `backend/tests/unit/test_seed_catalog.py` |
+| AC-035 | test_ac035_seeded_entries_expose_term_type_and_specializations_and_accept_put_and_delete | Integration | Passed | `backend/tests/unit/test_seed_catalog.py` |
+| AC-036, NFR-024 | test_ac036_nfr024_reseeding_does_not_recreate_a_deleted_seeded_term | Integration | Passed | `backend/tests/unit/test_seed_catalog.py` |
+| AC-036, NFR-024 | test_ac036_nfr024_reseeding_leaves_an_administrator_edit_intact | Integration | Passed | `backend/tests/unit/test_seed_catalog.py` |
+| AC-036, NFR-024 | test_ac036_nfr024_seeding_never_takes_over_an_administrator_created_term | Integration | Passed | `backend/tests/unit/test_seed_catalog.py` |
+| AC-036 | test_ac036_running_the_seeder_twice_produces_no_duplicates | Integration | Passed | `backend/tests/unit/test_seed_catalog.py` |
+| — | test_seeding_matches_an_existing_specialization_case_insensitively | Integration | Passed | `backend/tests/unit/test_seed_catalog.py` |
+| AC-034 | [AC-034] a patient types a term from the seeded catalogue on the search page and sees it suggested | E2E | Passed | `frontend/e2e/seed-catalog.spec.ts` |
+| AC-035 | [AC-035] the administrator reviews the seeded catalogue, then edits one entry and deletes another | E2E | Passed | `frontend/e2e/seed-catalog.spec.ts` |
+| NFR-016 | [NFR-016] clinic data is held in a managed database with automated backups and point-in-time recovery | E2E | Skipped | `frontend/e2e/seed-catalog.spec.ts` |
+| NFR-017 | [NFR-017] the system is sized for one small clinic (10-50 doctors, a few thousand patients) | E2E | Skipped | `frontend/e2e/seed-catalog.spec.ts` |
+
+### US-011: Patient searches by disease, symptom or specialization
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-041 | Find a Doctor > [AC-041] one character queries nothing, two or more show the suggestions returned | Unit | Passed | `frontend/src/screens/FindADoctor.test.tsx` |
+| AC-042, AC-045 | Find a Doctor > [AC-042][AC-045] selecting a suggestion lists the doctors with fee and the payable-at-clinic note | Unit | Passed | `frontend/src/screens/FindADoctor.test.tsx` |
+| AC-043 | Find a Doctor > [AC-043] a no_match resolution shows no match found and can browse the specializations | Unit | Passed | `frontend/src/screens/FindADoctor.test.tsx` |
+| AC-044 | Find a Doctor > [AC-044] a failed search shows an explicit error state | Unit | Passed | `frontend/src/screens/FindADoctor.test.tsx` |
+| AC-044 | Find a Doctor > [AC-044] a no_specialist_available resolution explains the clinic has no specialist | Unit | Passed | `frontend/src/screens/FindADoctor.test.tsx` |
+| AC-046 | Find a Doctor > [AC-046] the doctor-name filter narrows the list, is shown and is clearable | Unit | Passed | `frontend/src/screens/FindADoctor.test.tsx` |
+| AC-047 | Find a Doctor > [AC-047] selecting a doctor opens the profile with specializations, qualifications and fee | Unit | Passed | `frontend/src/screens/FindADoctor.test.tsx` |
+| AC-048 | Find a Doctor > [AC-048] a 404 doctor_unavailable says so and returns the patient to the result list | Unit | Passed | `frontend/src/screens/FindADoctor.test.tsx` |
+| AC-041, NFR-012 | test_ac041_nfr012_suggest_is_deterministic_case_insensitive_substring_no_fuzzy | Integration | Passed | `backend/tests/integration/test_doctor_directory_acceptance.py` |
+| AC-042 | test_ac042_term_mapped_to_two_specializations_returns_active_doctors_from_both | Integration | Passed | `backend/tests/integration/test_doctor_directory_acceptance.py` |
+| AC-043, NFR-012 | test_ac043_nfr012_unknown_term_is_no_match_with_no_invented_result | Integration | Passed | `backend/tests/integration/test_doctor_directory_acceptance.py` |
+| AC-044, NFR-023 | test_ac044_nfr023_term_with_no_active_doctor_is_no_specialist_available | Integration | Passed | `backend/tests/integration/test_doctor_directory_acceptance.py` |
+| AC-045, NFR-013 | test_ac045_nfr013_each_result_carries_name_specializations_qualifications_and_fee | Integration | Passed | `backend/tests/integration/test_doctor_directory_acceptance.py` |
+| AC-046 | test_ac046_directory_filters_by_specialization_and_name_and_clears | Integration | Passed | `backend/tests/integration/test_doctor_directory_acceptance.py` |
+| AC-047 | test_ac047_doctor_profile_requires_authentication | Integration | Passed | `backend/tests/integration/test_doctor_directory_acceptance.py` |
+| AC-047 | test_ac047_doctor_profile_shows_specializations_qualifications_and_fee | Integration | Passed | `backend/tests/integration/test_doctor_directory_acceptance.py` |
+| AC-048 | test_ac048_deactivated_and_unknown_doctor_are_identical_404_doctor_unavailable | Integration | Passed | `backend/tests/integration/test_doctor_directory_acceptance.py` |
+| NFR-016 | test_nfr016_backups_and_pitr_are_infrastructure | Integration | Skipped | `backend/tests/integration/test_doctor_directory_acceptance.py` |
+| NFR-017 | test_nfr017_sizing_is_infrastructure | Integration | Skipped | `backend/tests/integration/test_doctor_directory_acceptance.py` |
+| AC-041, NFR-012 | test_ac041_nfr012_suggest_returns_terms_and_specializations_by_substring | Integration | Passed | `backend/tests/unit/test_doctor_directory.py` |
+| AC-041 | test_ac041_suggest_is_empty_below_two_characters | Integration | Passed | `backend/tests/unit/test_doctor_directory.py` |
+| AC-042 | test_ac042_search_returns_doctor_cards_with_qualifications_and_fee | Integration | Passed | `backend/tests/unit/test_doctor_directory.py` |
+| AC-043 | test_ac043_unknown_term_is_no_match_with_no_guessed_alternative | Integration | Passed | `backend/tests/unit/test_doctor_directory.py` |
+| AC-044 | test_ac044_term_with_no_active_doctor_is_no_specialist_available | Integration | Passed | `backend/tests/unit/test_doctor_directory.py` |
+| AC-046 | test_ac046_list_filters_by_specialization_and_name_and_paginates | Integration | Passed | `backend/tests/unit/test_doctor_directory.py` |
+| AC-046 | test_ac046_list_requires_authentication | Integration | Passed | `backend/tests/unit/test_doctor_directory.py` |
+| AC-046 | test_ac046_list_returns_active_doctors_only | Integration | Passed | `backend/tests/unit/test_doctor_directory.py` |
+| AC-047 | test_ac047_read_one_returns_the_full_card_for_an_active_doctor | Integration | Passed | `backend/tests/unit/test_doctor_directory.py` |
+| AC-048 | test_ac048_unknown_non_doctor_and_deactivated_are_identical_404 | Integration | Passed | `backend/tests/unit/test_doctor_directory.py` |
+| NFR-013 | test_nfr013_no_doctor_endpoint_exposes_a_payment_field | Integration | Passed | `backend/tests/unit/test_doctor_directory.py` |
+| — | test_profile_update_stores_qualifications_and_consultation_fee | Integration | Passed | `backend/tests/unit/test_doctor_directory.py` |
+| — | test_specializations_listing_remains_available_to_a_patient | Integration | Passed | `backend/tests/unit/test_doctor_directory.py` |
+| AC-041, NFR-012 | [AC-041][NFR-012] one character offers no suggestion, two or more offer the catalogue terms | E2E | Passed | `frontend/e2e/doctor-search.spec.ts` |
+| AC-042 | [AC-042] selecting a term mapped to two specializations lists the doctors of both | E2E | Passed | `frontend/e2e/doctor-search.spec.ts` |
+| AC-043, NFR-012, NFR-023 | [AC-043][NFR-012][NFR-023] an unknown term shows the no-match message and never an invented doctor | E2E | Passed | `frontend/e2e/doctor-search.spec.ts` |
+| AC-044, NFR-023 | [AC-044][NFR-023] a term whose specialization has no active doctor shows the no-specialist message, not a blank page | E2E | Passed | `frontend/e2e/doctor-search.spec.ts` |
+| AC-045, NFR-013 | [AC-045][NFR-013] each result shows name, specializations, qualifications and fee, and no payment control exists anywhere | E2E | Passed | `frontend/e2e/doctor-search.spec.ts` |
+| AC-046 | [AC-046] filtering by specialization and by doctor name narrows the list, the filters are visible, and clearing restores it | E2E | Passed | `frontend/e2e/doctor-search.spec.ts` |
+| AC-047 | [AC-047] selecting a doctor opens that doctor's profile with specializations, qualifications and fee | E2E | Passed | `frontend/e2e/doctor-search.spec.ts` |
+| AC-048 | [AC-048] a doctor deactivated after the results load shows 'no longer available' and the patient returns to the list | E2E | Passed | `frontend/e2e/doctor-search.spec.ts` |
+| NFR-016 | [NFR-016] clinic data is held in a managed database with automated backups and point-in-time recovery | E2E | Skipped | `frontend/e2e/doctor-search.spec.ts` |
+| NFR-017 | [NFR-017] the system is sized for one small clinic (10-50 doctors, a few thousand patients) | E2E | Skipped | `frontend/e2e/doctor-search.spec.ts` |
 
 ## Project setup
 
