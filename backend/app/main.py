@@ -18,7 +18,8 @@ from fastapi.responses import JSONResponse, Response
 from app import models  # noqa: F401 -- imported so the tables register before create_all
 from app.database import Base, SessionLocal, engine
 from app.errors import EmptyBodyHTTPError
-from app.routers import admin_users, appointments, auth, patients, specializations
+from app.routers import admin_users, appointments, auth, patients, settings, specializations
+from app.routers.settings import get_or_create_settings
 from app.security import validate_session_idle_minutes
 from app.seed import seed_startup_users
 from app.services import configured_services
@@ -57,6 +58,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     db = SessionLocal()
     try:
         seed_startup_users(db)
+        # Seed the single clinic-settings row idempotently so the documented
+        # default (UTC, timezone_confirmed=false) is readable before any save.
+        get_or_create_settings(db)
     finally:
         db.close()
     yield
@@ -95,13 +99,20 @@ app.include_router(appointments.router)
 app.include_router(patients.router)
 app.include_router(specializations.public_router)
 app.include_router(specializations.admin_router)
+app.include_router(settings.public_router)
+app.include_router(settings.admin_router)
 
 
 @app.exception_handler(RequestValidationError)
 async def validation_error_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
     """Invalid input returns 422 listing each offending field, keyed by field name."""
     detail = [
-        {"field": str(err["loc"][-1]), "msg": err.get("msg", "invalid")} for err in exc.errors()
+        {
+            "field": str(err["loc"][-1]),
+            "msg": err.get("msg", "invalid"),
+            "message": err.get("msg", "invalid"),
+        }
+        for err in exc.errors()
     ]
     return JSONResponse(status_code=422, content={"detail": detail})
 

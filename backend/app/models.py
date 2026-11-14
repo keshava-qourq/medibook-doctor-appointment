@@ -7,7 +7,7 @@ the opaque bearer token issued at login, never the raw token.
 import uuid
 from datetime import UTC, date, datetime
 
-from sqlalchemy import Boolean, Column, Date, DateTime, Enum, ForeignKey, String, Table
+from sqlalchemy import Boolean, Column, Date, DateTime, Enum, ForeignKey, Integer, String, Table
 from sqlalchemy.dialects.postgresql import CITEXT
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import TypeDecorator
@@ -101,6 +101,25 @@ class CatalogTerm(Base):
     )
 
 
+class ClinicSettings(Base):
+    """The single clinic-wide settings row (a singleton, keyed by a fixed id).
+
+    The clinic timezone defaults to ``UTC`` with ``timezone_confirmed=False``
+    until an administrator saves settings; all date math (slot generation,
+    elapsed-slot filtering, cutoff, "today") resolves in this configured IANA
+    timezone. ``booking_cutoff_hours`` is exposed here; cutoff enforcement
+    itself lives in the appointments surface.
+    """
+
+    __tablename__ = "clinic_settings"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    timezone: Mapped[str] = mapped_column(String(64), nullable=False, default="UTC")
+    booking_cutoff_hours: Mapped[int] = mapped_column(Integer, nullable=False, default=24)
+    timezone_confirmed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+
 class Session(Base):
     __tablename__ = "sessions"
 
@@ -125,6 +144,7 @@ __all__ = [
     "Session",
     "Specialization",
     "CatalogTerm",
+    "ClinicSettings",
     "term_specializations",
     "ROLES",
 ]

@@ -4,6 +4,7 @@ One pair per entity in the approved data model.
 """
 
 from datetime import date
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from email_validator import EmailNotValidError, validate_email
 from pydantic import AliasChoices, BaseModel, Field, field_validator
@@ -200,4 +201,37 @@ class PatientPasswordChange(BaseModel):
     def _new_password_strength(cls, v: str) -> str:
         if len(v) < 8:
             raise ValueError("weak_password")
+        return v
+
+
+class ClinicSettingsOut(BaseModel):
+    """Clinic-wide settings as GET /api/settings returns them."""
+
+    timezone: str
+    booking_cutoff_hours: int
+    timezone_confirmed: bool
+
+
+class ClinicSettingsUpdate(BaseModel):
+    timezone: str
+    # `strict` rejects a non-numeric or float cutoff with 422 rather than
+    # silently coercing it; a negative value is rejected by the validator below.
+    booking_cutoff_hours: int = Field(strict=True)
+
+    @field_validator("timezone")
+    @classmethod
+    def _timezone_known(cls, v: str) -> str:
+        if not v or not v.strip():
+            raise ValueError("required")
+        try:
+            ZoneInfo(v)
+        except (ZoneInfoNotFoundError, ValueError) as exc:
+            raise ValueError("unknown_timezone") from exc
+        return v
+
+    @field_validator("booking_cutoff_hours")
+    @classmethod
+    def _cutoff_non_negative(cls, v: int) -> int:
+        if v < 0:
+            raise ValueError("must_be_non_negative")
         return v
