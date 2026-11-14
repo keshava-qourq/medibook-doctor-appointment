@@ -89,6 +89,7 @@ def search_doctors(
             User.id.in_(list(doctor_specs)),
             User.role == "doctor",
             User.is_active.is_(True),
+            User.profile_active.is_(True),
         )
         .order_by(User.full_name.asc(), User.id.asc())
         .all()

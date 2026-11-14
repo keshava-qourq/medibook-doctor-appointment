@@ -69,6 +69,14 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             conn.exec_driver_sql(
                 "ALTER TABLE users ADD COLUMN IF NOT EXISTS consultation_fee NUMERIC(10, 2)"
             )
+            conn.exec_driver_sql("ALTER TABLE users ADD COLUMN IF NOT EXISTS bio TEXT")
+            conn.exec_driver_sql("ALTER TABLE users ADD COLUMN IF NOT EXISTS location VARCHAR(255)")
+            # Directory visibility, additive and defaulting to visible so existing
+            # rows keep behaving exactly as before.
+            conn.exec_driver_sql(
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS "
+                "profile_active BOOLEAN NOT NULL DEFAULT TRUE"
+            )
             # catalog_terms soft-delete flag is additive to an existing table.
             conn.exec_driver_sql(
                 "ALTER TABLE catalog_terms ADD COLUMN IF NOT EXISTS "
