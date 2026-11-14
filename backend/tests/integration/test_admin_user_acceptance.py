@@ -68,8 +68,12 @@ def test_ac010_admin_creates_doctor_password_echoed_once_and_doctor_can_sign_in(
     resp = client.post(
         "/api/admin/users",
         headers=_bearer(token),
-        json={"full_name": "New Doctor", "email": email, "role": "doctor",
-              "initial_password": password},
+        json={
+            "full_name": "New Doctor",
+            "email": email,
+            "role": "doctor",
+            "initial_password": password,
+        },
     )
 
     assert resp.status_code == 201, resp.text
@@ -102,8 +106,12 @@ def test_ac010_admin_can_create_another_admin(client: TestClient, db_session: DB
     resp = client.post(
         "/api/admin/users",
         headers=_bearer(token),
-        json={"full_name": "Second Admin", "email": email, "role": "admin",
-              "initial_password": password},
+        json={
+            "full_name": "Second Admin",
+            "email": email,
+            "role": "admin",
+            "initial_password": password,
+        },
     )
     assert resp.status_code == 201, resp.text
     assert resp.json()["role"] == "admin"
@@ -125,8 +133,12 @@ def test_ac011_reissued_password_replaces_old_and_revokes_sessions(
     created = client.post(
         "/api/admin/users",
         headers=_bearer(admin_token),
-        json={"full_name": "Reissue Doctor", "email": email, "role": "doctor",
-              "initial_password": old_password},
+        json={
+            "full_name": "Reissue Doctor",
+            "email": email,
+            "role": "doctor",
+            "initial_password": old_password,
+        },
     )
     assert created.status_code == 201
     user_id = created.json()["id"]
@@ -160,8 +172,12 @@ def test_ac011_weak_reissued_password_is_rejected(client: TestClient, db_session
     created = client.post(
         "/api/admin/users",
         headers=_bearer(admin_token),
-        json={"full_name": "Weak Reset Doctor", "email": email, "role": "doctor",
-              "initial_password": password},
+        json={
+            "full_name": "Weak Reset Doctor",
+            "email": email,
+            "role": "doctor",
+            "initial_password": password,
+        },
     )
     user_id = created.json()["id"]
 
@@ -188,8 +204,7 @@ def test_ac012_duplicate_email_case_insensitive_is_409_and_creates_nothing(
     first = client.post(
         "/api/admin/users",
         headers=_bearer(admin_token),
-        json={"full_name": "First", "email": email, "role": "doctor",
-              "initial_password": password},
+        json={"full_name": "First", "email": email, "role": "doctor", "initial_password": password},
     )
     assert first.status_code == 201
 
@@ -198,8 +213,12 @@ def test_ac012_duplicate_email_case_insensitive_is_409_and_creates_nothing(
     dup = client.post(
         "/api/admin/users",
         headers=_bearer(admin_token),
-        json={"full_name": "Second", "email": email.upper(), "role": "admin",
-              "initial_password": _password()},
+        json={
+            "full_name": "Second",
+            "email": email.upper(),
+            "role": "admin",
+            "initial_password": _password(),
+        },
     )
     assert dup.status_code == 409, dup.text
     assert dup.json()["code"] == "email_in_use"
@@ -219,8 +238,12 @@ def test_ac013_unauthenticated_create_is_401_and_creates_nothing(
 
     resp = client.post(
         "/api/admin/users",
-        json={"full_name": "Ghost", "email": _email("ghost"), "role": "doctor",
-              "initial_password": _password()},
+        json={
+            "full_name": "Ghost",
+            "email": _email("ghost"),
+            "role": "doctor",
+            "initial_password": _password(),
+        },
     )
     assert resp.status_code == 401, resp.text
     assert "detail" in resp.json()
@@ -238,8 +261,12 @@ def test_ac013_non_admin_create_is_403_empty_body_and_creates_nothing(
     patient_password = _password()
     reg = client.post(
         "/api/auth/register",
-        json={"full_name": "Patient P", "email": patient_email, "phone": "+15551112222",
-              "password": patient_password},
+        json={
+            "full_name": "Patient P",
+            "email": patient_email,
+            "phone": "+15551112222",
+            "password": patient_password,
+        },
     )
     assert reg.status_code == 201
     patient_token = reg.json()["token"]
@@ -249,8 +276,12 @@ def test_ac013_non_admin_create_is_403_empty_body_and_creates_nothing(
     resp = client.post(
         "/api/admin/users",
         headers=_bearer(patient_token),
-        json={"full_name": "Ghost", "email": _email("ghost"), "role": "doctor",
-              "initial_password": _password()},
+        json={
+            "full_name": "Ghost",
+            "email": _email("ghost"),
+            "role": "doctor",
+            "initial_password": _password(),
+        },
     )
     assert resp.status_code == 403, resp.text
     assert resp.content == b""  # empty body, so it cannot be told apart from other 403s
@@ -271,8 +302,12 @@ def test_nfr001_admin_issued_password_stored_only_as_bcrypt_hash(
     created = client.post(
         "/api/admin/users",
         headers=_bearer(admin_token),
-        json={"full_name": "Hash Doctor", "email": email, "role": "doctor",
-              "initial_password": password},
+        json={
+            "full_name": "Hash Doctor",
+            "email": email,
+            "role": "doctor",
+            "initial_password": password,
+        },
     )
     assert created.status_code == 201
     user = db_session.get(User, created.json()["id"])
@@ -290,8 +325,12 @@ def test_nfr001_self_registration_password_stored_only_as_bcrypt_hash(
     password = _password()
     reg = client.post(
         "/api/auth/register",
-        json={"full_name": "Hash Patient", "email": email, "phone": "+15551113333",
-              "password": password},
+        json={
+            "full_name": "Hash Patient",
+            "email": email,
+            "phone": "+15551113333",
+            "password": password,
+        },
     )
     assert reg.status_code == 201
     user = db_session.get(User, reg.json()["user"]["id"])
@@ -308,8 +347,12 @@ def test_nfr001_reissued_password_stored_only_as_bcrypt_hash(
     created = client.post(
         "/api/admin/users",
         headers=_bearer(admin_token),
-        json={"full_name": "Reset Hash Doctor", "email": email, "role": "doctor",
-              "initial_password": _password()},
+        json={
+            "full_name": "Reset Hash Doctor",
+            "email": email,
+            "role": "doctor",
+            "initial_password": _password(),
+        },
     )
     user_id = created.json()["id"]
     new_password = _password()
@@ -337,8 +380,12 @@ def test_nfr002_deactivation_revokes_sessions_and_blocks_further_action(
     created = client.post(
         "/api/admin/users",
         headers=_bearer(admin_token),
-        json={"full_name": "Deactivate Doctor", "email": email, "role": "doctor",
-              "initial_password": password},
+        json={
+            "full_name": "Deactivate Doctor",
+            "email": email,
+            "role": "doctor",
+            "initial_password": password,
+        },
     )
     user_id = created.json()["id"]
 
@@ -371,8 +418,12 @@ def test_nfr022_invalid_create_is_422_lists_offending_fields_and_writes_nothing(
     resp = client.post(
         "/api/admin/users",
         headers=_bearer(admin_token),
-        json={"full_name": "", "email": "not-an-email", "role": "doctor",
-              "initial_password": "short"},
+        json={
+            "full_name": "",
+            "email": "not-an-email",
+            "role": "doctor",
+            "initial_password": "short",
+        },
     )
     assert resp.status_code == 422, resp.text
     detail = resp.json()["detail"]
