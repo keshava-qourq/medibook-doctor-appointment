@@ -74,7 +74,10 @@ async function setValue(locator: Locator, value: string) {
 }
 
 async function save(page: Page) {
-  await page.getByRole("button", { name: /save|update/i }).first().click();
+  await page
+    .getByRole("button", { name: /save|update/i })
+    .first()
+    .click();
 }
 
 test("[AC-018] a signed-in patient opens My Profile and sees their stored name, email, phone, date of birth and gender", async ({
@@ -158,7 +161,8 @@ test("[AC-020] a patient changes their password on screen; the old one no longer
 
   const [response] = await Promise.all([
     page.waitForResponse((r) => r.url().includes("/api/patients/me/password")),
-    page.getByRole("button", { name: /change password|update password|save password/i })
+    page
+      .getByRole("button", { name: /change password|update password|save password/i })
       .first()
       .click(),
   ]);
@@ -196,7 +200,8 @@ test("[AC-021][NFR-022] a wrong current password is rejected inline on current_p
 
   const [response] = await Promise.all([
     page.waitForResponse((r) => r.url().includes("/api/patients/me/password")),
-    page.getByRole("button", { name: /change password|update password|save password/i })
+    page
+      .getByRole("button", { name: /change password|update password|save password/i })
       .first()
       .click(),
   ]);
@@ -242,7 +247,8 @@ test("[NFR-001] a password typed on My Profile is never echoed back by the API o
 
   const [response] = await Promise.all([
     page.waitForResponse((r) => r.url().includes("/api/patients/me/password")),
-    page.getByRole("button", { name: /change password|update password|save password/i })
+    page
+      .getByRole("button", { name: /change password|update password|save password/i })
       .first()
       .click(),
   ]);
