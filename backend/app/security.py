@@ -47,9 +47,51 @@ def verify_password(password: str, password_hash: str) -> bool:
         return False
 
 
+def _parse_idle_minutes(raw: str) -> int:
+    """Parse a SESSION_IDLE_MINUTES value, raising a clear error if it is not a
+    positive integer."""
+    try:
+        value = int(raw)
+    except ValueError as exc:
+        raise ValueError(
+            f"SESSION_IDLE_MINUTES must be a positive integer, got {raw!r}"
+        ) from exc
+    if value <= 0:
+        raise ValueError(f"SESSION_IDLE_MINUTES must be a positive integer, got {raw!r}")
+    return value
+
+
+def validate_session_idle_minutes() -> int:
+    """Validate SESSION_IDLE_MINUTES at startup so a misconfigured value fails
+    loudly where the operator can read it, rather than turning every
+    authenticated request into a 500 on the hot path. Returns the effective
+    idle timeout in minutes.
+    """
+    raw = os.getenv("SESSION_IDLE_MINUTES")
+    if raw is None:
+        return DEFAULT_SESSION_IDLE_MINUTES
+    return _parse_idle_minutes(raw)
+
+
 def session_idle_minutes() -> int:
-    """How long a session may sit idle before it expires, from `SESSION_IDLE_MINUTES`."""
-    return int(os.getenv("SESSION_IDLE_MINUTES", str(DEFAULT_SESSION_IDLE_MINUTES)))
+    """How long a session may sit idle before it expires.
+
+    Read from the ``SESSION_IDLE_MINUTES`` environment variable (default 30).
+    A missing or non-numeric value falls back to the default so a bad env var
+    can never turn an authenticated request into a 500; ``validate_session_idle_minutes``
+    is called at startup to reject such a value loudly instead.
+
+    The architecture ultimately specifies this as an administrator-configurable
+    ``clinic_settings`` column; until that table exists it is sourced from the
+    environment, which keeps the default (30) and deployment overrides working.
+    """
+    raw = os.getenv("SESSION_IDLE_MINUTES")
+    if raw is None:
+        return DEFAULT_SESSION_IDLE_MINUTES
+    try:
+        return _parse_idle_minutes(raw)
+    except ValueError:
+        return DEFAULT_SESSION_IDLE_MINUTES
 
 
 def _hash_token(raw_token: str) -> str:
@@ -88,6 +130,7 @@ __all__ = [
     "hash_password",
     "verify_password",
     "session_idle_minutes",
+    "validate_session_idle_minutes",
     "create_session",
     "find_session_by_token",
 ]

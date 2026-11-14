@@ -31,6 +31,12 @@ router = APIRouter(dependencies=[Depends(require_role("admin"))])
 ALLOWED_ROLES = ("doctor", "admin")
 
 
+def _validation_error(field: str, msg: str) -> JSONResponse:
+    """A 422 in the same shape as ``validation_error_handler`` in main.py, so every
+    endpoint reports invalid input as ``{"detail": [{"field", "msg"}]}``."""
+    return JSONResponse(status_code=422, content={"detail": [{"field": field, "msg": msg}]})
+
+
 def _revoke_all_sessions(db: DBSession, user_id: str, reason: str) -> None:
     now = datetime.now(UTC)
     sessions = (
@@ -78,6 +84,12 @@ def create_user(payload: AdminUserCreate, db: DBSession = Depends(get_db)):  # n
     if errors:
         return JSONResponse(status_code=422, content={"detail": errors})
 
+    # Compare case-insensitively via func.lower on both sides so the lookup is
+    # correct on every dialect: on Postgres the email column is CITEXT (already
+    # case-insensitive), on the SQLite test database it is plain text, and
+    # func.lower(...) == email.lower() matches in both cases rather than relying
+    # on the storage type to fold case. The unique constraint on the column is
+    # the backstop, enforced by the IntegrityError handler below.
     existing = db.query(User).filter(func.lower(User.email) == email.lower()).first()
     if existing is not None:
         return JSONResponse(status_code=409, content={"code": "email_in_use"})
@@ -128,7 +140,7 @@ def update_user(user_id: str, payload: AdminUserUpdate, db: DBSession = Depends(
 
     if payload.full_name is not None:
         if not payload.full_name.strip():
-            return JSONResponse(status_code=422, content={"full_name": "required"})
+            return _validation_error("full_name", "required")
         user.full_name = payload.full_name
 
     deactivating = False
@@ -158,7 +170,7 @@ def reset_password(
         raise EmptyBodyHTTPError(404)
 
     if len(payload.password) < MIN_PASSWORD_LENGTH:
-        return JSONResponse(status_code=422, content={"password": "weak_password"})
+        return _validation_error("password", "weak_password")
 
     user.password_hash = hash_password(payload.password)
     db.add(user)
