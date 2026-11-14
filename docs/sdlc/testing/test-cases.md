@@ -3,9 +3,9 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-324 tests · Passed 290 · Failed 0 · Skipped 34 · Not run 0
+344 tests · Passed 313 · Failed 0 · Skipped 31 · Not run 0
 
-Acceptance criteria covered: 48/129 · passing: 42/129
+Acceptance criteria covered: 48/129 · passing: 45/129
 <!-- sdlc:auto:end summary -->
 
 <!-- sdlc:auto:start tests -->
@@ -311,6 +311,21 @@ Acceptance criteria covered: 48/129 · passing: 42/129
 | AC-019 | Profile > [AC-019] saving PATCHes the profile and confirms on screen | Unit | Passed | `frontend/src/screens/Profile.test.tsx` |
 | AC-020 | Profile > [AC-020] a successful password change posts both fields and confirms on screen | Unit | Passed | `frontend/src/screens/Profile.test.tsx` |
 | AC-021 | Profile > [AC-021] a 422 shows the message against current_password and keeps what was typed | Unit | Passed | `frontend/src/screens/Profile.test.tsx` |
+| AC-018 | test_ac018_registered_patient_reads_back_exactly_the_registration_fields | Integration | Passed | `backend/tests/integration/test_patient_self_service_acceptance.py` |
+| AC-018 | test_ac018_unauthenticated_profile_read_is_401 | Integration | Passed | `backend/tests/integration/test_patient_self_service_acceptance.py` |
+| AC-019 | test_ac019_a_partial_update_leaves_the_untouched_fields_in_force | Integration | Passed | `backend/tests/integration/test_patient_self_service_acceptance.py` |
+| AC-019 | test_ac019_update_persists_and_is_reflected_on_a_fresh_get_in_a_new_request | Integration | Passed | `backend/tests/integration/test_patient_self_service_acceptance.py` |
+| AC-019 | test_ac019_update_without_a_token_is_401_and_writes_nothing | Integration | Passed | `backend/tests/integration/test_patient_self_service_acceptance.py` |
+| AC-020 | test_ac020_a_new_password_under_eight_characters_is_refused_and_the_old_one_still_works | Integration | Passed | `backend/tests/integration/test_patient_self_service_acceptance.py` |
+| AC-020 | test_ac020_after_a_password_change_the_old_password_fails_and_the_new_one_succeeds | Integration | Passed | `backend/tests/integration/test_patient_self_service_acceptance.py` |
+| AC-020 | test_ac020_password_change_without_a_token_is_401 | Integration | Passed | `backend/tests/integration/test_patient_self_service_acceptance.py` |
+| AC-021 | test_ac021_a_wrong_current_password_is_refused_and_the_original_still_logs_in | Integration | Passed | `backend/tests/integration/test_patient_self_service_acceptance.py` |
+| AC-021 | test_ac021_repeated_wrong_attempts_do_not_change_the_stored_password | Integration | Passed | `backend/tests/integration/test_patient_self_service_acceptance.py` |
+| NFR-001 | test_nfr001_changed_password_is_stored_only_as_a_bcrypt_hash_and_is_in_no_response_body | Integration | Passed | `backend/tests/integration/test_patient_self_service_acceptance.py` |
+| NFR-016 | test_nfr016_backups_and_pitr_are_infrastructure | Integration | Skipped | `backend/tests/integration/test_patient_self_service_acceptance.py` |
+| NFR-017 | test_nfr017_sizing_is_infrastructure | Integration | Skipped | `backend/tests/integration/test_patient_self_service_acceptance.py` |
+| NFR-022 | test_nfr022_a_rejected_password_change_names_the_field_and_keeps_the_saved_password | Integration | Passed | `backend/tests/integration/test_patient_self_service_acceptance.py` |
+| NFR-022 | test_nfr022_invalid_profile_update_is_422_keyed_by_field_and_writes_nothing | Integration | Passed | `backend/tests/integration/test_patient_self_service_acceptance.py` |
 | AC-018 | [AC-018] a signed-in patient opens My Profile and sees their stored name, email, phone, date of birth and gender | E2E | Passed | `frontend/e2e/patient-profile-ui.spec.ts` |
 | AC-019 | [AC-019] editing name, phone, date of birth and gender and saving shows a confirmation, and re-navigating shows the new values | E2E | Passed | `frontend/e2e/patient-profile-ui.spec.ts` |
 | AC-020 | [AC-020] a patient changes their password on screen; the old one no longer signs in and the new one does | E2E | Passed | `frontend/e2e/patient-profile-ui.spec.ts` |
@@ -334,11 +349,14 @@ Acceptance criteria covered: 48/129 · passing: 42/129
 | AC-040 | Admin catalogue > [AC-040] a failed delete says nothing was changed | Unit | Passed | `frontend/src/screens/Admin.test.tsx` |
 | AC-040 | Admin catalogue > [AC-040] cancelling a delete leaves the term alone | Unit | Passed | `frontend/src/screens/Admin.test.tsx` |
 | AC-040 | Admin catalogue > [AC-040] deleting a term confirms, calls DELETE and reloads | Unit | Passed | `frontend/src/screens/Admin.test.tsx` |
-| AC-034 | test_ac034_every_documented_seed_term_suggests_and_resolves_to_a_specialization | Integration | Skipped | `backend/tests/integration/test_seed_catalog_acceptance.py` |
-| AC-034 | test_ac034_seeded_terms_are_marked_seeded_and_carry_an_entry_type | Integration | Skipped | `backend/tests/integration/test_seed_catalog_acceptance.py` |
-| AC-035 | test_ac035_a_seeded_entry_is_editable_and_deletable_like_any_other | Integration | Skipped | `backend/tests/integration/test_seed_catalog_acceptance.py` |
-| AC-036, NFR-024 | test_ac036_nfr024_reseeding_preserves_an_edit_and_never_recreates_a_deleted_term | Integration | Skipped | `backend/tests/integration/test_seed_catalog_acceptance.py` |
-| NFR-012 | test_nfr012_unknown_term_returns_the_no_match_response_never_an_invented_match | Integration | Skipped | `backend/tests/integration/test_seed_catalog_acceptance.py` |
+| AC-034 | test_ac034_every_documented_seed_term_suggests_and_resolves_to_a_specialization | Integration | Passed | `backend/tests/integration/test_seed_catalog_acceptance.py` |
+| AC-034 | test_ac034_suggest_matches_a_seeded_term_case_insensitively_by_substring | Integration | Passed | `backend/tests/integration/test_seed_catalog_acceptance.py` |
+| AC-035 | test_ac035_a_seeded_entry_is_editable_and_deletable_like_any_other | Integration | Passed | `backend/tests/integration/test_seed_catalog_acceptance.py` |
+| AC-035 | test_ac035_catalogue_administration_is_refused_to_a_patient | Integration | Passed | `backend/tests/integration/test_seed_catalog_acceptance.py` |
+| AC-035 | test_ac035_seeded_entry_shows_term_type_and_specializations_to_an_administrator | Integration | Passed | `backend/tests/integration/test_seed_catalog_acceptance.py` |
+| AC-036, NFR-024 | test_ac036_nfr024_reseeding_never_takes_over_an_administrator_created_term | Integration | Passed | `backend/tests/integration/test_seed_catalog_acceptance.py` |
+| AC-036, NFR-024 | test_ac036_nfr024_reseeding_preserves_an_edit_and_never_recreates_a_deleted_term | Integration | Passed | `backend/tests/integration/test_seed_catalog_acceptance.py` |
+| NFR-012 | test_nfr012_unknown_term_returns_the_no_match_response_never_an_invented_match | Integration | Passed | `backend/tests/integration/test_seed_catalog_acceptance.py` |
 | NFR-016 | test_nfr016_backups_and_pitr_are_infrastructure | Integration | Skipped | `backend/tests/integration/test_seed_catalog_acceptance.py` |
 | NFR-017 | test_nfr017_sizing_is_infrastructure | Integration | Skipped | `backend/tests/integration/test_seed_catalog_acceptance.py` |
 | AC-034 | test_ac034_clean_database_seeding_creates_every_documented_term_and_specialization | Integration | Passed | `backend/tests/unit/test_seed_catalog.py` |
@@ -367,10 +385,12 @@ Acceptance criteria covered: 48/129 · passing: 42/129
 | AC-047 | Find a Doctor > [AC-047] selecting a doctor opens the profile with specializations, qualifications and fee | Unit | Passed | `frontend/src/screens/FindADoctor.test.tsx` |
 | AC-048 | Find a Doctor > [AC-048] a 404 doctor_unavailable says so and returns the patient to the result list | Unit | Passed | `frontend/src/screens/FindADoctor.test.tsx` |
 | AC-041, NFR-012 | test_ac041_nfr012_suggest_is_deterministic_case_insensitive_substring_no_fuzzy | Integration | Passed | `backend/tests/integration/test_doctor_directory_acceptance.py` |
+| AC-042 | test_ac042_search_pages_with_limit_and_offset_and_reports_the_unpaged_total | Integration | Passed | `backend/tests/integration/test_doctor_directory_acceptance.py` |
 | AC-042 | test_ac042_term_mapped_to_two_specializations_returns_active_doctors_from_both | Integration | Passed | `backend/tests/integration/test_doctor_directory_acceptance.py` |
 | AC-043, NFR-012 | test_ac043_nfr012_unknown_term_is_no_match_with_no_invented_result | Integration | Passed | `backend/tests/integration/test_doctor_directory_acceptance.py` |
 | AC-044, NFR-023 | test_ac044_nfr023_term_with_no_active_doctor_is_no_specialist_available | Integration | Passed | `backend/tests/integration/test_doctor_directory_acceptance.py` |
 | AC-045, NFR-013 | test_ac045_nfr013_each_result_carries_name_specializations_qualifications_and_fee | Integration | Passed | `backend/tests/integration/test_doctor_directory_acceptance.py` |
+| AC-045, NFR-013 | test_ac045_nfr013_no_endpoint_in_the_search_journey_exposes_a_payment_surface | Integration | Passed | `backend/tests/integration/test_doctor_directory_acceptance.py` |
 | AC-046 | test_ac046_directory_filters_by_specialization_and_name_and_clears | Integration | Passed | `backend/tests/integration/test_doctor_directory_acceptance.py` |
 | AC-047 | test_ac047_doctor_profile_requires_authentication | Integration | Passed | `backend/tests/integration/test_doctor_directory_acceptance.py` |
 | AC-047 | test_ac047_doctor_profile_shows_specializations_qualifications_and_fee | Integration | Passed | `backend/tests/integration/test_doctor_directory_acceptance.py` |

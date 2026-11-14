@@ -6,7 +6,7 @@
 | Method | Path | Handler | Source | Summary |
 |---|---|---|---|---|
 | GET | /admin-only | admin_only | `backend/tests/unit/test_auth_core.py:64` | — |
-| PUT | /api/admin/doctors/{doctor_id} | update_doctor | `backend/app/routers/doctors.py:32` | — |
+| PUT | /api/admin/doctors/{doctor_id} | update_doctor | `backend/app/routers/doctors.py:81` | — |
 | GET | /api/admin/users | list_users | `backend/app/routers/admin_users.py:123` | — |
 | POST | /api/admin/users | create_user | `backend/app/routers/admin_users.py:64` | — |
 | PATCH | /api/admin/users/{user_id} | update_user | `backend/app/routers/admin_users.py:135` | — |
@@ -20,8 +20,8 @@
 | GET | /api/patients/me | read_me | `backend/app/routers/patients.py:34` | — |
 | PATCH | /api/patients/me | update_me | `backend/app/routers/patients.py:39` | — |
 | POST | /api/patients/me/password | change_password | `backend/app/routers/patients.py:54` | — |
-| GET | /api/search/doctors | search_doctors | `backend/app/routers/search.py:35` | — |
-| GET | /health | health | `backend/app/main.py:143` | Liveness probe reporting the configured backing services. |
+| GET | /api/search/doctors | search_doctors | `backend/app/routers/search.py:52` | — |
+| GET | /health | health | `backend/app/main.py:156` | Liveness probe reporting the configured backing services. |
 | GET | /owned-missing | owned_missing | `backend/tests/unit/test_auth_core.py:73` | — |
 | GET | /owned/{owner_id} | owned | `backend/tests/unit/test_auth_core.py:68` | — |
 | GET | /whoami | whoami | `backend/tests/unit/test_auth_core.py:58` | — |
@@ -69,5 +69,5 @@
 <!-- sdlc:auto:end drift -->
 
 <!-- sdlc:auto:start source -->
-Generated from commit `73e2af9`
+Generated from commit `84681d5`
 <!-- sdlc:auto:end source -->
