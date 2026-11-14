@@ -18,7 +18,7 @@ from fastapi.responses import JSONResponse, Response
 from app import models  # noqa: F401 -- imported so the tables register before create_all
 from app.database import Base, SessionLocal, engine
 from app.errors import EmptyBodyHTTPError
-from app.routers import admin_users, appointments, auth, patients
+from app.routers import admin_users, appointments, auth, patients, specializations
 from app.security import validate_session_idle_minutes
 from app.seed import seed_startup_users
 from app.services import configured_services
@@ -93,6 +93,8 @@ app.include_router(auth.router)
 app.include_router(admin_users.router, prefix="/api/admin", tags=["admin"])
 app.include_router(appointments.router)
 app.include_router(patients.router)
+app.include_router(specializations.public_router)
+app.include_router(specializations.admin_router)
 
 
 @app.exception_handler(RequestValidationError)

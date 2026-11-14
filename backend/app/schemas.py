@@ -93,6 +93,79 @@ class AdminPasswordReset(BaseModel):
     password: str = Field(validation_alias=AliasChoices("password", "new_password"))
 
 
+class SpecializationOut(BaseModel):
+    """A specialization as the read/write endpoints return it."""
+
+    id: str
+    name: str
+    description: str | None = None
+    is_active: bool
+
+
+class SpecializationListOut(BaseModel):
+    items: list[SpecializationOut]
+    total: int
+
+
+class SpecializationCreate(BaseModel):
+    name: str
+    description: str | None = None
+
+    @field_validator("name")
+    @classmethod
+    def _name_required(cls, v: str) -> str:
+        if not v or not v.strip():
+            raise ValueError("required")
+        return v
+
+
+class SpecializationUpdate(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    is_active: bool | None = None
+
+    @field_validator("name")
+    @classmethod
+    def _name_not_blank(cls, v: str | None) -> str | None:
+        if v is not None and not v.strip():
+            raise ValueError("required")
+        return v
+
+
+class CatalogTermSpecOut(BaseModel):
+    """A specialization as it appears nested inside a catalogue term."""
+
+    id: str
+    name: str
+    is_active: bool
+
+
+class CatalogTermOut(BaseModel):
+    id: str
+    term: str
+    entry_type: str
+    is_seeded: bool
+    specializations: list[CatalogTermSpecOut]
+
+
+class CatalogTermListOut(BaseModel):
+    items: list[CatalogTermOut]
+    total: int
+
+
+class CatalogTermCreate(BaseModel):
+    term: str
+    entry_type: str
+    specialization_ids: list[str] = []
+
+    @field_validator("term")
+    @classmethod
+    def _term_required(cls, v: str) -> str:
+        if not v or not v.strip():
+            raise ValueError("required")
+        return v
+
+
 class PatientProfileOut(BaseModel):
     """A patient's own profile as the self-service endpoints return it."""
 
