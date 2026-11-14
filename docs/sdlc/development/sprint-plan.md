@@ -7,12 +7,11 @@
 
 Working authentication for all three roles: patients self-register, staff accounts are issued by an administrator, and every request is authorised by role and record ownership.
 
-Capacity: 20 points · Committed: 18
+Capacity: 20 points · Committed: 13
 
 | Key | Type | Title | Points | Role | Depends on |
 |---|---|---|---|---|---|
 | US-001 | Story | Patient self-registration with email and password | 5 | backend-agent | — |
-| US-002 | Story | Sign in, sign out and session expiry | 5 | backend-agent | US-001 |
 | US-003 | Story | Administrator creates doctor and administrator accounts | 3 | backend-agent | US-002 |
 | US-004 | Story | Role-based access enforcement across every screen and API call | 5 | security-agent | US-002 |
 
@@ -20,11 +19,10 @@ Capacity: 20 points · Committed: 18
 
 Clinic configuration foundations: patient profile self-service, specializations, timezone and cutoff settings, the disease mapping catalogue, and deployed encryption safeguards.
 
-Capacity: 20 points · Committed: 19
+Capacity: 20 points · Committed: 16
 
 | Key | Type | Title | Points | Role | Depends on |
 |---|---|---|---|---|---|
-| US-005 | Story | Patient manages their own profile | 3 | backend-agent | US-002, US-004 |
 | US-006 | Story | Manage the clinic's specializations | 3 | backend-agent | US-004 |
 | US-008 | Story | Configure clinic timezone and booking cutoff | 3 | backend-agent | US-004 |
 | US-010 | Story | Administrator edits the disease-to-specialization mapping | 5 | backend-agent | US-006 |
@@ -34,11 +32,12 @@ Capacity: 20 points · Committed: 19
 
 A patient can find the right doctor: doctor profiles with fees, a seeded catalogue, deterministic term-to-specialization search and a filterable directory, all shown in the clinic timezone.
 
-Capacity: 20 points · Committed: 16
+Capacity: 20 points · Committed: 19
 
 | Key | Type | Title | Points | Role | Depends on |
 |---|---|---|---|---|---|
-| US-007 | Story | Create and maintain doctor profiles | 5 | backend-agent | US-003, US-006 |
+| US-002 | Story | Sign in, sign out and session expiry | 5 | backend-agent | US-001 |
+| US-005 | Story | Patient manages their own profile | 3 | backend-agent | US-002, US-004 |
 | US-009 | Story | Seeded disease and symptom catalogue available at launch | 3 | backend-agent | US-010 |
 | US-011 | Story | Patient searches by disease, symptom or specialization | 5 | backend-agent | US-007, US-010 |
 | US-012 | Story | Doctor directory results with specialization and consultation fee | 3 | frontend-agent | US-011 |
@@ -47,10 +46,11 @@ Capacity: 20 points · Committed: 16
 
 Doctors can describe when they actually consult: weekly recurring pattern with breaks, plus one-off leave and extra-hours exceptions.
 
-Capacity: 20 points · Committed: 15
+Capacity: 20 points · Committed: 20
 
 | Key | Type | Title | Points | Role | Depends on |
 |---|---|---|---|---|---|
+| US-007 | Story | Create and maintain doctor profiles | 5 | backend-agent | US-003, US-006 |
 | US-013 | Story | Doctor defines a weekly recurring availability pattern | 8 | backend-agent | US-007, US-008 |
 | ↳ US-013-T1 | Task | Add weekly availability and break tables with migration | — | backend-agent | — |
 | ↳ US-013-T2 | Task | Implement weekly pattern validation rules in the booking domain module | — | backend-agent | — |
