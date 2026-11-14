@@ -89,6 +89,17 @@ describe("Profile", () => {
     });
   });
 
+  it("[AC-019] a 422 naming no known field falls back to a general message", async () => {
+    fetchMock
+      .mockResolvedValueOnce(res(200, stored))
+      .mockResolvedValueOnce(res(422, { detail: [{ field: "unknown_field", msg: "nope" }] }));
+    const u = userEvent.setup();
+    render(<Profile />);
+    await u.click(await screen.findByRole("button", { name: /save changes/i }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(/check the details you entered/i);
+    expect(screen.getByTestId("saved-full_name")).toHaveTextContent("Jane Doe");
+  });
+
   it("[AC-021] a 422 shows the message against current_password and keeps what was typed", async () => {
     const current = crypto.randomUUID();
     const next = crypto.randomUUID();

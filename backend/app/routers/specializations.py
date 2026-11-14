@@ -162,6 +162,10 @@ def delete_specialization(id: str, db: DBSession = Depends(get_db)):  # noqa: A0
     return Response(status_code=204)
 
 
+def _spec_refs(rows: list[Specialization]) -> list[CatalogTermSpecOut]:
+    return [CatalogTermSpecOut(id=s.id, name=s.name, is_active=s.is_active) for s in rows]
+
+
 def _term_out(row: CatalogTerm) -> CatalogTermOut:
     return CatalogTermOut(
         id=row.id,
@@ -170,10 +174,7 @@ def _term_out(row: CatalogTerm) -> CatalogTermOut:
         kind=row.entry_type,
         specialization_ids=[s.id for s in row.specializations],
         is_seeded=row.is_seeded,
-        specializations=[
-            CatalogTermSpecOut(id=s.id, name=s.name, is_active=s.is_active)
-            for s in row.specializations
-        ],
+        specializations=_spec_refs(row.specializations),
     )
 
 
@@ -296,11 +297,7 @@ def suggest_catalog_terms(
             term=r.term,
             entry_type=r.entry_type,
             kind=r.entry_type,
-            specializations=[
-                CatalogTermSpecOut(id=s.id, name=s.name, is_active=s.is_active)
-                for s in r.specializations
-                if s.is_active
-            ],
+            specializations=_spec_refs([s for s in r.specializations if s.is_active]),
         )
         for r in rows
     ]
@@ -321,7 +318,7 @@ def suggest_catalog_terms(
             term=s.name,
             entry_type="specialization",
             kind="specialization",
-            specializations=[CatalogTermSpecOut(id=s.id, name=s.name, is_active=True)],
+            specializations=_spec_refs([s]),
         )
         for s in specs
     )

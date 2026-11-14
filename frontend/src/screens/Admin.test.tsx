@@ -163,6 +163,30 @@ describe("Admin catalogue", () => {
     expect(screen.getByRole("button", { name: "Delete Migraine" })).toBeInTheDocument();
   });
 
+  it("[AC-010] the accounts panel is the live one only, with a single create-account form", async () => {
+    render(<Screen />);
+    expect(
+      await screen.findByRole("heading", { name: "Doctor and admin accounts" }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { name: "Create account" })).toHaveLength(1);
+    await waitFor(() => expect(sent("GET", "/api/admin/users").length).toBe(1));
+  });
+
+  it("[AC-010] the section tabs still select and the doctor profile form still edits", async () => {
+    render(<Screen />);
+    await screen.findByText("Migraine");
+    const u = userEvent.setup();
+    // jsdom has no layout, so the jump handler's scroll is a no-op here.
+    Element.prototype.scrollIntoView = vi.fn();
+    const specsTab = screen.getByRole("button", { name: "Specializations" });
+    await u.click(specsTab);
+    expect(specsTab).toHaveAttribute("aria-current", "true");
+    const name = screen.getByLabelText("Display name") as HTMLInputElement;
+    await u.clear(name);
+    await u.type(name, "Dr. Anika R");
+    expect(name.value).toBe("Dr. Anika R");
+  });
+
   it("[AC-034] a failing catalogue load shows a load error", async () => {
     route({ "GET /api/admin/catalog-terms": () => res(500, { detail: "boom" }) });
     render(<Screen />);

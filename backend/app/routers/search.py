@@ -22,8 +22,6 @@ router = APIRouter(prefix="/api", tags=["search"])
 
 def _doctor_spec_map(db: DBSession, spec_ids: list[str]) -> dict[str, set[str]]:
     """Map each doctor id to the subset of ``spec_ids`` it is associated with."""
-    if not spec_ids:
-        return {}
     stmt = select(
         doctor_specializations.c.doctor_id, doctor_specializations.c.specialization_id
     ).where(doctor_specializations.c.specialization_id.in_(spec_ids))
@@ -31,6 +29,24 @@ def _doctor_spec_map(db: DBSession, spec_ids: list[str]) -> dict[str, set[str]]:
     for doctor_id, specialization_id in db.execute(stmt):
         out.setdefault(doctor_id, set()).add(specialization_id)
     return out
+
+
+def _page(
+    doctors: list[dict[str, object]],
+    specializations: list[dict[str, object]],
+    resolution: str,
+    limit: int,
+    offset: int,
+) -> dict[str, object]:
+    """The search response shape: a page of doctor cards plus how the term resolved."""
+    page = doctors[offset : offset + limit]
+    return {
+        "items": page,
+        "total": len(doctors),
+        "resolution": resolution,
+        "specializations": specializations,
+        "doctors": page,
+    }
 
 
 @router.get("/search/doctors")
@@ -42,15 +58,6 @@ def search_doctors(
     db: DBSession = Depends(get_db),  # noqa: B008
 ) -> dict[str, object]:
     needle = term.strip()
-    empty = {
-        "items": [],
-        "total": 0,
-        "resolution": "no_match",
-        "specializations": [],
-        "doctors": [],
-    }
-    if not needle:
-        return empty
 
     # Deterministic table lookup: exact (case-insensitive) match on a non-deleted
     # catalogue term. A soft-deleted term stops resolving (NFR-012, AC-040).
@@ -61,57 +68,40 @@ def search_doctors(
             CatalogTerm.is_deleted.is_(False),
         )
         .first()
+        if needle
+        else None
     )
     if row is None:
-        return empty
+        return _page([], [], "no_match", limit, offset)
 
     # Only active specializations resolve; deactivated ones are excluded (AC-025).
     active_specs = [s for s in row.specializations if s.is_active]
-    spec_ids = [s.id for s in active_specs]
     specializations = [{"id": s.id, "name": s.name} for s in active_specs]
+    if not active_specs:
+        return _page([], specializations, "no_specialist_available", limit, offset)
 
-    if not spec_ids:
-        return {
-            "items": [],
-            "total": 0,
-            "resolution": "no_specialist_available",
-            "specializations": specializations,
-            "doctors": [],
-        }
-
+    spec_ids = [s.id for s in active_specs]
     doctor_specs = _doctor_spec_map(db, spec_ids)
-    doctor_ids = list(doctor_specs)
-
-    doctors: list[dict[str, object]] = []
-    if doctor_ids:
-        active_spec_set = set(spec_ids)
-        rows = (
-            db.query(User)
-            .filter(
-                User.id.in_(doctor_ids),
-                User.role == "doctor",
-                User.is_active.is_(True),
-            )
-            .order_by(User.full_name.asc(), User.id.asc())
-            .all()
+    spec_names = {s.id: s.name for s in active_specs}
+    rows = (
+        db.query(User)
+        .filter(
+            User.id.in_(list(doctor_specs)),
+            User.role == "doctor",
+            User.is_active.is_(True),
         )
-        spec_names = {s.id: s.name for s in active_specs}
-        for d in rows:
-            matched = sorted(doctor_specs[d.id] & active_spec_set)
-            doctors.append(
-                doctor_card(d, [{"id": sid, "name": spec_names[sid]} for sid in matched])
-            )
-
-    total = len(doctors)
-    page = doctors[offset : offset + limit]
-    resolution = "matched" if total else "no_specialist_available"
-    return {
-        "items": page,
-        "total": total,
-        "resolution": resolution,
-        "specializations": specializations,
-        "doctors": page,
-    }
+        .order_by(User.full_name.asc(), User.id.asc())
+        .all()
+    )
+    doctors = [
+        doctor_card(
+            d,
+            [{"id": sid, "name": spec_names[sid]} for sid in sorted(doctor_specs[d.id])],
+        )
+        for d in rows
+    ]
+    resolution = "matched" if doctors else "no_specialist_available"
+    return _page(doctors, specializations, resolution, limit, offset)
 
 
 __all__ = ["router"]

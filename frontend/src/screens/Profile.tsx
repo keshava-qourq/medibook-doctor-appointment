@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type FieldValues, type Path, type UseFormSetError } from "react-hook-form";
 
 import { ApiError, apiFetch } from "@/lib/api";
 import { brand } from "@/lib/brand";
@@ -34,16 +34,26 @@ const PROFILE_FIELDS: Array<keyof ProfileValues> = [
 const PASSWORD_FIELDS: Array<keyof PasswordValues> = ["current_password", "new_password"];
 
 // 422 bodies are {"detail": [{"field": ..., "msg": ...}]} per the contract.
-function fieldErrors(body: unknown): Array<{ field: string; msg: string }> {
+// Puts each known field's message on its input; returns false when none matched.
+function applyFieldErrors<T extends FieldValues>(
+  body: unknown,
+  known: Array<Path<T>>,
+  setError: UseFormSetError<T>,
+): boolean {
   const detail = (body as { detail?: unknown } | null)?.detail;
-  if (!Array.isArray(detail)) return [];
-  return detail
-    .map((item) => item as { field?: unknown; msg?: unknown; loc?: unknown[] })
-    .map((item) => ({
-      field: String(item.field ?? (Array.isArray(item.loc) ? item.loc[item.loc.length - 1] : "")),
-      msg: String(item.msg ?? ""),
-    }))
-    .filter((item) => item.field && item.msg);
+  if (!Array.isArray(detail)) return false;
+  let matched = false;
+  for (const raw of detail) {
+    const item = raw as { field?: unknown; msg?: unknown; loc?: unknown[] };
+    const field = String(
+      item.field ?? (Array.isArray(item.loc) ? item.loc[item.loc.length - 1] : ""),
+    ) as Path<T>;
+    const msg = String(item.msg ?? "");
+    if (!msg || !known.includes(field)) continue;
+    matched = true;
+    setError(field, { type: "server", message: msg });
+  }
+  return matched;
 }
 
 const inputCls = "h-11 w-full rounded-[var(--brand-radius)] border border-slate-300 px-4 text-sm";
@@ -112,15 +122,8 @@ export default function Profile() {
       // The values the user typed stay in the form, and `profile` keeps the last
       // saved values on screen (NFR-022).
       if (e instanceof ApiError && e.status === 422) {
-        const errors = fieldErrors(e.body);
-        let matched = false;
-        errors.forEach(({ field, msg }) => {
-          if (PROFILE_FIELDS.includes(field as keyof ProfileValues)) {
-            matched = true;
-            profileForm.setError(field as keyof ProfileValues, { type: "server", message: msg });
-          }
-        });
-        if (!matched) setSaveError("Please check the details you entered and try again.");
+        if (!applyFieldErrors(e.body, PROFILE_FIELDS, profileForm.setError))
+          setSaveError("Please check the details you entered and try again.");
       } else {
         setSaveError("We could not save your profile. Nothing was changed.");
       }
@@ -139,15 +142,8 @@ export default function Profile() {
       passwordForm.reset({ current_password: "", new_password: "" });
     } catch (e) {
       if (e instanceof ApiError && e.status === 422) {
-        const errors = fieldErrors(e.body);
-        let matched = false;
-        errors.forEach(({ field, msg }) => {
-          if (PASSWORD_FIELDS.includes(field as keyof PasswordValues)) {
-            matched = true;
-            passwordForm.setError(field as keyof PasswordValues, { type: "server", message: msg });
-          }
-        });
-        if (!matched) setPasswordError("Please check the details you entered and try again.");
+        if (!applyFieldErrors(e.body, PASSWORD_FIELDS, passwordForm.setError))
+          setPasswordError("Please check the details you entered and try again.");
       } else {
         setPasswordError("We could not change your password. Please try again.");
       }

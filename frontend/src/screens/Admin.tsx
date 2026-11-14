@@ -10,7 +10,7 @@ import { apiFetch, ApiError } from "@/lib/api";
 
 const { Button, Input, Textarea, Label, Table, THead, TBody, TR, TH, TD, Avatar } = UI;
 
-const { Settings, Edit } = Icons;
+const { Edit } = Icons;
 
 const TZ = [
   { value: "UTC", label: "UTC, Coordinated Universal Time", abbr: "UTC" },
@@ -484,23 +484,6 @@ const DOCS = [
   },
 ];
 
-const WORDS = [
-  "fern",
-  "olive",
-  "cedar",
-  "moss",
-  "linen",
-  "clay",
-  "willow",
-  "sage",
-  "ember",
-  "birch",
-];
-function makePassword() {
-  const w = () => WORDS[Math.floor(Math.random() * WORDS.length)];
-  return w() + "-" + w() + "-" + Math.floor(1000 + Math.random() * 9000);
-}
-
 function fmtTime(iso, tz) {
   try {
     return new Intl.DateTimeFormat("en-GB", {
@@ -797,9 +780,7 @@ function SpecPicker({ idp, legend, specs, value, onToggle, error, wf }) {
 }
 
 export default function Screen() {
-  const [accounts, setAccounts] = React.useState(
-    ACCOUNTS_SEED.map((a, i) => (a.role === "doctor" ? { ...a, id: "a" + (i + 1) } : a)),
-  );
+  const accounts = ACCOUNTS_SEED;
   const [doctors, setDoctors] = React.useState(DOCTORS_SEED);
   const [specs, setSpecs] = React.useState(SPECS_SEED);
   const [terms, setTerms] = React.useState(TERMS_SEED);
@@ -827,32 +808,20 @@ export default function Screen() {
     );
   }, []);
   const [tab, setTab] = React.useState("accounts");
-  const counter = React.useRef(100);
-
-  /* accounts */
-  const [ca, setCa] = React.useState({ name: "", email: "", role: "doctor", password: "" });
-  const [caErr, setCaErr] = React.useState({});
-  const [caStatus, setCaStatus] = React.useState(null);
-  const [acctStatus, setAcctStatus] = React.useState(null);
-  const [secret, setSecret] = React.useState(null);
 
   /* doctor profile */
-  const toDraft = (d) => ({
-    displayName: d.displayName,
-    specs: d.specs,
-    quals: d.quals,
-    bio: d.bio,
-    room: d.room,
-    fee: d.fee,
-    active: d.active,
+  const first = DOCTORS_SEED[0];
+  const [pd, setPd] = React.useState({
+    displayName: first.displayName,
+    specs: first.specs,
+    quals: first.quals,
+    bio: first.bio,
+    room: first.room,
+    fee: first.fee,
+    active: first.active,
   });
-  const [selId, setSelId] = React.useState("d1");
-  const [pd, setPd] = React.useState(() => toDraft(DOCTORS_SEED[0]));
   const [pErr, setPErr] = React.useState({});
   const [pStatus, setPStatus] = React.useState(null);
-
-  /* specializations */
-  const [specStatus, setSpecStatus] = React.useState(null);
 
   /* catalogue */
   const emptyTerm = { id: null, term: "", type: "disease", specs: [] };
@@ -874,7 +843,7 @@ export default function Screen() {
     loadCatalogue().catch(() => setTStatus("Could not load the catalogue."));
   }, [loadCatalogue]);
 
-  const doc = doctors.find((d) => d.id === selId) || doctors[0];
+  const doc = doctors[0];
   const specName = (id) => (specs.find((s) => s.id === id) || {}).name || id;
   const abbr = (TZ.find((z) => z.value === saved.tz) || {}).abbr || saved.tz;
   const neuro = specs.find((s) => s.id === "neuro");
@@ -904,60 +873,6 @@ export default function Screen() {
       window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     el.focus({ preventScroll: true });
     el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
-  };
-
-  /* ---- accounts ---- */
-  const createAccount = (e) => {
-    e.preventDefault();
-    const errs = {};
-    const name = ca.name.trim();
-    const email = ca.email.trim();
-    if (!name) errs.name = "Enter their full name.";
-    if (!email) errs.email = "Enter an email address.";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email))
-      errs.email = "That email doesn’t look right. Try name@clinic.org.";
-    else if (accounts.some((a) => a.email.toLowerCase() === email.toLowerCase()))
-      errs.email =
-        "This email already has an account. Each address can belong to one account only.";
-    if (ca.password.length < 10 || !/[A-Za-z]/.test(ca.password) || !/\d/.test(ca.password))
-      errs.password = "Use at least 10 characters with a letter and a number.";
-    setCaErr(errs);
-    setCaStatus(null);
-    if (Object.keys(errs).length) return;
-    const n = ++counter.current;
-    const accId = "a" + n;
-    setAccounts((list) => [...list, { id: accId, name, email, role: ca.role, active: true }]);
-    if (ca.role === "doctor") {
-      const nd = {
-        id: "d" + n,
-        accountId: accId,
-        displayName: /^dr\.?\s/i.test(name) ? name : "Dr. " + name,
-        specs: [],
-        quals: "",
-        bio: "",
-        room: "",
-        fee: "",
-        active: false,
-        future: 0,
-      };
-      setDoctors((l) => [...l, nd]);
-      setSelId(nd.id);
-      setPd(toDraft(nd));
-      setPErr({});
-      setPStatus("Complete this profile and tick Active to put them in patient search.");
-    }
-    setSecret({ kind: "created", name, password: ca.password });
-    setCaStatus(
-      ca.role === "doctor"
-        ? "Account created. Their blank profile is waiting in Doctor profile below."
-        : "Administrator account created and active.",
-    );
-    setCa({ name: "", email: "", role: "doctor", password: "" });
-  };
-
-  const resetPassword = (a) => {
-    setSecret({ kind: "reset", name: a.name, password: makePassword() });
-    setAcctStatus(null);
   };
 
   /* ---- doctor profile ---- */
@@ -1388,9 +1303,6 @@ export default function Screen() {
                   ))}
                 </TBody>
               </Table>
-            </div>
-            <div aria-live="polite" style={{ marginTop: 16 }}>
-              {specStatus ? <Msg>{specStatus}</Msg> : null}
             </div>
           </Panel>
 
