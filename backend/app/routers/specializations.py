@@ -19,10 +19,13 @@ from app.database import get_db
 from app.errors import EmptyBodyHTTPError
 from app.models import CatalogTerm, Specialization, User
 from app.schemas import (
+    CatalogSuggestItem,
+    CatalogSuggestOut,
     CatalogTermCreate,
     CatalogTermListOut,
     CatalogTermOut,
     CatalogTermSpecOut,
+    CatalogTermUpdate,
     SpecializationCreate,
     SpecializationListOut,
     SpecializationOut,
@@ -162,6 +165,8 @@ def _term_out(row: CatalogTerm) -> CatalogTermOut:
         id=row.id,
         term=row.term,
         entry_type=row.entry_type,
+        kind=row.entry_type,
+        specialization_ids=[s.id for s in row.specializations],
         is_seeded=row.is_seeded,
         specializations=[
             CatalogTermSpecOut(id=s.id, name=s.name, is_active=s.is_active)
@@ -170,17 +175,39 @@ def _term_out(row: CatalogTerm) -> CatalogTermOut:
     )
 
 
+def _active_specs(db: DBSession, ids: list[str]) -> list[Specialization]:
+    """Resolve the given ids to active specializations only; a term links only to
+    active specializations."""
+    return (
+        db.query(Specialization)
+        .filter(Specialization.id.in_(ids), Specialization.is_active.is_(True))
+        .all()
+    )
+
+
+def _duplicate_term(db: DBSession, term: str, exclude_id: str | None = None) -> bool:
+    query = db.query(CatalogTerm).filter(
+        func.lower(CatalogTerm.term) == term.lower(),
+        CatalogTerm.is_deleted.is_(False),
+    )
+    if exclude_id is not None:
+        query = query.filter(CatalogTerm.id != exclude_id)
+    return query.first() is not None
+
+
 @admin_router.post("/catalog-terms", status_code=201, response_model=CatalogTermOut)
 def create_catalog_term(payload: CatalogTermCreate, db: DBSession = Depends(get_db)):  # noqa: B008
-    specs = (
-        db.query(Specialization).filter(Specialization.id.in_(payload.specialization_ids)).all()
-        if payload.specialization_ids
-        else []
-    )
+    if _duplicate_term(db, payload.term):
+        return JSONResponse(status_code=409, content={"code": "duplicate_term"})
+
     row = CatalogTerm(term=payload.term, entry_type=payload.entry_type, is_seeded=False)
-    row.specializations = specs
+    row.specializations = _active_specs(db, payload.specialization_ids)
     db.add(row)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        return JSONResponse(status_code=409, content={"code": "duplicate_term"})
     db.refresh(row)
     return _term_out(row)
 
@@ -191,10 +218,78 @@ def list_catalog_terms(
     offset: int = Query(default=0, ge=0),
     db: DBSession = Depends(get_db),  # noqa: B008
 ):
-    query = db.query(CatalogTerm)
+    query = db.query(CatalogTerm).filter(CatalogTerm.is_deleted.is_(False))
     total = query.count()
     rows = query.order_by(CatalogTerm.created_at.desc()).offset(offset).limit(limit).all()
     return CatalogTermListOut(items=[_term_out(r) for r in rows], total=total)
+
+
+@admin_router.put("/catalog-terms/{id}", response_model=CatalogTermOut)
+def update_catalog_term(
+    id: str,  # noqa: A002 -- matches the {id} path in the API contract
+    payload: CatalogTermUpdate,
+    db: DBSession = Depends(get_db),  # noqa: B008
+):
+    row = db.get(CatalogTerm, id)
+    if row is None or row.is_deleted:
+        raise EmptyBodyHTTPError(404)
+
+    fields = payload.model_dump(exclude_unset=True)
+    if "term" in fields and fields["term"] is not None:
+        if _duplicate_term(db, fields["term"], exclude_id=id):
+            return JSONResponse(status_code=409, content={"code": "duplicate_term"})
+        row.term = fields["term"]
+    if "entry_type" in fields and fields["entry_type"] is not None:
+        row.entry_type = fields["entry_type"]
+    if "specialization_ids" in fields and fields["specialization_ids"] is not None:
+        row.specializations = _active_specs(db, fields["specialization_ids"])
+
+    db.add(row)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        return JSONResponse(status_code=409, content={"code": "duplicate_term"})
+    db.refresh(row)
+    return _term_out(row)
+
+
+@admin_router.delete("/catalog-terms/{id}", status_code=204)
+def delete_catalog_term(id: str, db: DBSession = Depends(get_db)):  # noqa: A002, B008
+    row = db.get(CatalogTerm, id)
+    if row is None or row.is_deleted:
+        raise EmptyBodyHTTPError(404)
+    # Soft-delete: the row stays so already-booked appointments that reference it
+    # are untouched (NFR-026), but it stops resolving and stops appearing in suggest.
+    row.is_deleted = True
+    db.add(row)
+    db.commit()
+    return Response(status_code=204)
+
+
+@public_router.get("/catalog/suggest", response_model=CatalogSuggestOut)
+def suggest_catalog_terms(
+    q: str = Query(default=""),
+    user: User = Depends(current_user),  # noqa: B008 -- enforces the 401 contract
+    db: DBSession = Depends(get_db),  # noqa: B008
+):
+    """Deterministic case-insensitive substring match over non-deleted terms; an
+    empty list for a query shorter than two characters, no fuzzy or ML ranking
+    (NFR-012)."""
+    needle = q.strip()
+    if len(needle) < 2:
+        return CatalogSuggestOut(items=[])
+    rows = (
+        db.query(CatalogTerm)
+        .filter(
+            CatalogTerm.is_deleted.is_(False),
+            func.lower(CatalogTerm.term).like(f"%{needle.lower()}%"),
+        )
+        .order_by(CatalogTerm.term.asc())
+        .all()
+    )
+    items = [CatalogSuggestItem(term=r.term, kind=r.entry_type) for r in rows]
+    return CatalogSuggestOut(items=items)
 
 
 __all__ = ["public_router", "admin_router"]

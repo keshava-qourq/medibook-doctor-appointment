@@ -18,7 +18,16 @@ from fastapi.responses import JSONResponse, Response
 from app import models  # noqa: F401 -- imported so the tables register before create_all
 from app.database import Base, SessionLocal, engine
 from app.errors import EmptyBodyHTTPError
-from app.routers import admin_users, appointments, auth, patients, settings, specializations
+from app.routers import (
+    admin_users,
+    appointments,
+    auth,
+    doctors,
+    patients,
+    search,
+    settings,
+    specializations,
+)
 from app.routers.settings import get_or_create_settings
 from app.security import validate_session_idle_minutes
 from app.seed import seed_startup_users
@@ -55,6 +64,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             conn.exec_driver_sql("ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(32)")
             conn.exec_driver_sql("ALTER TABLE users ADD COLUMN IF NOT EXISTS date_of_birth DATE")
             conn.exec_driver_sql("ALTER TABLE users ADD COLUMN IF NOT EXISTS gender VARCHAR(32)")
+            # catalog_terms soft-delete flag is additive to an existing table.
+            conn.exec_driver_sql(
+                "ALTER TABLE catalog_terms ADD COLUMN IF NOT EXISTS "
+                "is_deleted BOOLEAN NOT NULL DEFAULT FALSE"
+            )
     db = SessionLocal()
     try:
         seed_startup_users(db)
@@ -101,6 +115,8 @@ app.include_router(specializations.public_router)
 app.include_router(specializations.admin_router)
 app.include_router(settings.public_router)
 app.include_router(settings.admin_router)
+app.include_router(search.router)
+app.include_router(doctors.router)
 
 
 @app.exception_handler(RequestValidationError)

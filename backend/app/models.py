@@ -94,11 +94,23 @@ class CatalogTerm(Base):
     term: Mapped[str] = mapped_column(CIText(), nullable=False, index=True)
     entry_type: Mapped[str] = mapped_column(String(32), nullable=False)
     is_seeded: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # Soft-delete: a deleted term stops resolving and stops appearing in suggest,
+    # but the row stays so already-booked appointments that reference it are
+    # untouched (NFR-026).
+    is_deleted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
 
     specializations: Mapped[list["Specialization"]] = relationship(
         secondary=term_specializations, lazy="selectin"
     )
+
+
+doctor_specializations = Table(
+    "doctor_specializations",
+    Base.metadata,
+    Column("doctor_id", String(36), ForeignKey("users.id"), primary_key=True),
+    Column("specialization_id", String(36), ForeignKey("specializations.id"), primary_key=True),
+)
 
 
 class ClinicSettings(Base):
@@ -146,5 +158,6 @@ __all__ = [
     "CatalogTerm",
     "ClinicSettings",
     "term_specializations",
+    "doctor_specializations",
     "ROLES",
 ]

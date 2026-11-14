@@ -144,7 +144,11 @@ class CatalogTermSpecOut(BaseModel):
 class CatalogTermOut(BaseModel):
     id: str
     term: str
+    # `entry_type` is the stored column; `kind` is the contract's name for the same
+    # value. Both are returned so old and new clients agree.
     entry_type: str
+    kind: str
+    specialization_ids: list[str]
     is_seeded: bool
     specializations: list[CatalogTermSpecOut]
 
@@ -154,10 +158,15 @@ class CatalogTermListOut(BaseModel):
     total: int
 
 
+_CATALOG_KINDS = ("disease", "symptom")
+
+
 class CatalogTermCreate(BaseModel):
     term: str
-    entry_type: str
-    specialization_ids: list[str] = []
+    # The contract sends the type as `kind`; `entry_type` is accepted for
+    # backward compatibility with earlier callers/tests.
+    entry_type: str = Field(validation_alias=AliasChoices("kind", "entry_type"))
+    specialization_ids: list[str]
 
     @field_validator("term")
     @classmethod
@@ -165,6 +174,78 @@ class CatalogTermCreate(BaseModel):
         if not v or not v.strip():
             raise ValueError("required")
         return v
+
+    @field_validator("entry_type")
+    @classmethod
+    def _kind_valid(cls, v: str) -> str:
+        if v not in _CATALOG_KINDS:
+            raise ValueError("invalid_kind")
+        return v
+
+    @field_validator("specialization_ids")
+    @classmethod
+    def _at_least_one_spec(cls, v: list[str]) -> list[str]:
+        if not v:
+            raise ValueError("at least one required")
+        return v
+
+
+class CatalogTermUpdate(BaseModel):
+    term: str | None = None
+    entry_type: str | None = Field(
+        default=None, validation_alias=AliasChoices("kind", "entry_type")
+    )
+    specialization_ids: list[str] | None = None
+
+    @field_validator("term")
+    @classmethod
+    def _term_not_blank(cls, v: str | None) -> str | None:
+        if v is not None and not v.strip():
+            raise ValueError("required")
+        return v
+
+    @field_validator("entry_type")
+    @classmethod
+    def _kind_valid(cls, v: str | None) -> str | None:
+        if v is not None and v not in _CATALOG_KINDS:
+            raise ValueError("invalid_kind")
+        return v
+
+    @field_validator("specialization_ids")
+    @classmethod
+    def _at_least_one_spec(cls, v: list[str] | None) -> list[str] | None:
+        if v is not None and not v:
+            raise ValueError("at least one required")
+        return v
+
+
+class DoctorProfileUpdate(BaseModel):
+    """Admin edit of a doctor's profile; only the specialization mapping is used
+    for term-driven search. Other fields are accepted for the contract shape."""
+
+    display_name: str | None = None
+    specialization_ids: list[str] | None = None
+    qualifications: str | None = None
+    biography: str | None = None
+    room_location: str | None = None
+    consultation_fee: float | None = None
+    is_active: bool | None = None
+
+
+class DoctorProfileOut(BaseModel):
+    id: str
+    full_name: str
+    specialization_ids: list[str]
+    is_active: bool
+
+
+class CatalogSuggestItem(BaseModel):
+    term: str
+    kind: str
+
+
+class CatalogSuggestOut(BaseModel):
+    items: list[CatalogSuggestItem]
 
 
 class PatientProfileOut(BaseModel):

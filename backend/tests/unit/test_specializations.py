@@ -153,7 +153,7 @@ def test_ac024_delete_referenced_is_409_with_counts_and_deactivation_allowed(
     # schema so the reference-counting guard has a doctor reference to count too.
     db_session.execute(
         text(
-            "CREATE TABLE doctor_specializations "
+            "CREATE TABLE IF NOT EXISTS doctor_specializations "
             "(doctor_id varchar(36), specialization_id varchar(36))"
         )
     )
