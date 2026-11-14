@@ -204,9 +204,7 @@ def test_ac026_nfr013_admin_saves_full_doctor_profile_and_a_fresh_get_returns_it
         "consultation_fee": 650,
         "is_active": True,
     }
-    saved = client.put(
-        f"/api/admin/doctors/{doctor_id}", headers=_bearer(admin), json=payload
-    )
+    saved = client.put(f"/api/admin/doctors/{doctor_id}", headers=_bearer(admin), json=payload)
     assert saved.status_code == 200, saved.text
     body = saved.json()
     assert body["id"] == doctor_id, body
@@ -257,9 +255,7 @@ def test_ac026_doctor_profile_edit_is_admin_only_and_needs_a_token(
     assert anonymous.status_code == 401, anonymous.text
     assert "detail" in anonymous.json()
 
-    forbidden = client.put(
-        f"/api/admin/doctors/{doctor_id}", headers=_bearer(patient), json=body
-    )
+    forbidden = client.put(f"/api/admin/doctors/{doctor_id}", headers=_bearer(patient), json=body)
     assert forbidden.status_code == 403, forbidden.text
     assert forbidden.content == b"", forbidden.text
 
