@@ -231,6 +231,7 @@ export default function DoctorAvailability() {
   });
 
   const timezone = weekly.data?.timezone ?? "UTC";
+  const fmtSlot = (iso: string) => formatInTimeZone(new Date(iso), timezone, "d MMM yyyy HH:mm");
 
   const {
     control,
@@ -380,11 +381,7 @@ export default function DoctorAvailability() {
           } cancelled with the reason "${reason}": ${cancelled
             .map(
               (a) =>
-                `${a.patient_name} (${formatInTimeZone(
-                  new Date(a.slot_start),
-                  timezone,
-                  "d MMM yyyy HH:mm",
-                )})`,
+                `${a.patient_name} (${fmtSlot(a.slot_start)})`,
             )
             .join(", ")}.`
         : "Exception saved. No booked appointments were affected.",
@@ -610,11 +607,7 @@ export default function DoctorAvailability() {
               <ul className="mt-2 flex flex-col gap-1 text-sm">
                 {affected.map((a) => (
                   <li key={a.id}>
-                    {`${a.patient_name} · ${formatInTimeZone(
-                      new Date(a.slot_start),
-                      timezone,
-                      "d MMM yyyy HH:mm",
-                    )} · ${a.status}`}
+                    {`${a.patient_name} · ${fmtSlot(a.slot_start)} · ${a.status}`}
                   </li>
                 ))}
               </ul>
@@ -693,11 +686,7 @@ export default function DoctorAvailability() {
               <ul className="mt-2 flex flex-col gap-1 text-sm">
                 {pending.map((a) => (
                   <li key={a.id}>
-                    {`${a.patient_name} · ${formatInTimeZone(
-                      new Date(a.slot_start),
-                      timezone,
-                      "d MMM yyyy HH:mm",
-                    )} · ${a.status}`}
+                    {`${a.patient_name} · ${fmtSlot(a.slot_start)} · ${a.status}`}
                   </li>
                 ))}
               </ul>
