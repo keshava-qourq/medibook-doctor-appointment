@@ -220,12 +220,18 @@ class CatalogTermUpdate(BaseModel):
 
 
 class CatalogSuggestItem(BaseModel):
+    id: str
     term: str
+    # `entry_type` is the contract's name; `kind` is the earlier name for the
+    # same value. Both are returned so old and new clients agree.
+    entry_type: str
     kind: str
+    specializations: list[CatalogTermSpecOut]
 
 
 class CatalogSuggestOut(BaseModel):
     items: list[CatalogSuggestItem]
+    total: int = 0
 
 
 class PatientProfileOut(BaseModel):

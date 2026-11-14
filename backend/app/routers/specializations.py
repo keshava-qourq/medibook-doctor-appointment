@@ -162,6 +162,10 @@ def delete_specialization(id: str, db: DBSession = Depends(get_db)):  # noqa: A0
     return Response(status_code=204)
 
 
+def _spec_refs(rows: list[Specialization]) -> list[CatalogTermSpecOut]:
+    return [CatalogTermSpecOut(id=s.id, name=s.name, is_active=s.is_active) for s in rows]
+
+
 def _term_out(row: CatalogTerm) -> CatalogTermOut:
     return CatalogTermOut(
         id=row.id,
@@ -170,10 +174,7 @@ def _term_out(row: CatalogTerm) -> CatalogTermOut:
         kind=row.entry_type,
         specialization_ids=[s.id for s in row.specializations],
         is_seeded=row.is_seeded,
-        specializations=[
-            CatalogTermSpecOut(id=s.id, name=s.name, is_active=s.is_active)
-            for s in row.specializations
-        ],
+        specializations=_spec_refs(row.specializations),
     )
 
 
@@ -280,7 +281,7 @@ def suggest_catalog_terms(
     (NFR-012)."""
     needle = q.strip()
     if len(needle) < 2:
-        return CatalogSuggestOut(items=[])
+        return CatalogSuggestOut(items=[], total=0)
     rows = (
         db.query(CatalogTerm)
         .filter(
@@ -290,8 +291,38 @@ def suggest_catalog_terms(
         .order_by(CatalogTerm.term.asc())
         .all()
     )
-    items = [CatalogSuggestItem(term=r.term, kind=r.entry_type) for r in rows]
-    return CatalogSuggestOut(items=items)
+    items = [
+        CatalogSuggestItem(
+            id=r.id,
+            term=r.term,
+            entry_type=r.entry_type,
+            kind=r.entry_type,
+            specializations=_spec_refs([s for s in r.specializations if s.is_active]),
+        )
+        for r in rows
+    ]
+    # Specializations are suggestible entries in their own right (AC-041): same
+    # deterministic case-insensitive substring over the stored rows.
+    specs = (
+        db.query(Specialization)
+        .filter(
+            Specialization.is_active.is_(True),
+            func.lower(Specialization.name).like(f"%{needle.lower()}%"),
+        )
+        .order_by(Specialization.name.asc())
+        .all()
+    )
+    items.extend(
+        CatalogSuggestItem(
+            id=s.id,
+            term=s.name,
+            entry_type="specialization",
+            kind="specialization",
+            specializations=_spec_refs([s]),
+        )
+        for s in specs
+    )
+    return CatalogSuggestOut(items=items, total=len(items))
 
 
 __all__ = ["public_router", "admin_router"]

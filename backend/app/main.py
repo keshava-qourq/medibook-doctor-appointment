@@ -30,7 +30,7 @@ from app.routers import (
 )
 from app.routers.settings import get_or_create_settings
 from app.security import validate_session_idle_minutes
-from app.seed import seed_startup_users
+from app.seed import seed_catalog, seed_startup_users
 from app.services import configured_services
 
 
@@ -64,14 +64,26 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             conn.exec_driver_sql("ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(32)")
             conn.exec_driver_sql("ALTER TABLE users ADD COLUMN IF NOT EXISTS date_of_birth DATE")
             conn.exec_driver_sql("ALTER TABLE users ADD COLUMN IF NOT EXISTS gender VARCHAR(32)")
+            # Doctor directory fields are additive to an existing `users` table.
+            conn.exec_driver_sql("ALTER TABLE users ADD COLUMN IF NOT EXISTS qualifications TEXT")
+            conn.exec_driver_sql(
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS consultation_fee NUMERIC(10, 2)"
+            )
             # catalog_terms soft-delete flag is additive to an existing table.
             conn.exec_driver_sql(
                 "ALTER TABLE catalog_terms ADD COLUMN IF NOT EXISTS "
                 "is_deleted BOOLEAN NOT NULL DEFAULT FALSE"
             )
+            # Seeded-row identity is additive to an existing catalog_terms table.
+            conn.exec_driver_sql(
+                "ALTER TABLE catalog_terms ADD COLUMN IF NOT EXISTS seed_key VARCHAR(64)"
+            )
     db = SessionLocal()
     try:
         seed_startup_users(db)
+        # Starter disease/symptom catalogue: idempotent, never overwrites or
+        # recreates administrator edits or deletions (NFR-024).
+        seed_catalog(db)
         # Seed the single clinic-settings row idempotently so the documented
         # default (UTC, timezone_confirmed=false) is readable before any save.
         get_or_create_settings(db)
@@ -117,6 +129,7 @@ app.include_router(settings.public_router)
 app.include_router(settings.admin_router)
 app.include_router(search.router)
 app.include_router(doctors.router)
+app.include_router(doctors.public_router)
 
 
 @app.exception_handler(RequestValidationError)

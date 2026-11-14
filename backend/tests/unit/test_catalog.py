@@ -172,7 +172,11 @@ def test_suggest_returns_empty_for_short_query(db_session: DBSession, app_client
     for q in ("", "e"):
         resp = app_client.get("/api/catalog/suggest", headers=headers, params={"q": q})
         assert resp.status_code == 200
-        assert resp.json() == {"items": []}
+        body = resp.json()
+        # List endpoints always return {items, total} (behaviour rule); below two
+        # characters the item list is empty.
+        assert body["items"] == []
+        assert body["total"] == 0
 
 
 def test_suggest_matches_case_insensitive_substring(db_session: DBSession, app_client: TestClient):

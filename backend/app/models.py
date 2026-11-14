@@ -6,8 +6,20 @@ the opaque bearer token issued at login, never the raw token.
 
 import uuid
 from datetime import UTC, date, datetime
+from decimal import Decimal
 
-from sqlalchemy import Boolean, Column, Date, DateTime, Enum, ForeignKey, Integer, String, Table
+from sqlalchemy import (
+    Boolean,
+    Column,
+    Date,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
+    Table,
+)
 from sqlalchemy.dialects.postgresql import CITEXT
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import TypeDecorator
@@ -53,6 +65,10 @@ class User(Base):
     date_of_birth: Mapped[date | None] = mapped_column(Date, nullable=True)
     gender: Mapped[str | None] = mapped_column(String(32), nullable=True)
     role: Mapped[str] = mapped_column(Enum(*ROLES, name="user_role"), nullable=False)
+    # Doctor profile fields (informational only -- the fee is settled at the
+    # clinic, no payment is ever taken here, NFR-013). NULL for other roles.
+    qualifications: Mapped[str | None] = mapped_column(String, nullable=True)
+    consultation_fee: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     # Bcrypt hash only; no plain-text or reversible password is ever stored (NFR-001).
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -94,6 +110,10 @@ class CatalogTerm(Base):
     term: Mapped[str] = mapped_column(CIText(), nullable=False, index=True)
     entry_type: Mapped[str] = mapped_column(String(32), nullable=False)
     is_seeded: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # Stable identity of a seeded row, independent of the term text, so an
+    # administrator may rename a seeded term without the seeder recreating the
+    # original (NFR-024). NULL for administrator-created terms.
+    seed_key: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     # Soft-delete: a deleted term stops resolving and stops appearing in suggest,
     # but the row stays so already-booked appointments that reference it are
     # untouched (NFR-026).
