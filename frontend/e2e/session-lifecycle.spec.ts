@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 
 import {
   apiContext,
+  bearer,
   deactivateUser,
   generatedPassword,
   loginApi,
@@ -11,10 +12,11 @@ import {
 } from "./support/api";
 import { adminCredentials } from "./support/admin";
 
-// The pre-existing session.spec.ts carries these same criteria but a module-level
-// test.skip(true, ...) in that file skips every test in it, so none of them run. These
-// declarations give AC-007, AC-008, AC-009 and NFR-002 an executable, passing-or-skipped
-// home that is not disabled by that file-level skip.
+// US-002-1: the session lifecycle on screen -- sign-out, administrator deactivation,
+// administrator password reset and idle expiry (AC-007, AC-008, AC-009, NFR-002).
+// The API halves of the same criteria (a revoked token refused while the user's other
+// token still works, the idle window, the inactive-account refusal) are proven in
+// backend/tests/integration/test_session_auth_acceptance.py.
 
 async function adminToken(api: Awaited<ReturnType<typeof apiContext>>) {
   const admin = adminCredentials();
@@ -51,15 +53,32 @@ test("[AC-007][NFR-002] sign-out ends the session and the back button does not s
     password,
   });
   expect(reg.status()).toBe(201);
+  // A second, concurrent session of the same account: signing out of the browser must
+  // leave it working, because logout revokes only the caller's own token.
+  const other = await loginApi(api, email, password);
+  expect(other.status()).toBe(200);
+  const otherToken = (await other.json()).token as string;
 
   await signInPatient(page, email, password);
+  const browserToken = await page.evaluate(() => localStorage.getItem("session_token"));
+  expect(browserToken, "signing in stores the session token").toBeTruthy();
 
   await page.getByRole("button", { name: /sign out|log out/i }).click();
   await expect(page).toHaveURL(/sign-in/);
+  expect(
+    await page.evaluate(() => localStorage.getItem("session_token")),
+    "signing out clears the stored session token",
+  ).toBeFalsy();
 
   await page.goBack();
   await expect(page).toHaveURL(/sign-in/);
   await expect(page.getByText(/find a doctor/i)).not.toBeVisible();
+
+  // The signed-out token is dead at the API, while the account's other session lives on.
+  const dead = await api.get("/api/auth/me", { headers: bearer(String(browserToken)) });
+  expect(dead.status(), "the signed-out token must be refused").toBe(401);
+  const alive = await api.get("/api/auth/me", { headers: bearer(otherToken) });
+  expect(alive.status(), "the account's other session must still work").toBe(200);
   await api.dispose();
 });
 
