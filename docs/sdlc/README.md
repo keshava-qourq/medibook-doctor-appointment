@@ -7,7 +7,7 @@ Develop a web-based healthcare appointment management application where patients
 
 The application must use predefined disease-to-specialization mappings to help patients find relevant doctors, without using AI, LLMs, or machine learning. It should prevent double bookings and display real-time appointment availability. **No payment gateway or online payment functionality is required.**
 
-**Documentation version:** v13
+**Documentation version:** v14
 <!-- sdlc:auto:end overview -->
 
 ## Contents
@@ -19,7 +19,7 @@ The application must use predefined disease-to-specialization mappings to help p
 | [Architecture](architecture/README.md) | 44 entries |
 | [Planning](planning/README.md) | 16 entries |
 | [Development](development/README.md) | 6 entries |
-| [Testing](testing/README.md) | 5 entries |
+| [Testing](testing/README.md) | 0 entries |
 | [Deployment](deployment/README.md) | 1 entry |
 | [Maintenance](maintenance/README.md) | 0 entries |
 | [Data model](architecture/data-model.md) | generated |
@@ -34,5 +34,5 @@ The application must use predefined disease-to-specialization mappings to help p
 | [Runbook](deployment/runbook.md) | deployed |
 | [Release notes](deployment/release-notes.md) | 2 releases |
 | [Traceability matrix](traceability-matrix.md) | 32 requirements |
-| [Changelog](CHANGELOG.md) | 13 versions |
+| [Changelog](CHANGELOG.md) | 14 versions |
 <!-- sdlc:auto:end contents -->
