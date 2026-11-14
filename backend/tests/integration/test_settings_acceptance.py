@@ -128,9 +128,7 @@ def test_ac030_admin_saves_timezone_and_get_reflects_it_confirmed(
 # -- AC-031: admin changes booking_cutoff_hours; the new value is returned immediately -
 
 
-def test_ac031_cutoff_change_is_returned_immediately(
-    client: TestClient, db_session: DBSession
-):
+def test_ac031_cutoff_change_is_returned_immediately(client: TestClient, db_session: DBSession):
     _require(client, "/api/admin/settings", "/api/settings")
     token = _admin_token(client, db_session)
 
