@@ -3,6 +3,8 @@
 One pair per entity in the approved data model.
 """
 
+from datetime import date
+
 from email_validator import EmailNotValidError, validate_email
 from pydantic import AliasChoices, BaseModel, Field, field_validator
 
@@ -89,3 +91,40 @@ class AdminPasswordReset(BaseModel):
     # The API contract (and the e2e client) send this as `new_password`;
     # `password` is accepted too for backward compatibility.
     password: str = Field(validation_alias=AliasChoices("password", "new_password"))
+
+
+class PatientProfileOut(BaseModel):
+    """A patient's own profile as the self-service endpoints return it."""
+
+    id: str
+    full_name: str
+    email: str
+    phone: str | None = None
+    date_of_birth: date | None = None
+    gender: str | None = None
+
+
+class PatientProfileUpdate(BaseModel):
+    full_name: str | None = None
+    phone: str | None = None
+    date_of_birth: date | None = None
+    gender: str | None = None
+
+    @field_validator("full_name")
+    @classmethod
+    def _full_name_not_blank(cls, v: str | None) -> str | None:
+        if v is not None and not v.strip():
+            raise ValueError("required")
+        return v
+
+
+class PatientPasswordChange(BaseModel):
+    current_password: str
+    new_password: str
+
+    @field_validator("new_password")
+    @classmethod
+    def _new_password_strength(cls, v: str) -> str:
+        if len(v) < 8:
+            raise ValueError("weak_password")
+        return v
