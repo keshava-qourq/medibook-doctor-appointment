@@ -5,74 +5,63 @@
 <!-- sdlc:auto:start narrative -->
 ### TEST-RUN-001 · draft · source: testing:run_checks
 
-An automated check run was executed across the project with no ticket association. All checks passed. The input reports 8 of 8 checks succeeded.
+An automated check run was executed against the project with no associated ticket. The run completed with a succeeded status. All 8 of 8 checks passed.
 
-- Operation: run_checks
-- Ticket: none (project-wide run)
-- Status: succeeded
-- Result detail: 8/8 checks passed
-- No breakdown of which individual checks ran (e.g. lint, build, unit suites) was provided.
-- No execution date, environment, duration, or operator was stated in the input.
-- No failures, flaky results, or follow-up actions were reported.
+Activity: run_checks
+Ticket: none (project-wide run, not scoped to a ticket)
+Outcome: succeeded
+Reported detail: 8/8 checks passed
 
-### TEST-WRITE-5654ece7 · draft · source: testing:write_tests (ticket=5654ece7-cdc9-43a9-a504-7a1cc8fbc8d7)
+Not stated in the input: the identity or type of the 8 checks (e.g. lint, build, unit, integration), the environment or commit they ran against, execution date/time, duration, who or what triggered the run, and which requirements or tickets the checks exercise. No failures, warnings, or follow-up actions were reported.
 
-Tests were authored for development ticket 5654ece7-cdc9-43a9-a504-7a1cc8fbc8d7. The operation completed successfully and produced 3 test files. The input does not state which features or requirements these tests exercise.
+### TEST-WRITE-001 · draft · source: testing:b82b5866-82ce-4352-8e56-c82d6d196d5a
 
-- Operation: write_tests
-- Ticket: 5654ece7-cdc9-43a9-a504-7a1cc8fbc8d7
-- Status: succeeded
-- Result detail: 3 test file(s) created
-- File names, test case names, test type (unit/integration/e2e), and assertions were not provided.
-- No execution results for these tests were reported separately; only the project-wide run_checks result (8/8 passed) exists in the input.
-- Requirement traceability unavailable: the input gives no mapping from this ticket id to any US-xxx requirement key.
+Test authoring task for ticket b82b5866-82ce-4352-8e56-c82d6d196d5a completed successfully. 3 test files were written. The input does not state what functionality these tests cover.
 
-### TEST-WRITE-85eb3021 · draft · source: testing:write_tests (ticket=85eb3021-561b-4ff2-99c4-109e466f10bd)
+Activity: write_tests
+Ticket: b82b5866-82ce-4352-8e56-c82d6d196d5a
+Outcome: succeeded
+Reported detail: 3 test file(s) produced
 
-Tests were authored for development ticket 85eb3021-561b-4ff2-99c4-109e466f10bd. The operation completed successfully and produced 3 test files. No detail on scope or coverage was supplied.
+Not stated in the input: test file names or paths, the test framework used, the number or names of individual test cases, pass/fail results for these tests, the ticket's title or scope, and which requirement keys (US-001 … US-032) the ticket implements — so no related_ids could be traced.
 
-- Operation: write_tests
-- Ticket: 85eb3021-561b-4ff2-99c4-109e466f10bd
-- Status: succeeded
-- Result detail: 3 test file(s) created
-- File names, test case names, and test level were not provided.
-- No per-ticket pass/fail result was recorded in the input.
-- Requirement traceability unavailable: no ticket-to-requirement mapping was given.
+### TEST-WRITE-002 · draft · source: testing:26474a9d-3d26-48df-9922-888cc0dce9de
 
-### TEST-WRITE-4a75a3ca · draft · source: testing:write_tests (ticket=4a75a3ca-822e-4d3d-bcb1-91c996bf9178)
+Test authoring task for ticket 26474a9d-3d26-48df-9922-888cc0dce9de completed successfully. 4 test files were written. The input does not state what functionality these tests cover.
 
-Tests were authored for development ticket 4a75a3ca-822e-4d3d-bcb1-91c996bf9178. The operation completed successfully and produced 3 test files. The input does not describe what behaviour the tests verify.
+Activity: write_tests
+Ticket: 26474a9d-3d26-48df-9922-888cc0dce9de
+Outcome: succeeded
+Reported detail: 4 test file(s) produced
 
-- Operation: write_tests
-- Ticket: 4a75a3ca-822e-4d3d-bcb1-91c996bf9178
-- Status: succeeded
-- Result detail: 3 test file(s) created
-- No file names, test case titles, fixtures, or test data described.
-- No per-ticket execution outcome reported.
-- Requirement traceability unavailable: no ticket-to-requirement mapping was given.
+Not stated in the input: test file names or paths, the test framework used, individual test case names, pass/fail results for these tests, the ticket's title or scope, and which requirement keys (US-001 … US-032) the ticket implements — so no related_ids could be traced.
 
-### TEST-WRITE-bb015c87 · draft · source: testing:write_tests (ticket=bb015c87-0206-466c-86c1-4523b92b3694)
+### TEST-WRITE-003 · draft · source: testing:58fe15c9-dce9-4662-bf57-6ab21b1dd6d0
 
-Tests were authored for development ticket bb015c87-0206-466c-86c1-4523b92b3694. The operation completed successfully and produced 6 test files, the largest test-authoring output recorded in this phase.
+Test authoring task for ticket 58fe15c9-dce9-4662-bf57-6ab21b1dd6d0 completed successfully. 5 test files were written. The input does not state what functionality these tests cover.
 
-- Operation: write_tests
-- Ticket: bb015c87-0206-466c-86c1-4523b92b3694
-- Status: succeeded
-- Result detail: 6 test file(s) created
-- Twice the file count of the other 3-file tickets; the input gives no reason for the larger output and no description of the area under test.
-- No file names, test case titles, or test level provided.
-- No per-ticket execution outcome reported.
-- Requirement traceability unavailable: no ticket-to-requirement mapping was given.
+Activity: write_tests
+Ticket: 58fe15c9-dce9-4662-bf57-6ab21b1dd6d0
+Outcome: succeeded
+Reported detail: 5 test file(s) produced
 
-### TEST-WRITE-13f5a102 · draft · source: testing:write_tests (ticket=13f5a102-fed9-41f9-aecb-ee7411a4cdbe)
+Not stated in the input: test file names or paths, the test framework used, individual test case names, pass/fail results for these tests, the ticket's title or scope, and which requirement keys (US-001 … US-032) the ticket implements — so no related_ids could be traced.
 
-Tests were authored for development ticket 13f5a102-fed9-41f9-aecb-ee7411a4cdbe. The operation completed successfully and produced 2 test files, the smallest output recorded in this phase.
+### TEST-COVERAGE-GAP-001 · draft · source: testing
 
-- Operation: write_tests
-- Ticket: 13f5a102-fed9-41f9-aecb-ee7411a4cdbe
-- Status: succeeded
-- Result detail: 2 test file(s) created
-- No file names, test case titles, or test level provided.
-- No per-ticket execution outcome reported.
-- Requirement traceability unavailable: no ticket-to-requirement mapping was given.
+Documentation note on testing coverage gaps. The testing input records 12 test files authored across 3 tickets and one 8/8 check run, but supplies no mapping from tests to requirements. Verification of the project's stated critical behaviours cannot be confirmed from this input.
+
+Recorded totals from input:
+- 3 write_tests activities, all succeeded, 12 test files total (3 + 4 + 5).
+- 1 run_checks activity, succeeded, 8/8 checks passed.
+
+Gaps — the input does not state whether tests exist for, or results of, the behaviours named in the project description:
+- Double-booking prevention on appointment slots.
+- Real-time appointment availability display.
+- Role-based access separation across patient, doctor, and administrator.
+- Disease/symptom-to-specialization mapping lookup.
+- Book / reschedule / cancel appointment flows.
+- Admin management of doctors, specializations, and appointments.
+
+Also absent: a traceability matrix from tests to US-001 … US-032, defect records, regression or UAT runs, environment details, and execution dates. No conclusion about overall test adequacy is asserted here; this entry records only what the input omits so a human can confirm or close the gaps.
 <!-- sdlc:auto:end narrative -->
