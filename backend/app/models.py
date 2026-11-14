@@ -202,6 +202,75 @@ class Appointment(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
 
 
+class DoctorWeeklyAvailability(Base):
+    """One doctor's working pattern for one weekday (0=Monday..6=Sunday).
+
+    Times are stored as local clinic wall-clock ``HH:MM`` strings; the clinic
+    timezone itself lives in ``ClinicSettings``.
+    """
+
+    __tablename__ = "doctor_weekly_availability"
+    __table_args__ = (Index("uq_doctor_weekday", "doctor_id", "weekday", unique=True),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid4)
+    doctor_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("users.id"), nullable=False, index=True
+    )
+    weekday: Mapped[int] = mapped_column(Integer, nullable=False)
+    is_working: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    start_time: Mapped[str | None] = mapped_column(String(5), nullable=True)
+    end_time: Mapped[str | None] = mapped_column(String(5), nullable=True)
+    slot_minutes: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    breaks: Mapped[list["AvailabilityBreak"]] = relationship(
+        back_populates="day", cascade="all, delete-orphan", lazy="selectin"
+    )
+
+
+class AvailabilityBreak(Base):
+    """A non-bookable period inside one weekday's working hours."""
+
+    __tablename__ = "availability_breaks"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid4)
+    availability_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("doctor_weekly_availability.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    start_time: Mapped[str] = mapped_column(String(5), nullable=False)
+    end_time: Mapped[str] = mapped_column(String(5), nullable=False)
+
+    day: Mapped["DoctorWeeklyAvailability"] = relationship(back_populates="breaks")
+
+
+AVAILABILITY_EXCEPTION_KINDS = ("unavailable", "extra_hours")
+
+
+class DoctorAvailabilityException(Base):
+    """A one-off override of the weekly pattern for a single date.
+
+    ``kind='unavailable'`` withdraws the whole date, or the ``start_time``..
+    ``end_time`` range inside it; ``kind='extra_hours'`` adds a bookable window
+    on that date. Times are clinic-local ``HH:MM`` strings, like the weekly
+    pattern.
+    """
+
+    __tablename__ = "doctor_availability_exceptions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid4)
+    doctor_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("users.id"), nullable=False, index=True
+    )
+    date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    kind: Mapped[str] = mapped_column(String(16), nullable=False)
+    start_time: Mapped[str | None] = mapped_column(String(5), nullable=True)
+    end_time: Mapped[str | None] = mapped_column(String(5), nullable=True)
+    reason: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+
 class Session(Base):
     __tablename__ = "sessions"
 
@@ -229,6 +298,10 @@ __all__ = [
     "ClinicSettings",
     "Appointment",
     "APPOINTMENT_STATUSES",
+    "DoctorWeeklyAvailability",
+    "AvailabilityBreak",
+    "DoctorAvailabilityException",
+    "AVAILABILITY_EXCEPTION_KINDS",
     "term_specializations",
     "doctor_specializations",
     "ROLES",

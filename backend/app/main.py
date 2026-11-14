@@ -22,6 +22,7 @@ from app.routers import (
     admin_users,
     appointments,
     auth,
+    availability,
     doctors,
     patients,
     search,
@@ -138,6 +139,8 @@ app.include_router(settings.admin_router)
 app.include_router(search.router)
 app.include_router(doctors.router)
 app.include_router(doctors.public_router)
+app.include_router(availability.router)
+app.include_router(availability.public_router)
 
 
 @app.exception_handler(RequestValidationError)

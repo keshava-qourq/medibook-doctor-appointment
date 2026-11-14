@@ -12,7 +12,7 @@ Nothing here accepts or returns a payment, checkout, invoice or refund field
 
 from datetime import UTC, datetime, timedelta
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy.exc import IntegrityError
@@ -46,6 +46,41 @@ def _out(row: Appointment) -> dict[str, object]:
         "slot_start": _as_aware(row.slot_start).isoformat(),
         "slot_end": _as_aware(row.slot_end).isoformat(),
         "status": row.status,
+        "cancellation_reason": row.cancellation_reason,
+    }
+
+
+@router.get("/appointments")
+def list_appointments(
+    limit: int = Query(default=20, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    user: User = Depends(current_user),  # noqa: B008
+    db: DBSession = Depends(get_db),  # noqa: B008
+) -> dict[str, object]:
+    """Every appointment the caller is party to, cancelled ones included: a
+    cancelled appointment stays visible to its patient with its reason (NFR-026).
+
+    Upcoming items come first, ascending by slot start; past items follow,
+    most recent first.
+    """
+    rows = (
+        db.query(Appointment)
+        .filter((Appointment.patient_id == user.id) | (Appointment.doctor_id == user.id))
+        .all()
+    )
+    now = datetime.now(UTC)
+    upcoming = sorted(
+        (r for r in rows if _as_aware(r.slot_start) > now), key=lambda r: _as_aware(r.slot_start)
+    )
+    past = sorted(
+        (r for r in rows if _as_aware(r.slot_start) <= now),
+        key=lambda r: _as_aware(r.slot_start),
+        reverse=True,
+    )
+    ordered = upcoming + past
+    return {
+        "items": [_out(r) for r in ordered[offset : offset + limit]],
+        "total": len(ordered),
     }
 
 
