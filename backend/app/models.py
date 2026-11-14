@@ -197,6 +197,8 @@ class Appointment(Base):
         nullable=False,
         default="booked",
     )
+    # Optional free-text visit reason the patient gives when booking (US-017-T3).
+    reason: Mapped[str | None] = mapped_column(String(500), nullable=True)
     cancellation_reason: Mapped[str | None] = mapped_column(String(255), nullable=True)
     cancelled_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)

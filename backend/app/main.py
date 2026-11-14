@@ -78,6 +78,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
                 "ALTER TABLE users ADD COLUMN IF NOT EXISTS "
                 "profile_active BOOLEAN NOT NULL DEFAULT TRUE"
             )
+            # Optional visit reason is additive to an existing appointments table.
+            conn.exec_driver_sql(
+                "ALTER TABLE appointments ADD COLUMN IF NOT EXISTS reason VARCHAR(500)"
+            )
             # catalog_terms soft-delete flag is additive to an existing table.
             conn.exec_driver_sql(
                 "ALTER TABLE catalog_terms ADD COLUMN IF NOT EXISTS "

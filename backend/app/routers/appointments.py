@@ -30,14 +30,49 @@ router = APIRouter(prefix="/api", tags=["clinical"])
 SLOT_MINUTES = 30
 
 
+IN_PERSON_NOTE = (
+    "This appointment is in person at the clinic. There is no remote consultation option."
+)
+
+
 class AppointmentCreate(BaseModel):
     doctor_id: str
     slot_start: datetime
+    reason: str | None = None
 
 
 def _as_aware(value: datetime) -> datetime:
     """SQLite hands back naive datetimes even for timezone-aware columns."""
     return value if value.tzinfo is not None else value.replace(tzinfo=UTC)
+
+
+def _fee_text(doctor: User) -> str:
+    """Informational fee text, payable at the clinic -- never a payment surface
+    (NFR-013)."""
+    fee = doctor.consultation_fee
+    if fee is None:
+        return "Consultation fee payable at the clinic."
+    return f"Consultation fee of {fee} is payable at the clinic."
+
+
+def _confirmation(
+    row: Appointment, doctor: User, tz: ZoneInfo, timezone_name: str
+) -> dict[str, object]:
+    """The full booking confirmation payload (AC-065, AC-069, NFR-013)."""
+    return {
+        "id": row.id,
+        "doctor_id": row.doctor_id,
+        "patient_id": row.patient_id,
+        "doctor_name": doctor.full_name,
+        "slot_start": _as_aware(row.slot_start).astimezone(tz).isoformat(),
+        "slot_end": _as_aware(row.slot_end).astimezone(tz).isoformat(),
+        "status": row.status,
+        "timezone": timezone_name,
+        "location": doctor.location,
+        "fee_text": _fee_text(doctor),
+        "reason": row.reason,
+        "in_person_note": IN_PERSON_NOTE,
+    }
 
 
 def _zone(name: str) -> ZoneInfo:
@@ -56,6 +91,7 @@ def _out(row: Appointment, tz: ZoneInfo, timezone_name: str) -> dict[str, object
         "slot_end": _as_aware(row.slot_end).astimezone(tz).isoformat(),
         "status": row.status,
         "cancellation_reason": row.cancellation_reason,
+        "reason": row.reason,
         "timezone": timezone_name,
     }
 
@@ -125,6 +161,30 @@ def create_appointment(
         raise EmptyBodyHTTPError(403)
 
     slot_start = _as_aware(payload.slot_start)
+
+    # A slot within the booking cutoff is refused 403 cutoff_passed.
+    cutoff = timedelta(hours=settings.booking_cutoff_hours)
+    if slot_start - datetime.now(UTC) < cutoff:
+        return JSONResponse(status_code=403, content={"code": "cutoff_passed"})
+
+    # The same patient already holds a booked appointment with this doctor at this
+    # slot: refuse, pointing at the existing appointment (AC-068).
+    own = (
+        db.query(Appointment)
+        .filter(
+            Appointment.doctor_id == doctor.id,
+            Appointment.patient_id == patient.id,
+            Appointment.slot_start == slot_start,
+            Appointment.status != "cancelled",
+        )
+        .first()
+    )
+    if own is not None:
+        return JSONResponse(
+            status_code=409,
+            content={"code": "duplicate_appointment", "existing_appointment_id": own.id},
+        )
+
     taken = (
         db.query(Appointment)
         .filter(
@@ -143,15 +203,18 @@ def create_appointment(
         slot_start=slot_start,
         slot_end=slot_start + timedelta(minutes=SLOT_MINUTES),
         status="booked",
+        reason=payload.reason,
     )
     db.add(row)
     try:
         db.commit()
     except IntegrityError:
+        # The uniqueness constraint lost the race inside the transaction: nothing
+        # partial is written and the slot stays as it was (AC-066, AC-067, NFR-014).
         db.rollback()
         return JSONResponse(status_code=409, content={"code": "slot_taken"})
     db.refresh(row)
-    return _out(row, tz, settings.timezone)
+    return _confirmation(row, doctor, tz, settings.timezone)
 
 
 @router.get("/appointments/{id}", status_code=200)
