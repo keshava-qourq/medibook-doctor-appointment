@@ -30,3 +30,4 @@ when a test and the code disagreed.
 - Tests create every user and all data only through the API (patients via `/api/auth/register`, doctors and admins via `/api/admin/users`), never by writing the database directly.
 - Each test generates its own unique email addresses and records so no two tests share state or collide on a unique constraint.
 - The `/api/catalog/suggest` endpoint returns an empty list for a query shorter than two characters and matches stored terms by deterministic case-insensitive substring, with no fuzzy or ML ranking.
+- When a criterion is a pure infrastructure/provisioning NFR that no application-level test can observe (backups/PITR, capacity sizing), it belongs to environment: the fix is enabling managed-DB backups/PITR and declaring sizing in deployment config (e.g. docker-compose.yml / IaC), and the e2e KNOWN-LIMIT skips are the appropriate, correct placeholder rather than a code or test defect. (decided in U
