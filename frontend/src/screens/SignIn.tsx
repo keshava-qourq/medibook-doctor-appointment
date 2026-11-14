@@ -121,14 +121,17 @@ export default function Screen() {
                 auth.signIn(res.token, res.user);
                 navigate(res.landing);
               } catch (err) {
-                const detail =
-                  err instanceof ApiError &&
-                  err.body &&
-                  typeof err.body === "object" &&
-                  typeof (err.body as { detail?: unknown }).detail === "string"
-                    ? (err.body as { detail: string }).detail
+                const body =
+                  err instanceof ApiError && err.body && typeof err.body === "object"
+                    ? (err.body as { detail?: unknown; code?: unknown })
                     : null;
-                setSignInError(detail || "Sign in failed. Please try again.");
+                const code = body && typeof body.code === "string" ? body.code : null;
+                const detail = body && typeof body.detail === "string" ? body.detail : null;
+                if (code === "account_inactive") {
+                  setSignInError("This account is inactive. Please contact an administrator.");
+                } else {
+                  setSignInError(detail || "Sign in failed. Please try again.");
+                }
               }
             }}
           >
