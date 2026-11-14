@@ -30,7 +30,7 @@ def _read(rel: str) -> str:
 
 
 def test_nfr016_clinic_database_declares_automated_backups_and_pitr():
-    """The managed clinic database is declared with automated backups and
+    """[NFR-016] The managed clinic database is declared with automated backups and
     point-in-time recovery enabled, so records can be restored after a failure."""
     guide = _read("docs/sdlc/deployment/deployment-guide.md").lower()
     assert "automated backups" in guide
@@ -43,7 +43,7 @@ def test_nfr016_clinic_database_declares_automated_backups_and_pitr():
 
 
 def test_nfr017_deployment_is_sized_for_one_small_clinic():
-    """The system's target operating scale (roughly 10-50 doctors and a few
+    """[NFR-017] The system's target operating scale (roughly 10-50 doctors and a few
     thousand registered patients) is declared in the committed requirements."""
     requirements = _read("docs/sdlc/requirements/README.md").lower()
     # Accept either hyphen or en-dash between the doctor bounds.
