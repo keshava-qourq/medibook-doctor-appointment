@@ -108,8 +108,7 @@ def _term_hits(payload, term: str) -> list[dict]:
     return [
         row
         for row in _items(payload)
-        if row["term"].lower() == term.lower()
-        and row.get("entry_type") in ("disease", "symptom")
+        if row["term"].lower() == term.lower() and row.get("entry_type") in ("disease", "symptom")
     ]
 
 
