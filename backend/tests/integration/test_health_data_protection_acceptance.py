@@ -335,9 +335,11 @@ def test_ac122_nfr005_deployment_declares_tls_in_transit_with_http_redirected_to
     """[NFR-005][AC-122] All traffic is carried over TLS and an unencrypted request is
     redirected to the encrypted equivalent. This is a load-balancer/hosting setting no
     in-process test can observe, so it is verified as the committed declaration."""
-    guide = (_repo_root() / "docs/sdlc/deployment/deployment-guide.md").read_text(
-        encoding="utf-8"
-    ).lower()
+    guide = (
+        (_repo_root() / "docs/sdlc/deployment/deployment-guide.md")
+        .read_text(encoding="utf-8")
+        .lower()
+    )
     assert "tls" in guide, "the deployment must declare TLS termination"
     assert "https" in guide
     assert "redirect" in guide, "HTTP must be declared as redirected to HTTPS"
@@ -346,9 +348,11 @@ def test_ac122_nfr005_deployment_declares_tls_in_transit_with_http_redirected_to
 def test_ac123_nfr006_deployment_declares_encryption_at_rest_for_the_clinic_database():
     """[NFR-006][AC-123] The database holding patient, appointment and consultation data
     has encryption at rest switched on, evidenced in the deployment documentation."""
-    guide = (_repo_root() / "docs/sdlc/deployment/deployment-guide.md").read_text(
-        encoding="utf-8"
-    ).lower()
+    guide = (
+        (_repo_root() / "docs/sdlc/deployment/deployment-guide.md")
+        .read_text(encoding="utf-8")
+        .lower()
+    )
     assert "encryption at rest" in guide
     assert "postgresql" in guide
 

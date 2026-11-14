@@ -1,6 +1,12 @@
 import { expect, test } from "@playwright/test";
 
-import { apiContext, generatedPassword, loginApi, registerPatient, uniqueEmail } from "./support/api";
+import {
+  apiContext,
+  generatedPassword,
+  loginApi,
+  registerPatient,
+  uniqueEmail,
+} from "./support/api";
 
 // US-031-2: protection of health data. The observable halves (AC-124 stored password
 // material, AC-125 errors and logs) are proven in the pytest integration suite, which can
