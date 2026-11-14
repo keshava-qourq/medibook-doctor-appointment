@@ -6,6 +6,7 @@ import * as UI from "@/lib/ui";
 import { Icons } from "@/lib/icons";
 import { brand } from "@/lib/brand";
 import AdminUsers from "@/screens/AdminUsers";
+import { apiFetch, ApiError } from "@/lib/api";
 
 const { Button, Input, Textarea, Label, Table, THead, TBody, TR, TH, TD, Avatar } = UI;
 
@@ -802,6 +803,29 @@ export default function Screen() {
   const [doctors, setDoctors] = React.useState(DOCTORS_SEED);
   const [specs, setSpecs] = React.useState(SPECS_SEED);
   const [terms, setTerms] = React.useState(TERMS_SEED);
+  /* the catalogue and its specializations are live data, not the design's sample rows */
+  const loadCatalogue = React.useCallback(async () => {
+    const [specRes, termRes] = await Promise.all([
+      apiFetch("/api/specializations?limit=100&offset=0"),
+      apiFetch("/api/admin/catalog-terms?limit=100&offset=0"),
+    ]);
+    setSpecs(
+      (specRes.items || []).map((s) => ({
+        id: s.id,
+        name: s.name,
+        description: s.description || "",
+        active: s.is_active,
+      })),
+    );
+    setTerms(
+      (termRes.items || []).map((t) => ({
+        id: t.id,
+        term: t.term,
+        type: t.entry_type || t.kind,
+        specs: t.specialization_ids || (t.specializations || []).map((s) => s.id),
+      })),
+    );
+  }, []);
   const [tab, setTab] = React.useState("accounts");
   const counter = React.useRef(100);
 
@@ -845,6 +869,10 @@ export default function Screen() {
 
   /* docs */
   const [docOpen, setDocOpen] = React.useState(null);
+
+  React.useEffect(() => {
+    loadCatalogue().catch(() => setTStatus("Could not load the catalogue."));
+  }, [loadCatalogue]);
 
   const doc = doctors.find((d) => d.id === selId) || doctors[0];
   const specName = (id) => (specs.find((s) => s.id === id) || {}).name || id;
@@ -990,7 +1018,7 @@ export default function Screen() {
     const el = document.getElementById("te-term");
     if (el) el.focus();
   };
-  const saveTerm = (e) => {
+  const saveTerm = async (e) => {
     e.preventDefault();
     const errs = {};
     const name = td.term.trim();
@@ -1002,35 +1030,47 @@ export default function Screen() {
     setTErr(errs);
     setTStatus(null);
     if (Object.keys(errs).length) return;
-    if (td.id) {
-      setTerms((l) =>
-        l.map((t) => (t.id === td.id ? { ...t, term: name, type: td.type, specs: td.specs } : t)),
-      );
-      setTStatus("Saved “" + name + "”. Patient search uses the new mapping straight away.");
-    } else {
-      setTerms((l) => [
-        { id: "t" + ++counter.current, term: name, type: td.type, specs: td.specs },
-        ...l,
-      ]);
-      setTStatus(
-        "Added “" +
-          name +
-          "” at the top of the list. Patients searching it now reach " +
-          td.specs.map(specName).join(" and ") +
-          ".",
-      );
+    const body = JSON.stringify({ term: name, kind: td.type, specialization_ids: td.specs });
+    try {
+      if (td.id) {
+        await apiFetch("/api/admin/catalog-terms/" + td.id, { method: "PUT", body });
+        setTStatus("Saved “" + name + "”. Patient search uses the new mapping straight away.");
+      } else {
+        await apiFetch("/api/admin/catalog-terms", { method: "POST", body });
+        setTStatus(
+          "Added “" +
+            name +
+            "”. Patients searching it now reach " +
+            td.specs.map(specName).join(" and ") +
+            ".",
+        );
+      }
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 409) {
+        setTErr({ term: "“" + name + "” is already in the catalogue. Edit that entry instead." });
+      } else {
+        setTStatus("Could not save “" + name + "”. Nothing was changed.");
+      }
+      return;
     }
     setTd(emptyTerm);
+    await loadCatalogue().catch(() => {});
   };
-  const deleteTerm = (t) => {
-    setTerms((l) => l.filter((x) => x.id !== t.id));
+  const deleteTerm = async (t) => {
     setDelId(null);
+    try {
+      await apiFetch("/api/admin/catalog-terms/" + t.id, { method: "DELETE" });
+    } catch {
+      setTStatus("Could not delete “" + t.term + "”. Nothing was changed.");
+      return;
+    }
     if (td.id === t.id) setTd(emptyTerm);
     setTStatus(
       "“" +
         t.term +
         "” deleted. It no longer resolves in patient search; appointments already booked through it are unaffected.",
     );
+    await loadCatalogue().catch(() => {});
   };
 
   /* ---- settings ---- */
@@ -1409,7 +1449,11 @@ export default function Screen() {
               className="at-scroll overflow-auto"
               style={{ marginTop: 24, maxHeight: 520 }}
             >
-              <Table className="w-full" style={{ minWidth: 640, borderCollapse: "collapse" }}>
+              <Table
+                aria-label="Disease and symptom catalogue"
+                className="w-full"
+                style={{ minWidth: 640, borderCollapse: "collapse" }}
+              >
                 <THead>
                   <TR>
                     <TH data-wf="i-5-0-0" scope="col" style={thS}>

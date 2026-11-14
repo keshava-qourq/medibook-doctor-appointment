@@ -94,6 +94,10 @@ class CatalogTerm(Base):
     term: Mapped[str] = mapped_column(CIText(), nullable=False, index=True)
     entry_type: Mapped[str] = mapped_column(String(32), nullable=False)
     is_seeded: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # Stable identity of a seeded row, independent of the term text, so an
+    # administrator may rename a seeded term without the seeder recreating the
+    # original (NFR-024). NULL for administrator-created terms.
+    seed_key: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     # Soft-delete: a deleted term stops resolving and stops appearing in suggest,
     # but the row stays so already-booked appointments that reference it are
     # untouched (NFR-026).
