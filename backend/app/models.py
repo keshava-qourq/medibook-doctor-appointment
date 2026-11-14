@@ -15,10 +15,12 @@ from sqlalchemy import (
     DateTime,
     Enum,
     ForeignKey,
+    Index,
     Integer,
     Numeric,
     String,
     Table,
+    text,
 )
 from sqlalchemy.dialects.postgresql import CITEXT
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -68,8 +70,15 @@ class User(Base):
     # Doctor profile fields (informational only -- the fee is settled at the
     # clinic, no payment is ever taken here, NFR-013). NULL for other roles.
     qualifications: Mapped[str | None] = mapped_column(String, nullable=True)
+    bio: Mapped[str | None] = mapped_column(String, nullable=True)
+    location: Mapped[str | None] = mapped_column(String(255), nullable=True)
     consultation_fee: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    # Directory visibility of a doctor, separate from the account being usable:
+    # an administrator who deactivates a doctor's profile hides them from the
+    # directory, search and booking, while the doctor keeps their session and can
+    # still read the appointments already booked with them (AC-028/AC-029, NFR-026).
+    profile_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     # Bcrypt hash only; no plain-text or reversible password is ever stored (NFR-001).
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
@@ -152,6 +161,116 @@ class ClinicSettings(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
 
 
+APPOINTMENT_STATUSES = ("booked", "confirmed", "completed", "cancelled")
+
+
+class Appointment(Base):
+    """A booked slot. History is preserved: deactivating a doctor never deletes,
+    cancels or hides their appointments (NFR-026). No payment field exists
+    anywhere on this record (NFR-013)."""
+
+    __tablename__ = "appointments"
+    # Unique per doctor+slot for live rows only, so a cancelled slot can be
+    # re-booked while a booked/confirmed one cannot be double-booked.
+    __table_args__ = (
+        Index(
+            "uq_appointment_doctor_slot",
+            "doctor_id",
+            "slot_start",
+            unique=True,
+            sqlite_where=text("status <> 'cancelled'"),
+            postgresql_where=text("status <> 'cancelled'"),
+        ),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid4)
+    doctor_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("users.id"), nullable=False, index=True
+    )
+    patient_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("users.id"), nullable=False, index=True
+    )
+    slot_start: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    slot_end: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    status: Mapped[str] = mapped_column(
+        Enum(*APPOINTMENT_STATUSES, name="appointment_status"),
+        nullable=False,
+        default="booked",
+    )
+    cancellation_reason: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    cancelled_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+
+class DoctorWeeklyAvailability(Base):
+    """One doctor's working pattern for one weekday (0=Monday..6=Sunday).
+
+    Times are stored as local clinic wall-clock ``HH:MM`` strings; the clinic
+    timezone itself lives in ``ClinicSettings``.
+    """
+
+    __tablename__ = "doctor_weekly_availability"
+    __table_args__ = (Index("uq_doctor_weekday", "doctor_id", "weekday", unique=True),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid4)
+    doctor_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("users.id"), nullable=False, index=True
+    )
+    weekday: Mapped[int] = mapped_column(Integer, nullable=False)
+    is_working: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    start_time: Mapped[str | None] = mapped_column(String(5), nullable=True)
+    end_time: Mapped[str | None] = mapped_column(String(5), nullable=True)
+    slot_minutes: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    breaks: Mapped[list["AvailabilityBreak"]] = relationship(
+        back_populates="day", cascade="all, delete-orphan", lazy="selectin"
+    )
+
+
+class AvailabilityBreak(Base):
+    """A non-bookable period inside one weekday's working hours."""
+
+    __tablename__ = "availability_breaks"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid4)
+    availability_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("doctor_weekly_availability.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    start_time: Mapped[str] = mapped_column(String(5), nullable=False)
+    end_time: Mapped[str] = mapped_column(String(5), nullable=False)
+
+    day: Mapped["DoctorWeeklyAvailability"] = relationship(back_populates="breaks")
+
+
+AVAILABILITY_EXCEPTION_KINDS = ("unavailable", "extra_hours")
+
+
+class DoctorAvailabilityException(Base):
+    """A one-off override of the weekly pattern for a single date.
+
+    ``kind='unavailable'`` withdraws the whole date, or the ``start_time``..
+    ``end_time`` range inside it; ``kind='extra_hours'`` adds a bookable window
+    on that date. Times are clinic-local ``HH:MM`` strings, like the weekly
+    pattern.
+    """
+
+    __tablename__ = "doctor_availability_exceptions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid4)
+    doctor_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("users.id"), nullable=False, index=True
+    )
+    date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    kind: Mapped[str] = mapped_column(String(16), nullable=False)
+    start_time: Mapped[str | None] = mapped_column(String(5), nullable=True)
+    end_time: Mapped[str | None] = mapped_column(String(5), nullable=True)
+    reason: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+
 class Session(Base):
     __tablename__ = "sessions"
 
@@ -177,6 +296,12 @@ __all__ = [
     "Specialization",
     "CatalogTerm",
     "ClinicSettings",
+    "Appointment",
+    "APPOINTMENT_STATUSES",
+    "DoctorWeeklyAvailability",
+    "AvailabilityBreak",
+    "DoctorAvailabilityException",
+    "AVAILABILITY_EXCEPTION_KINDS",
     "term_specializations",
     "doctor_specializations",
     "ROLES",

@@ -39,7 +39,9 @@ env:
   IMAGE: 497511975196.dkr.ecr.us-east-1.amazonaws.com/aisdlc-050247095334
   AMPLIFY_APP: d13el1ykvx8z63
   BRANCH: p050247095334
-  # false for a frontend-only project: there is no backend/ to build and no image to push.
+  # "true" for a project with a backend/: the API image is built and pushed. Set to
+  # "false" for a frontend-only project, where there is no backend/ to build and no
+  # image to push.
   HAS_API: "true"
 
 jobs:
@@ -100,8 +102,15 @@ jobs:
           # Amplify publishes in the background. Wait for it: the platform reports this
           # deployment live when this run succeeds, so success must mean the site is
           # serving the new bundle, not that the upload was accepted.
+          #
+          # We cap the wait by elapsed wall-clock time rather than by a fixed iteration
+          # count: each get-job call itself takes a variable amount of time, so counting
+          # iterations would misreport how long we actually waited. DEADLINE_SECONDS is
+          # the true budget, and the timeout message reports the real elapsed seconds.
+          DEADLINE_SECONDS=900
+          STARTED=$(date +%s)
           STATUS=PENDING
-          for _ in $(seq 1 90); do
+          while true; do
             STATUS=$(aws amplify get-job --app-id "$AMPLIFY_APP" --branch-name "$BRANCH" \
               --job-id "$JOB" --query 'job.summary.status' --output text)
             case "$STATUS" in
@@ -110,10 +119,15 @@ jobs:
                 echo "Amplify could not publish the frontend (job $JOB: $STATUS)." >&2
                 exit 1 ;;
             esac
+            ELAPSED=$(( $(date +%s) - STARTED ))
+            if [ "$ELAPSED" -ge "$DEADLINE_SECONDS" ]; then
+              break
+            fi
             sleep 10
           done
           if [ "$STATUS" != "SUCCEED" ]; then
-            echo "Amplify was still publishing the frontend after 15 minutes (job $JOB)." >&2
+            ELAPSED=$(( $(date +%s) - STARTED ))
+            echo "Amplify was still publishing the frontend after ${ELAPSED}s (job $JOB)." >&2
             exit 1
           fi
 

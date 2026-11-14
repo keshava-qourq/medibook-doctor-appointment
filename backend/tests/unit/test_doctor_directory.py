@@ -329,8 +329,9 @@ def test_nfr013_no_doctor_endpoint_exposes_a_payment_field(
     db_session: DBSession, app_client: TestClient
 ):
     headers = _auth(db_session, _make_user(db_session))
+    spec_id = _spec(app_client, headers, _name("gp"))
     doctor = _make_user(db_session, role="doctor")
-    _profile(app_client, headers, doctor.id, specialization_ids=[], consultation_fee=10)
+    _profile(app_client, headers, doctor.id, specialization_ids=[spec_id], consultation_fee=10)
     card = app_client.get(f"/api/doctors/{doctor.id}", headers=headers).json()
     forbidden = {"payment", "checkout", "invoice", "refund", "upload", "telemedicine"}
     assert not any(any(word in key.lower() for word in forbidden) for key in card)

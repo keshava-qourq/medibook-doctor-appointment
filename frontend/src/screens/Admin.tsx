@@ -6,6 +6,7 @@ import * as UI from "@/lib/ui";
 import { Icons } from "@/lib/icons";
 import { brand } from "@/lib/brand";
 import AdminUsers from "@/screens/AdminUsers";
+import AdminDoctorProfile from "@/screens/AdminDoctorProfile";
 import { apiFetch, ApiError } from "@/lib/api";
 
 const { Button, Input, Textarea, Label, Table, THead, TBody, TR, TH, TD, Avatar } = UI;
@@ -1125,116 +1126,7 @@ export default function Screen() {
             <h2 id="h-profile" tabIndex={-1} style={{ ...H2, textAlign: "center" }}>
               Doctor profile
             </h2>
-            <div
-              className="flex items-center justify-center gap-2"
-              style={{ marginTop: 12, marginBottom: 24 }}
-            >
-              <Avatar name={doc.displayName} />
-              <p style={{ ...MUTED }}>
-                editing {doc.displayName},{" "}
-                {(accounts.find((a) => a.id === doc.accountId) || {}).email}
-              </p>
-            </div>
-            <form
-              onSubmit={saveProfile}
-              onKeyDown={profileKey}
-              noValidate
-              className="flex flex-col gap-4"
-            >
-              <Field id="pf-name" label="Display name" error={pErr.displayName}>
-                <Input
-                  id="pf-name"
-                  data-wf="i-3-0-0"
-                  value={pd.displayName}
-                  onChange={(e) => setPd({ ...pd, displayName: e.target.value })}
-                  aria-invalid={pErr.displayName ? "true" : undefined}
-                  aria-describedby={pErr.displayName ? "pf-name-msg" : undefined}
-                  style={{ ...fieldBase, ...(pErr.displayName ? errField : {}) }}
-                />
-              </Field>
-              <SpecPicker
-                idp="pf-specs"
-                wf="i-3-0-1"
-                legend="Specializations (at least one)"
-                specs={profileSpecs}
-                value={pd.specs}
-                onToggle={toggleSpec}
-                error={pErr.specs}
-              />
-              <Field id="pf-quals" label="Qualifications">
-                <Input
-                  id="pf-quals"
-                  data-wf="i-3-0-2"
-                  value={pd.quals}
-                  onChange={(e) => setPd({ ...pd, quals: e.target.value })}
-                  placeholder="MBBS, MD"
-                  style={fieldBase}
-                />
-              </Field>
-              <Field id="pf-bio" label="Biography">
-                <Textarea
-                  id="pf-bio"
-                  data-wf="i-3-0-3"
-                  rows={4}
-                  value={pd.bio}
-                  onChange={(e) => setPd({ ...pd, bio: e.target.value })}
-                  placeholder="A sentence or two patients will read before booking"
-                  style={{
-                    ...fieldBase,
-                    borderRadius: 24,
-                    padding: "12px 20px",
-                    resize: "vertical",
-                  }}
-                />
-              </Field>
-              <Field id="pf-room" label="Room / location">
-                <Input
-                  id="pf-room"
-                  data-wf="i-3-0-4"
-                  value={pd.room}
-                  onChange={(e) => setPd({ ...pd, room: e.target.value })}
-                  placeholder="Wing, room number"
-                  style={fieldBase}
-                />
-              </Field>
-              <Field
-                id="pf-fee"
-                label="Consultation fee (display text)"
-                hint="Shown as plain text and payable at the clinic. There is no online payment."
-              >
-                <Input
-                  id="pf-fee"
-                  data-wf="i-3-0-5"
-                  value={pd.fee}
-                  onChange={(e) => setPd({ ...pd, fee: e.target.value })}
-                  aria-describedby="pf-fee-msg"
-                  placeholder="$80 per consultation"
-                  style={fieldBase}
-                />
-              </Field>
-              <label
-                className="flex items-center gap-3"
-                style={{ minHeight: 44, cursor: "pointer", fontWeight: 600 }}
-              >
-                <input
-                  type="checkbox"
-                  data-wf="i-3-0-6"
-                  checked={pd.active}
-                  onChange={(e) => setPd({ ...pd, active: e.target.checked })}
-                  style={{ width: 22, height: 22, accentColor: "var(--ink)" }}
-                />
-                <span>
-                  Active{" "}
-                  <span style={{ fontWeight: 400, color: "var(--muted)" }}>
-                    — patients can find and book this doctor
-                  </span>
-                </span>
-              </label>
-              <p style={{ ...MUTED, fontSize: 13 }}>
-                press Enter in any single-line field to save this profile.
-              </p>
-              <div aria-live="polite">{pStatus ? <Msg>{pStatus}</Msg> : null}</div>
-            </form>
+            <AdminDoctorProfile specializations={profileSpecs} />
           </Panel>
 
           {/* Row 4 right: specializations */}
