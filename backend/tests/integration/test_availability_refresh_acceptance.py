@@ -429,9 +429,9 @@ def test_nfr015_availability_is_a_plain_polled_get_not_a_push_channel(
     paths = client.get("/openapi.json").json().get("paths", {})
     methods = {m.lower() for m in paths.get(AVAILABILITY, {})}
     assert "get" in methods, "availability must be fetchable with a plain GET for polling"
-    assert not any(
-        "ws" in str(p).lower() or "socket" in str(p).lower() for p in paths
-    ), "no websocket/push path should exist: freshness is by polled GET only"
+    assert not any("ws" in str(p).lower() or "socket" in str(p).lower() for p in paths), (
+        "no websocket/push path should exist: freshness is by polled GET only"
+    )
 
 
 # -- NFR-016 / NFR-017 (infrastructure, not observable here) ------------------
