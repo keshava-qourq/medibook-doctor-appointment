@@ -452,9 +452,7 @@ def test_ac119_an_accept_language_header_changes_no_message(
     assert plain.json() == translated.json(), "validation messages must not be translated"
 
     detail = plain.json().get("detail", [])
-    message = " ".join(
-        str(err.get("message", "")) for err in detail if isinstance(err, dict)
-    )
+    message = " ".join(str(err.get("message", "")) for err in detail if isinstance(err, dict))
     assert message.strip(), "a rejection must carry a message"
     assert message.isascii(), f"messages are English: {message!r}"
 
