@@ -1,18 +1,13 @@
 // @ts-nocheck -- generated from the approved design under its JS runtime contract; not hand-written TypeScript.
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
 
-import { Icons } from "@/lib/icons";
 import { brand } from "@/lib/brand";
 import { useNavigate } from "@/lib/navigate";
 import { ApiError, apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { RegisterForm } from "@/screens/Register";
 
-const { ArrowLeft, ArrowRight } = Icons;
-
 const PRODUCT = "MediBook – Doctor Appointment & Consultation Management System";
-const SCREEN = "Sign In / Register";
 const tint = (pct) => `color-mix(in srgb, ${brand.primaryColor} ${pct}%, ${brand.backgroundColor})`;
 
 const TABS = [
