@@ -219,26 +219,6 @@ class CatalogTermUpdate(BaseModel):
         return v
 
 
-class DoctorProfileUpdate(BaseModel):
-    """Admin edit of a doctor's profile; only the specialization mapping is used
-    for term-driven search. Other fields are accepted for the contract shape."""
-
-    display_name: str | None = None
-    specialization_ids: list[str] | None = None
-    qualifications: str | None = None
-    biography: str | None = None
-    room_location: str | None = None
-    consultation_fee: float | None = None
-    is_active: bool | None = None
-
-
-class DoctorProfileOut(BaseModel):
-    id: str
-    full_name: str
-    specialization_ids: list[str]
-    is_active: bool
-
-
 class CatalogSuggestItem(BaseModel):
     term: str
     kind: str

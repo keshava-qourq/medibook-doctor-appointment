@@ -10,14 +10,20 @@ instead so existing appointments keep resolving it (NFR-026).
 
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse, Response
-from sqlalchemy import func, inspect, text
+from sqlalchemy import Table, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session as DBSession
 
 from app.auth import current_user, require_role
 from app.database import get_db
 from app.errors import EmptyBodyHTTPError
-from app.models import CatalogTerm, Specialization, User
+from app.models import (
+    CatalogTerm,
+    Specialization,
+    User,
+    doctor_specializations,
+    term_specializations,
+)
 from app.schemas import (
     CatalogSuggestItem,
     CatalogSuggestOut,
@@ -55,14 +61,10 @@ def _duplicate(db: DBSession, name: str, exclude_id: str | None = None) -> bool:
     return query.first() is not None
 
 
-def _count(db: DBSession, table: str, column: str, spec_id: str) -> int:
-    """Count references in a table that may not exist yet (its owning sprint has
-    not landed), treating an absent table as zero references."""
-    bind = db.get_bind()
-    if not inspect(bind).has_table(table):
-        return 0
-    stmt = text(f"SELECT count(*) FROM {table} WHERE {column} = :sid")  # noqa: S608 -- names are constants
-    return int(db.execute(stmt, {"sid": spec_id}).scalar() or 0)
+def _count(db: DBSession, table: Table, spec_id: str) -> int:
+    """Count rows in an association table referencing this specialization."""
+    stmt = select(func.count()).select_from(table).where(table.c.specialization_id == spec_id)
+    return int(db.execute(stmt).scalar() or 0)
 
 
 @public_router.get("/specializations", response_model=SpecializationListOut)
@@ -140,8 +142,8 @@ def delete_specialization(id: str, db: DBSession = Depends(get_db)):  # noqa: A0
     if row is None:
         raise EmptyBodyHTTPError(404)
 
-    doctors = _count(db, "doctor_specializations", "specialization_id", spec_id)
-    mappings = _count(db, "term_specializations", "specialization_id", spec_id)
+    doctors = _count(db, doctor_specializations, spec_id)
+    mappings = _count(db, term_specializations, spec_id)
     if doctors or mappings:
         return JSONResponse(
             status_code=409,

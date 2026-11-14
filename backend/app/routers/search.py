@@ -6,42 +6,28 @@ doctors of those specializations are returned. Resolution is a plain
 deterministic table lookup -- no AI/ML (NFR-012): a term absent from the
 catalogue, soft-deleted, or mapping only to deactivated specializations
 resolves to nothing rather than a guessed match.
-
-The doctor<->specialization association table (``doctor_specializations``) is
-owned by a later sprint; it is read here through plain SQL, treating an absent
-table as zero doctors, so this router never alters another component's model.
 """
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import func, inspect, text
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session as DBSession
 
 from app.auth import current_user
 from app.database import get_db
-from app.models import CatalogTerm, User
+from app.models import CatalogTerm, User, doctor_specializations
 
 router = APIRouter(prefix="/api", tags=["search"])
 
 
 def _doctor_spec_map(db: DBSession, spec_ids: list[str]) -> dict[str, set[str]]:
-    """Map each doctor id to the subset of ``spec_ids`` it is associated with.
-
-    Reads the ``doctor_specializations`` table directly; an absent table (its
-    owning sprint has not landed) means no associations, so an empty map.
-    """
+    """Map each doctor id to the subset of ``spec_ids`` it is associated with."""
     if not spec_ids:
         return {}
-    bind = db.get_bind()
-    if not inspect(bind).has_table("doctor_specializations"):
-        return {}
-    placeholders = ", ".join(f":s{i}" for i in range(len(spec_ids)))
-    params = {f"s{i}": sid for i, sid in enumerate(spec_ids)}
-    stmt = text(
-        "SELECT doctor_id, specialization_id FROM doctor_specializations "  # noqa: S608 -- placeholders only
-        f"WHERE specialization_id IN ({placeholders})"
-    )
+    stmt = select(
+        doctor_specializations.c.doctor_id, doctor_specializations.c.specialization_id
+    ).where(doctor_specializations.c.specialization_id.in_(spec_ids))
     out: dict[str, set[str]] = {}
-    for doctor_id, specialization_id in db.execute(stmt, params):
+    for doctor_id, specialization_id in db.execute(stmt):
         out.setdefault(doctor_id, set()).add(specialization_id)
     return out
 
