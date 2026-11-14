@@ -165,8 +165,9 @@ test("[AC-004][NFR-014] a rejected registration leaves no usable account, so the
   expect(response.status(), "the valid retry must succeed with 201").toBe(201);
   await expect(page).toHaveURL(/find-a-doctor|\/search/);
 
-  expect(await countAccounts(api, email), "exactly one account must exist after the valid retry").toBe(
-    1,
-  );
+  expect(
+    await countAccounts(api, email),
+    "exactly one account must exist after the valid retry",
+  ).toBe(1);
   await api.dispose();
 });
