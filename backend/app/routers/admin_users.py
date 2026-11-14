@@ -170,7 +170,7 @@ def reset_password(
         raise EmptyBodyHTTPError(404)
 
     if len(payload.password) < MIN_PASSWORD_LENGTH:
-        return _validation_error("password", "weak_password")
+        return JSONResponse(status_code=422, content={"password": "weak_password"})
 
     user.password_hash = hash_password(payload.password)
     db.add(user)
