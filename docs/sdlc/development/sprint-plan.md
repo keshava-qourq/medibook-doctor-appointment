@@ -32,12 +32,11 @@ Capacity: 20 points · Committed: 16
 
 Sign-in sessions and patient profile, seeded catalogue, and patient-facing doctor search with results
 
-Capacity: 20 points · Committed: 19
+Capacity: 20 points · Committed: 16
 
 | Key | Type | Title | Points | Role | Depends on |
 |---|---|---|---|---|---|
 | US-002 | Story | Sign in, sign out and session expiry | 5 | backend-agent | US-001, US-003 |
-| US-005 | Story | Patient manages their own profile | 3 | backend-agent | US-001, US-002 |
 | US-009 | Story | Seeded disease and symptom catalogue available at launch | 3 | backend-agent | US-006, US-010 |
 | US-011 | Story | Patient searches by disease, symptom or specialization | 5 | backend-agent | US-009, US-010 |
 | US-012 | Story | Doctor directory results with specialization and consultation fee | 3 | frontend-agent | US-011 |
@@ -63,10 +62,11 @@ Capacity: 20 points · Committed: 20
 
 Bookable slots generated from availability, freshly refreshed on screen, and a booking that can never double-book
 
-Capacity: 20 points · Committed: 19
+Capacity: 24 points · Committed: 22
 
 | Key | Type | Title | Points | Role | Depends on |
 |---|---|---|---|---|---|
+| US-005 | Story | Patient manages their own profile | 3 | backend-agent | US-001, US-002 |
 | US-015 | Story | System generates discrete bookable slots that hold exactly one patient | 8 | backend-agent | US-013, US-014 |
 | ↳ US-015-T1 | Task | Implement slot expansion from the weekly pattern | — | backend-agent | — |
 | ↳ US-015-T2 | Task | Apply exceptions and clinic-time cutoff to generated slots | — | backend-agent | — |
