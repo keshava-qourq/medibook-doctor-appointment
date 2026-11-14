@@ -222,9 +222,12 @@ def test_nfr001_changed_password_stored_only_as_bcrypt_hash(
     )
     assert change.status_code == 200, change.text
 
-    user = db_session.query(User).filter(User.full_name == "Profile Patient").order_by(
-        User.created_at.desc()
-    ).first()
+    user = (
+        db_session.query(User)
+        .filter(User.full_name == "Profile Patient")
+        .order_by(User.created_at.desc())
+        .first()
+    )
     assert user is not None
     assert user.password_hash != new_password
     assert user.password_hash.startswith("$2")  # bcrypt with a per-user salt

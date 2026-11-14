@@ -459,9 +459,7 @@ def test_ac047_doctor_profile_shows_specializations_qualifications_and_fee(
         assert word not in str(body).lower(), f"a profile may not offer {word}"
 
 
-def test_ac047_doctor_profile_requires_authentication(
-    client: TestClient, db_session: DBSession
-):
+def test_ac047_doctor_profile_requires_authentication(client: TestClient, db_session: DBSession):
     """[AC-047] The directory is behind the Bearer token like every other endpoint."""
     _require(client, "/api/doctors/{doctor_id}")
     token = _admin_token(client, db_session)
