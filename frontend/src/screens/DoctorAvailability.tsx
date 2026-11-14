@@ -379,10 +379,7 @@ export default function DoctorAvailability() {
         ? `Exception saved. ${cancelled.length} appointment${
             cancelled.length === 1 ? " was" : "s were"
           } cancelled with the reason "${reason}": ${cancelled
-            .map(
-              (a) =>
-                `${a.patient_name} (${fmtSlot(a.slot_start)})`,
-            )
+            .map((a) => `${a.patient_name} (${fmtSlot(a.slot_start)})`)
             .join(", ")}.`
         : "Exception saved. No booked appointments were affected.",
     );
@@ -606,9 +603,7 @@ export default function DoctorAvailability() {
               </h3>
               <ul className="mt-2 flex flex-col gap-1 text-sm">
                 {affected.map((a) => (
-                  <li key={a.id}>
-                    {`${a.patient_name} · ${fmtSlot(a.slot_start)} · ${a.status}`}
-                  </li>
+                  <li key={a.id}>{`${a.patient_name} · ${fmtSlot(a.slot_start)} · ${a.status}`}</li>
                 ))}
               </ul>
             </CardContent>
@@ -685,9 +680,7 @@ export default function DoctorAvailability() {
               </p>
               <ul className="mt-2 flex flex-col gap-1 text-sm">
                 {pending.map((a) => (
-                  <li key={a.id}>
-                    {`${a.patient_name} · ${fmtSlot(a.slot_start)} · ${a.status}`}
-                  </li>
+                  <li key={a.id}>{`${a.patient_name} · ${fmtSlot(a.slot_start)} · ${a.status}`}</li>
                 ))}
               </ul>
               <div className="mt-3 flex gap-2">

@@ -555,7 +555,8 @@ def test_ac053_an_unavailable_exception_removes_every_slot_in_its_range(
 
     # The untouched part of the part-day exception still offers slots.
     assert any(
-        s["available"] and _local(s["slot_start"]).date() == part_day
+        s["available"]
+        and _local(s["slot_start"]).date() == part_day
         and _local(s["slot_start"]).hour >= 14
         for s in items
     ), "only the excepted range is withdrawn"
