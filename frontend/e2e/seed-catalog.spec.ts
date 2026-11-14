@@ -130,7 +130,10 @@ test("[AC-035] the administrator reviews the seeded catalogue, then edits one en
   await termField.fill(renamed);
   await Promise.all([
     page.waitForResponse((r) => r.url().includes("/api/admin/catalog-terms")),
-    page.getByRole("button", { name: /save term/i }).first().click(),
+    page
+      .getByRole("button", { name: /save term/i })
+      .first()
+      .click(),
   ]);
   await expect(
     catalogue.getByRole("row").filter({ hasText: renamed }).first(),
@@ -139,10 +142,16 @@ test("[AC-035] the administrator reviews the seeded catalogue, then edits one en
 
   // And deletable like any administrator-created one.
   const victimRow = catalogue.getByRole("row").filter({ hasText: victim.term }).first();
-  await victimRow.getByRole("button", { name: /delete/i }).first().click();
+  await victimRow
+    .getByRole("button", { name: /delete/i })
+    .first()
+    .click();
   await Promise.all([
     page.waitForResponse((r) => r.url().includes("/api/admin/catalog-terms")),
-    page.getByRole("button", { name: /yes, delete/i }).first().click(),
+    page
+      .getByRole("button", { name: /yes, delete/i })
+      .first()
+      .click(),
   ]);
   await expect(
     catalogue.getByRole("row").filter({ hasText: victim.term }),

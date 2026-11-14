@@ -459,9 +459,7 @@ def test_ac047_doctor_profile_shows_specializations_qualifications_and_fee(
         assert word not in str(body).lower(), f"a profile may not offer {word}"
 
 
-def test_ac047_doctor_profile_requires_authentication(
-    client: TestClient, db_session: DBSession
-):
+def test_ac047_doctor_profile_requires_authentication(client: TestClient, db_session: DBSession):
     """[AC-047] The directory is behind the Bearer token like every other endpoint."""
     _require(client, "/api/doctors/{doctor_id}")
     token = _admin_token(client, db_session)
@@ -512,6 +510,60 @@ def test_ac048_deactivated_and_unknown_doctor_are_identical_404_doctor_unavailab
     assert doctor_id not in _ids(_search(client, patient, term).json())
     directory = client.get("/api/doctors", headers=_bearer(patient), params={"limit": 100})
     assert doctor_id not in _ids(directory.json())
+
+
+def test_ac045_nfr013_no_endpoint_in_the_search_journey_exposes_a_payment_surface(
+    client: TestClient, db_session: DBSession
+):
+    """[AC-045][NFR-013] Across the whole patient search journey -- suggest, search,
+    directory and one doctor profile -- no response carries a payment, checkout,
+    invoice or refund field: the fee is informational only."""
+    _require(client, "/api/catalog/suggest", "/api/search/doctors", "/api/doctors")
+    token = _admin_token(client, db_session)
+    spec_id = _create_spec(client, token, _name("Gastroenterology"))
+    doctor_id, _ = _create_doctor(client, token, [spec_id])
+    term = _name("ulcer")
+    _create_term(client, token, term, [spec_id])
+
+    patient = _patient_token(client)
+    responses = [
+        _suggest(client, patient, term[:5]),
+        _search(client, patient, term),
+        client.get("/api/doctors", headers=_bearer(patient), params={"limit": 100}),
+        client.get(f"/api/doctors/{doctor_id}", headers=_bearer(patient)),
+    ]
+    forbidden = ("payment", "checkout", "invoice", "refund", "pay_now")
+    for resp in responses:
+        assert resp.status_code == 200, resp.text
+        body = resp.text.lower()
+        for word in forbidden:
+            assert word not in body, f"{word} must appear nowhere in the search journey"
+
+
+def test_ac042_search_pages_with_limit_and_offset_and_reports_the_unpaged_total(
+    client: TestClient, db_session: DBSession
+):
+    """[AC-042] A search result is a paged list: limit/offset page the items while
+    total stays the unpaged count, and no doctor is returned twice across pages."""
+    _require(client, "/api/search/doctors")
+    token = _admin_token(client, db_session)
+    spec_id = _create_spec(client, token, _name("Endocrinology"))
+    expected = {_create_doctor(client, token, [spec_id])[0] for _ in range(3)}
+    term = _name("thyroid")
+    _create_term(client, token, term, [spec_id])
+
+    patient = _patient_token(client)
+    full = _search(client, patient, term, limit=100)
+    assert full.status_code == 200, full.text
+    assert expected <= _ids(full.json()), full.text
+    assert full.json()["total"] >= 3, full.text
+
+    first = _search(client, patient, term, limit=2, offset=0)
+    second = _search(client, patient, term, limit=2, offset=2)
+    assert first.status_code == 200 and second.status_code == 200
+    assert len(_items(first.json())) == 2, first.text
+    assert first.json()["total"] == full.json()["total"], "total is the unpaged count"
+    assert not (_ids(first.json()) & _ids(second.json())), "pages must not overlap"
 
 
 # -- NFR-016 / NFR-017: infrastructure/provisioning, not observable from the app ------

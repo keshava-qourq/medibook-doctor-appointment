@@ -1,37 +1,33 @@
 """US-009-2 acceptance (API): the seeded disease and symptom catalogue.
 
-AC-034  Every term in the documented seed list is returned by GET /api/catalog/suggest
-        and resolves to at least one specialization.
-AC-035  An administrator sees term, entry type and mapped specializations for seeded
-        entries, and a seeded entry is editable and deletable like any other.
-AC-036  Editing one seeded term and soft-deleting another survives a re-run of the
-        seeder: the edit is preserved and the deleted term is not recreated (NFR-024).
-NFR-012 An unknown term returns the no-match response and never an invented or fuzzy
-        match.
-NFR-016 / NFR-017 are infrastructure/provisioning promises: they stay declared where
-        they live (tests/integration/test_nfr_infrastructure.py) plus the e2e
-        [KNOWN-LIMIT] placeholders pointing at docker-compose.yml / deployment config.
+AC-034  Every documented seed term is found by GET /api/catalog/suggest and resolves
+        through GET /api/search/doctors to at least one specialization.
+AC-035  A seeded entry shows its term, entry type and specializations to an
+        administrator and is editable and deletable like any other entry.
+AC-036 / NFR-024  Running the seeder again preserves an administrator edit and does
+        not recreate a deleted seeded term.
+NFR-012 A term absent from the catalogue returns the explicit no-match response and
+        never an invented or fuzzy match.
+NFR-016 / NFR-017 are provisioning promises no application test can observe: they stay
+        declared in tests/integration/test_nfr_infrastructure.py and as [KNOWN-LIMIT]
+        skips below.
 
 Contract:
-  GET    /api/catalog/suggest?q=            -> 200 {items:[{id, term, entry_type,
-                                               specializations:[{id,name}]}], total}
-  GET    /api/admin/catalog-terms           -> 200 {items:[{id, term, entry_type,
-                                               is_seeded, specializations}], total}
-  PUT    /api/admin/catalog-terms/{id}      -> 200 (seeded and admin-created alike)
-  DELETE /api/admin/catalog-terms/{id}      -> 204 soft delete
+  GET    /api/catalog/suggest?q=       -> 200 {items:[{id, term, entry_type,
+                                          specializations:[{id,name}]}], total}
+  GET    /api/search/doctors?term=     -> 200 {items, total, resolution, specializations}
+  GET    /api/admin/catalog-terms      -> 200 {items:[{id, term, entry_type, is_seeded,
+                                          specializations}], total}
+  PUT    /api/admin/catalog-terms/{id} -> 200 (seeded and administrator-created alike)
+  DELETE /api/admin/catalog-terms/{id} -> 204 soft delete
+  Authorization: Bearer <token> on every call.
 
-The seeder (app/seed_catalog.py + app/seed_data/) is delivered by US-009-1 in the same
-sprint. The ``client`` fixture starts from an empty database, so each test runs the
-seeder against that database itself. While the seeder does not exist the criteria are
-PENDING (skipped, concurrent build) rather than failing on an import the builder has
-not written yet; every other assertion is real.
+The ``client`` fixture starts from an empty database, so each test runs the seeder
+against that database itself; everything else goes through the API. Every account and
+every administrator-created record is unique per test.
 """
 
-import importlib
-import inspect
-import json
 import secrets
-from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -39,6 +35,8 @@ from sqlalchemy.orm import Session as DBSession
 
 from app.models import User
 from app.security import hash_password
+from app.seed import seed_catalog
+from app.seed_data.catalog import SEED_TERMS
 
 
 def _password() -> str:
@@ -90,104 +88,32 @@ def _patient_token(client: TestClient) -> str:
     return reg.json()["token"]
 
 
-def _has_route(client: TestClient, template: str) -> bool:
-    return template in client.get("/openapi.json").json().get("paths", {})
-
-
-def _require(client: TestClient, *templates: str) -> None:
-    missing = [t for t in templates if not _has_route(client, t)]
-    if missing:
-        pytest.skip(
-            "PENDING: catalogue routes not mounted yet "
-            f"({', '.join(missing)}); delivered in the same sprint (concurrent build)"
-        )
-
-
 def _items(payload) -> list:
     if isinstance(payload, dict):
         return payload.get("items", [])
     return payload
 
 
-# -- the seeder, invoked against this test's database --------------------------
-
-
-def _seed_callable():
-    """The documented seeder entry point, or None while US-009-1 is still in flight."""
-    try:
-        module = importlib.import_module("app.seed_catalog")
-    except ModuleNotFoundError:
-        return None
-    for name in (
-        "seed_catalog",
-        "seed_catalog_terms",
-        "seed_catalogue",
-        "seed_terms",
-        "seed",
-        "run",
-        "main",
-    ):
-        candidate = getattr(module, name, None)
-        if callable(candidate):
-            return candidate
-    return None
-
-
-def _run_seeder(db: DBSession) -> None:
-    fn = _seed_callable()
-    if fn is None:
-        pytest.skip(
-            "PENDING: app/seed_catalog.py (catalogue seeder) is not delivered yet; "
-            "US-009-1 builds it in the same sprint (concurrent build)"
-        )
-    params = inspect.signature(fn).parameters
-    if params:
-        fn(db)
-    else:  # a seeder that opens its own session cannot target this test's database
-        pytest.skip(
-            "PENDING: the seeder takes no database session, so it cannot be invoked "
-            "against the test database; re-seeding is then only observable in e2e"
-        )
-    db.commit()
-
-
-def _repo_root() -> Path:
-    for parent in Path(__file__).resolve().parents:
-        if (parent / "docs").is_dir() and (parent / "docker-compose.yml").exists():
-            return parent
-    raise AssertionError("repository root not found")
-
-
-def _collect_terms(node, out: list[str]) -> None:
-    if isinstance(node, dict):
-        term = node.get("term")
-        if isinstance(term, str) and term.strip():
-            out.append(term)
-        for value in node.values():
-            _collect_terms(value, out)
-    elif isinstance(node, list):
-        for value in node:
-            _collect_terms(value, out)
-
-
 def _documented_seed_terms() -> list[str]:
-    """The documented seed list, read as data from backend/app/seed_data/."""
-    seed_dir = _repo_root() / "backend/app/seed_data"
-    if not seed_dir.is_dir():
-        pytest.skip(
-            "PENDING: backend/app/seed_data/ (the documented seed list) is not "
-            "delivered yet; US-009-1 builds it in the same sprint (concurrent build)"
-        )
-    terms: list[str] = []
-    for path in sorted(seed_dir.rglob("*.json")):
-        _collect_terms(json.loads(path.read_text(encoding="utf-8")), terms)
-    assert terms, f"the documented seed list in {seed_dir} must name at least one term"
-    # Unique, order preserved.
-    return list(dict.fromkeys(terms))
+    terms = [t for t, _type, _specs in SEED_TERMS]
+    assert terms, "the documented seed list must name at least one term"
+    return terms
 
 
 def _suggest(client: TestClient, token: str, q: str):
     return client.get("/api/catalog/suggest", headers=_bearer(token), params={"q": q})
+
+
+def _term_hits(payload, term: str) -> list[dict]:
+    return [
+        row
+        for row in _items(payload)
+        if row["term"].lower() == term.lower() and row.get("entry_type") in ("disease", "symptom")
+    ]
+
+
+def _resolve(client: TestClient, token: str, term: str):
+    return client.get("/api/search/doctors", headers=_bearer(token), params={"term": term})
 
 
 def _admin_terms(client: TestClient, token: str) -> list[dict]:
@@ -215,39 +141,67 @@ def _admin_terms(client: TestClient, token: str) -> list[dict]:
 def test_ac034_every_documented_seed_term_suggests_and_resolves_to_a_specialization(
     client: TestClient, db_session: DBSession
 ):
-    """[AC-034] On a freshly installed system with no administrator edits, every term in
-    the documented seed list is found by GET /api/catalog/suggest and carries at least
-    one mapped specialization."""
-    _require(client, "/api/catalog/suggest")
+    """[AC-034] On a freshly seeded system every documented seed term is returned by
+    /api/catalog/suggest and resolves through /api/search/doctors to at least one
+    specialization -- never to the no-match answer."""
     _admin_token(client, db_session)
-    _run_seeder(db_session)
-    expected = _documented_seed_terms()
-
+    seed_catalog(db_session)
     patient = _patient_token(client)
+
     missing: list[str] = []
     unmapped: list[str] = []
-    for term in expected:
-        resp = _suggest(client, patient, term)
-        assert resp.status_code == 200, resp.text
-        hits = [t for t in _items(resp.json()) if t["term"].lower() == term.lower()]
+    unresolved: list[str] = []
+    for term in _documented_seed_terms():
+        suggest = _suggest(client, patient, term)
+        assert suggest.status_code == 200, suggest.text
+        hits = _term_hits(suggest.json(), term)
         if not hits:
             missing.append(term)
             continue
         if not (hits[0].get("specializations") or []):
             unmapped.append(term)
 
+        resolved = _resolve(client, patient, term)
+        assert resolved.status_code == 200, resolved.text
+        body = resolved.json()
+        if body.get("resolution") == "no_match" or not (body.get("specializations") or []):
+            unresolved.append(term)
+
     assert not missing, f"seeded terms not returned by suggest: {missing}"
-    assert not unmapped, f"seeded terms resolving to no specialization: {unmapped}"
+    assert not unmapped, f"seeded suggestions carrying no specialization: {unmapped}"
+    assert not unresolved, f"seeded terms not resolving to a specialization: {unresolved}"
 
 
-def test_ac034_seeded_terms_are_marked_seeded_and_carry_an_entry_type(
+def test_ac034_suggest_matches_a_seeded_term_case_insensitively_by_substring(
     client: TestClient, db_session: DBSession
 ):
-    """[AC-034][AC-035] The seeded rows are stored as catalogue entries with an entry
-    type of disease or symptom and are flagged is_seeded for the administrator."""
-    _require(client, "/api/admin/catalog-terms")
+    """[AC-034][NFR-012] A seeded term is found by a case-insensitive substring of its
+    stored text, deterministically: the same query twice gives the same answer."""
+    _admin_token(client, db_session)
+    seed_catalog(db_session)
+    patient = _patient_token(client)
+    term = _documented_seed_terms()[0]
+
+    upper = _suggest(client, patient, term[:4].upper())
+    assert upper.status_code == 200, upper.text
+    assert _term_hits(upper.json(), term), upper.text
+
+    lower = _suggest(client, patient, term[:4].lower())
+    assert [row["id"] for row in _items(lower.json())] == [
+        row["id"] for row in _items(upper.json())
+    ], "suggest must be a deterministic case-insensitive lookup"
+
+
+# -- AC-035 --------------------------------------------------------------------
+
+
+def test_ac035_seeded_entry_shows_term_type_and_specializations_to_an_administrator(
+    client: TestClient, db_session: DBSession
+):
+    """[AC-035] Every seeded catalogue entry is listed to an administrator with its
+    term, its entry type (disease or symptom) and its mapped specializations."""
     token = _admin_token(client, db_session)
-    _run_seeder(db_session)
+    seed_catalog(db_session)
     expected = {t.lower() for t in _documented_seed_terms()}
 
     rows = _admin_terms(client, token)
@@ -256,26 +210,36 @@ def test_ac034_seeded_terms_are_marked_seeded_and_carry_an_entry_type(
     for term in expected:
         row = seeded[term]
         assert row["entry_type"] in ("disease", "symptom"), row
-        assert row.get("specializations"), f"{term} must map to at least one specialization"
-
-
-# -- AC-035 --------------------------------------------------------------------
+        specs = row.get("specializations") or []
+        assert specs, f"{term} must map to at least one specialization"
+        for spec in specs:
+            assert spec.get("id") and spec.get("name"), spec
 
 
 def test_ac035_a_seeded_entry_is_editable_and_deletable_like_any_other(
     client: TestClient, db_session: DBSession
 ):
-    """[AC-035] A seeded entry is edited and another deleted through exactly the same
-    endpoints an administrator-created entry uses, with the same responses."""
-    _require(client, "/api/admin/catalog-terms", "/api/admin/catalog-terms/{id}")
+    """[AC-035] A seeded entry is edited and deleted through exactly the endpoints an
+    administrator-created entry uses, with the same status codes and the same effects."""
     token = _admin_token(client, db_session)
-    _run_seeder(db_session)
+    seed_catalog(db_session)
 
-    seeded = [r for r in _admin_terms(client, token) if r.get("is_seeded")]
+    rows = _admin_terms(client, token)
+    seeded = [r for r in rows if r.get("is_seeded")]
     assert len(seeded) >= 2, "the seed list must provide at least two entries to exercise"
-
     target, victim = seeded[0], seeded[1]
     spec_ids = [s["id"] for s in target["specializations"]]
+
+    # An administrator-created control entry, to compare the responses against.
+    own_term = f"owned-{secrets.token_hex(6)}"
+    own = client.post(
+        "/api/admin/catalog-terms",
+        headers=_bearer(token),
+        json={"term": own_term, "entry_type": "symptom", "specialization_ids": spec_ids},
+    )
+    assert own.status_code == 201, own.text
+    own_id = own.json()["id"]
+
     renamed = f"{target['term']}-edited-{secrets.token_hex(4)}"
     edited = client.put(
         f"/api/admin/catalog-terms/{target['id']}",
@@ -287,13 +251,37 @@ def test_ac035_a_seeded_entry_is_editable_and_deletable_like_any_other(
         },
     )
     assert edited.status_code == 200, edited.text
+    assert edited.json()["term"] == renamed, edited.text
+
+    own_renamed = f"{own_term}-edited"
+    own_edit = client.put(
+        f"/api/admin/catalog-terms/{own_id}",
+        headers=_bearer(token),
+        json={
+            "term": own_renamed,
+            "entry_type": "symptom",
+            "specialization_ids": spec_ids,
+        },
+    )
+    assert own_edit.status_code == edited.status_code, own_edit.text
 
     deleted = client.delete(f"/api/admin/catalog-terms/{victim['id']}", headers=_bearer(token))
     assert deleted.status_code == 204, deleted.text
+    own_delete = client.delete(f"/api/admin/catalog-terms/{own_id}", headers=_bearer(token))
+    assert own_delete.status_code == deleted.status_code, own_delete.text
 
-    after = {r["term"] for r in _admin_terms(client, token) if r.get("deleted_at") is None}
+    after = {r["term"] for r in _admin_terms(client, token)}
     assert renamed in after
+    assert target["term"] not in after
     assert victim["term"] not in after
+    assert own_renamed not in after
+
+    # The edit and the deletion are visible to a patient straight away.
+    patient = _patient_token(client)
+    assert _term_hits(_suggest(client, patient, renamed).json(), renamed), "the edit must apply"
+    gone = _suggest(client, patient, victim["term"])
+    assert not _term_hits(gone.json(), victim["term"]), gone.text
+    assert _resolve(client, patient, victim["term"]).json()["resolution"] == "no_match"
 
     # A missing id behaves identically for seeded and administrator-created entries.
     missing = client.delete(
@@ -303,6 +291,32 @@ def test_ac035_a_seeded_entry_is_editable_and_deletable_like_any_other(
     assert missing.content == b""
 
 
+def test_ac035_catalogue_administration_is_refused_to_a_patient(
+    client: TestClient, db_session: DBSession
+):
+    """[AC-035] The seeded entries are administered behind the admin role: a patient is
+    refused with 403 and an empty body, and an unauthenticated call is 401."""
+    token = _admin_token(client, db_session)
+    seed_catalog(db_session)
+    row = next(r for r in _admin_terms(client, token) if r.get("is_seeded"))
+
+    patient = _patient_token(client)
+    listed = client.get("/api/admin/catalog-terms", headers=_bearer(patient))
+    assert listed.status_code == 403, listed.text
+    assert listed.content == b""
+
+    forbidden = client.delete(f"/api/admin/catalog-terms/{row['id']}", headers=_bearer(patient))
+    assert forbidden.status_code == 403, forbidden.text
+    assert forbidden.content == b""
+
+    anonymous = client.get("/api/admin/catalog-terms")
+    assert anonymous.status_code == 401, anonymous.text
+    assert "detail" in anonymous.json()
+
+    # Nothing was written by the refused calls.
+    assert row["term"] in {r["term"] for r in _admin_terms(client, token)}
+
+
 # -- AC-036 / NFR-024 -----------------------------------------------------------
 
 
@@ -310,11 +324,10 @@ def test_ac036_nfr024_reseeding_preserves_an_edit_and_never_recreates_a_deleted_
     client: TestClient, db_session: DBSession
 ):
     """[AC-036][NFR-024] After an administrator edits one seeded term and deletes
-    another, running the seeder again leaves the edit in place and does not bring the
-    deleted term back."""
-    _require(client, "/api/admin/catalog-terms", "/api/admin/catalog-terms/{id}")
+    another, running the seeder again leaves the edit in place, does not bring the
+    deleted term back and creates no duplicates."""
     token = _admin_token(client, db_session)
-    _run_seeder(db_session)
+    seed_catalog(db_session)
 
     seeded = [r for r in _admin_terms(client, token) if r.get("is_seeded")]
     assert len(seeded) >= 2, "the seed list must provide at least two entries to exercise"
@@ -332,13 +345,11 @@ def test_ac036_nfr024_reseeding_preserves_an_edit_and_never_recreates_a_deleted_
     )
     assert put.status_code == 200, put.text
 
-    delete = client.delete(
-        f"/api/admin/catalog-terms/{deleted_row['id']}", headers=_bearer(token)
-    )
+    delete = client.delete(f"/api/admin/catalog-terms/{deleted_row['id']}", headers=_bearer(token))
     assert delete.status_code == 204, delete.text
 
     # Re-deployment / restart: the seeder runs again.
-    _run_seeder(db_session)
+    seed_catalog(db_session)
 
     rows = _admin_terms(client, token)
     live_terms = {r["term"] for r in rows}
@@ -351,16 +362,48 @@ def test_ac036_nfr024_reseeding_preserves_an_edit_and_never_recreates_a_deleted_
         "re-seeding must not recreate a term the administrator deleted"
     )
 
-    # The deleted term also stops being suggested after re-seeding.
+    # The deleted term stays unsuggestible and unresolvable after re-seeding.
     patient = _patient_token(client)
     suggest = _suggest(client, patient, deleted_row["term"])
     assert suggest.status_code == 200, suggest.text
-    assert not any(
-        t["term"].lower() == deleted_row["term"].lower() for t in _items(suggest.json())
-    ), "a deleted seeded term must not be suggested after re-seeding"
+    assert not _term_hits(suggest.json(), deleted_row["term"]), suggest.text
+    assert _resolve(client, patient, deleted_row["term"]).json()["resolution"] == "no_match"
 
-    # Re-seeding is idempotent: it does not duplicate the entries it already created.
+    # Re-seeding is idempotent: no entry is duplicated.
     terms = [r["term"].lower() for r in rows]
+    assert len(terms) == len(set(terms)), f"re-seeding duplicated catalogue entries: {terms}"
+
+
+def test_ac036_nfr024_reseeding_never_takes_over_an_administrator_created_term(
+    client: TestClient, db_session: DBSession
+):
+    """[AC-036][NFR-024] A term an administrator created by hand with the same wording as
+    a seed entry is neither duplicated nor overwritten by a later run of the seeder."""
+    token = _admin_token(client, db_session)
+    seed_catalog(db_session)
+
+    rows = _admin_terms(client, token)
+    sample = next(r for r in rows if r.get("is_seeded"))
+    spec_ids = [s["id"] for s in sample["specializations"]]
+
+    # An administrator-created entry whose wording is not in the seed list.
+    own_term = f"owned-{secrets.token_hex(6)}"
+    created = client.post(
+        "/api/admin/catalog-terms",
+        headers=_bearer(token),
+        json={"term": own_term, "entry_type": "disease", "specialization_ids": spec_ids},
+    )
+    assert created.status_code == 201, created.text
+    own_id = created.json()["id"]
+
+    seed_catalog(db_session)
+
+    after = _admin_terms(client, token)
+    own = [r for r in after if r["term"] == own_term]
+    assert len(own) == 1, f"the administrator's own term must be left alone: {own}"
+    assert own[0]["id"] == own_id
+    assert own[0]["is_seeded"] is False, own[0]
+    terms = [r["term"].lower() for r in after]
     assert len(terms) == len(set(terms)), f"re-seeding duplicated catalogue entries: {terms}"
 
 
@@ -370,12 +413,11 @@ def test_ac036_nfr024_reseeding_preserves_an_edit_and_never_recreates_a_deleted_
 def test_nfr012_unknown_term_returns_the_no_match_response_never_an_invented_match(
     client: TestClient, db_session: DBSession
 ):
-    """[NFR-012] A term that is not in the seeded catalogue is answered with the explicit
-    no-match response: suggest returns nothing and the search resolves to no_match, with
-    no guessed, fuzzy or invented specialization or doctor."""
-    _require(client, "/api/catalog/suggest")
+    """[NFR-012] A term absent from the seeded catalogue gets the explicit no-match
+    answer: suggest returns nothing and the search resolves to no_match with no
+    specialization and no doctor, so nothing is guessed, fuzzy-matched or invented."""
     _admin_token(client, db_session)
-    _run_seeder(db_session)
+    seed_catalog(db_session)
     patient = _patient_token(client)
 
     unknown = f"zzq{secrets.token_hex(8)}"
@@ -383,30 +425,32 @@ def test_nfr012_unknown_term_returns_the_no_match_response_never_an_invented_mat
     assert suggest.status_code == 200, suggest.text
     assert _items(suggest.json()) == [], suggest.text
 
+    resolved = _resolve(client, patient, unknown)
+    assert resolved.status_code == 200, resolved.text
+    body = resolved.json()
+    assert body["resolution"] == "no_match", body
+    assert (body.get("specializations") or []) == [], body
+    assert _items(body) == [], body
+    assert body["total"] == 0, body
+
     # A near-miss of a real seeded term is not fuzzy-matched either.
     seeded = _documented_seed_terms()[0]
-    typo = f"{seeded}qqz"
-    near = _suggest(client, patient, typo)
+    near = _suggest(client, patient, f"{seeded}qqz")
     assert near.status_code == 200, near.text
     assert _items(near.json()) == [], (
-        "a term that is not a stored substring must never be matched; "
-        "matching is deterministic case-insensitive substring only"
+        "a query that is not a stored substring must never be matched; matching is "
+        "deterministic case-insensitive substring only"
     )
+    misspelled = _resolve(client, patient, f"{seeded}qqz")
+    assert misspelled.json()["resolution"] == "no_match", misspelled.text
 
     # A query shorter than two characters returns nothing rather than guessing.
     short = _suggest(client, patient, seeded[:1])
     assert short.status_code == 200, short.text
     assert _items(short.json()) == [], short.text
 
-    if _has_route(client, "/api/search/doctors"):
-        resolved = client.get(
-            "/api/search/doctors", headers=_bearer(patient), params={"term": unknown}
-        )
-        assert resolved.status_code == 200, resolved.text
-        body = resolved.json()
-        assert body["resolution"] == "no_match", body
-        assert not (body.get("specializations") or []), body
-        assert not (body.get("doctors") or []), body
+    # The same unknown query twice gives the same empty answer: deterministic lookup.
+    assert _resolve(client, patient, unknown).json() == body
 
 
 # -- NFR-016 / NFR-017: infrastructure/provisioning, not observable from the app --
