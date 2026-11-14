@@ -161,9 +161,7 @@ def _create_doctor_with_spec(client: TestClient, token: str, spec_ids: list[str]
 
 
 def _resolve(client: TestClient, token: str, term: str):
-    return client.get(
-        "/api/search/doctors", headers=_bearer(token), params={"term": term}
-    )
+    return client.get("/api/search/doctors", headers=_bearer(token), params={"term": term})
 
 
 def _suggest(client: TestClient, token: str, q: str):

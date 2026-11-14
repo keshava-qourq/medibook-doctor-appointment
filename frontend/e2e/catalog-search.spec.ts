@@ -155,7 +155,9 @@ test("[AC-040][NFR-026] a deleted term disappears from suggest and no longer res
   expect(listItems(await suggestBefore.json()).some((t) => t.term === term)).toBe(true);
 
   // Soft-delete it.
-  const deleted = await api.delete(`/api/admin/catalog-terms/${termId}`, { headers: bearer(token) });
+  const deleted = await api.delete(`/api/admin/catalog-terms/${termId}`, {
+    headers: bearer(token),
+  });
   expect(deleted.status(), "deleting a term must succeed with 204").toBe(204);
 
   // After deletion it no longer suggests.
