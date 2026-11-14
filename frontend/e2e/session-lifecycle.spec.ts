@@ -23,7 +23,11 @@ async function adminToken(api: Awaited<ReturnType<typeof apiContext>>) {
   return (await res.json()).token as string;
 }
 
-async function signInPatient(page: import("@playwright/test").Page, email: string, password: string) {
+async function signInPatient(
+  page: import("@playwright/test").Page,
+  email: string,
+  password: string,
+) {
   await page.goto("/sign-in");
   await page.locator("#at-email").fill(email);
   await page.locator("#at-password").fill(password);
