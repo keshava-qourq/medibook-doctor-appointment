@@ -92,7 +92,6 @@ describe("PatientAvailability", () => {
     );
     renderScreen({ initialDoctorId: "d1", initialDate: "2026-11-20", refreshIntervalMs: 5000 });
 
-    const u = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     expect(await screen.findByRole("button", { name: "Book" })).toBeInTheDocument();
 
     // the slot is taken elsewhere; the next poll must reflect it
@@ -102,7 +101,6 @@ describe("PatientAvailability", () => {
     await waitFor(() => expect(screen.getByText("Unavailable")).toBeInTheDocument());
     expect(screen.queryByRole("button", { name: "Book" })).toBeNull();
     expect(availCalls().length).toBeGreaterThanOrEqual(2);
-    void u;
   });
 
   it("[AC-063] changing the doctor clears the previous slots and fetches the new selection fresh", async () => {
