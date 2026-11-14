@@ -1,22 +1,129 @@
-{"total": {"lines":{"total":7696,"covered":2637,"skipped":0,"pct":34.26},"statements":{"total":7696,"covered":2637,"skipped":0,"pct":34.26},"functions":{"total":148,"covered":57,"skipped":0,"pct":38.51},"branches":{"total":266,"covered":189,"skipped":0,"pct":71.05},"branchesTrue":{"total":0,"covered":0,"skipped":0,"pct":100}}
-,"/work/frontend/playwright.config.ts": {"lines":{"total":43,"covered":0,"skipped":0,"pct":0},"functions":{"total":1,"covered":0,"skipped":0,"pct":0},"statements":{"total":43,"covered":0,"skipped":0,"pct":0},"branches":{"total":1,"covered":0,"skipped":0,"pct":0}}
-,"/work/frontend/e2e/support/admin.ts": {"lines":{"total":10,"covered":0,"skipped":0,"pct":0},"functions":{"total":1,"covered":1,"skipped":0,"pct":100},"statements":{"total":10,"covered":0,"skipped":0,"pct":0},"branches":{"total":1,"covered":1,"skipped":0,"pct":100}}
-,"/work/frontend/e2e/support/api.ts": {"lines":{"total":45,"covered":0,"skipped":0,"pct":0},"functions":{"total":1,"covered":0,"skipped":0,"pct":0},"statements":{"total":45,"covered":0,"skipped":0,"pct":0},"branches":{"total":1,"covered":0,"skipped":0,"pct":0}}
-,"/work/frontend/e2e/support/smoke.ts": {"lines":{"total":10,"covered":0,"skipped":0,"pct":0},"functions":{"total":1,"covered":1,"skipped":0,"pct":100},"statements":{"total":10,"covered":0,"skipped":0,"pct":0},"branches":{"total":1,"covered":1,"skipped":0,"pct":100}}
-,"/work/frontend/src/App.tsx": {"lines":{"total":92,"covered":78,"skipped":0,"pct":84.78},"functions":{"total":5,"covered":5,"skipped":0,"pct":100},"statements":{"total":92,"covered":78,"skipped":0,"pct":84.78},"branches":{"total":11,"covered":9,"skipped":0,"pct":81.81}}
-,"/work/frontend/src/main.tsx": {"lines":{"total":12,"covered":0,"skipped":0,"pct":0},"functions":{"total":1,"covered":0,"skipped":0,"pct":0},"statements":{"total":12,"covered":0,"skipped":0,"pct":0},"branches":{"total":1,"covered":0,"skipped":0,"pct":0}}
-,"/work/frontend/src/lib/api.ts": {"lines":{"total":84,"covered":76,"skipped":0,"pct":90.47},"functions":{"total":11,"covered":11,"skipped":0,"pct":100},"statements":{"total":84,"covered":76,"skipped":0,"pct":90.47},"branches":{"total":32,"covered":26,"skipped":0,"pct":81.25}}
-,"/work/frontend/src/lib/auth.tsx": {"lines":{"total":70,"covered":69,"skipped":0,"pct":98.57},"functions":{"total":5,"covered":5,"skipped":0,"pct":100},"statements":{"total":70,"covered":69,"skipped":0,"pct":98.57},"branches":{"total":31,"covered":27,"skipped":0,"pct":87.09}}
-,"/work/frontend/src/lib/brand.ts": {"lines":{"total":10,"covered":10,"skipped":0,"pct":100},"functions":{"total":0,"covered":0,"skipped":0,"pct":100},"statements":{"total":10,"covered":10,"skipped":0,"pct":100},"branches":{"total":0,"covered":0,"skipped":0,"pct":100}}
-,"/work/frontend/src/lib/icons.tsx": {"lines":{"total":136,"covered":136,"skipped":0,"pct":100},"functions":{"total":2,"covered":2,"skipped":0,"pct":100},"statements":{"total":136,"covered":136,"skipped":0,"pct":100},"branches":{"total":3,"covered":3,"skipped":0,"pct":100}}
-,"/work/frontend/src/lib/navigate.ts": {"lines":{"total":22,"covered":21,"skipped":0,"pct":95.45},"functions":{"total":2,"covered":2,"skipped":0,"pct":100},"statements":{"total":22,"covered":21,"skipped":0,"pct":95.45},"branches":{"total":6,"covered":4,"skipped":0,"pct":66.66}}
-,"/work/frontend/src/lib/ui.tsx": {"lines":{"total":271,"covered":107,"skipped":0,"pct":39.48},"functions":{"total":26,"covered":6,"skipped":0,"pct":23.07},"statements":{"total":271,"covered":107,"skipped":0,"pct":39.48},"branches":{"total":12,"covered":7,"skipped":0,"pct":58.33}}
-,"/work/frontend/src/screens/Admin.tsx": {"lines":{"total":1591,"covered":523,"skipped":0,"pct":32.87},"functions":{"total":12,"covered":0,"skipped":0,"pct":0},"statements":{"total":1591,"covered":523,"skipped":0,"pct":32.87},"branches":{"total":0,"covered":0,"skipped":0,"pct":100}}
-,"/work/frontend/src/screens/AdminUsers.tsx": {"lines":{"total":308,"covered":292,"skipped":0,"pct":94.8},"functions":{"total":12,"covered":10,"skipped":0,"pct":83.33},"statements":{"total":308,"covered":292,"skipped":0,"pct":94.8},"branches":{"total":55,"covered":44,"skipped":0,"pct":80}}
-,"/work/frontend/src/screens/DoctorAvailability.tsx": {"lines":{"total":994,"covered":58,"skipped":0,"pct":5.83},"functions":{"total":12,"covered":0,"skipped":0,"pct":0},"statements":{"total":994,"covered":58,"skipped":0,"pct":5.83},"branches":{"total":0,"covered":0,"skipped":0,"pct":100}}
-,"/work/frontend/src/screens/DoctorSchedule.tsx": {"lines":{"total":1195,"covered":189,"skipped":0,"pct":15.81},"functions":{"total":6,"covered":0,"skipped":0,"pct":0},"statements":{"total":1195,"covered":189,"skipped":0,"pct":15.81},"branches":{"total":0,"covered":0,"skipped":0,"pct":100}}
-,"/work/frontend/src/screens/FindADoctor.tsx": {"lines":{"total":1169,"covered":571,"skipped":0,"pct":48.84},"functions":{"total":23,"covered":2,"skipped":0,"pct":8.69},"statements":{"total":1169,"covered":571,"skipped":0,"pct":48.84},"branches":{"total":61,"covered":27,"skipped":0,"pct":44.26}}
-,"/work/frontend/src/screens/MyAppointments.tsx": {"lines":{"total":1263,"covered":149,"skipped":0,"pct":11.79},"functions":{"total":14,"covered":0,"skipped":0,"pct":0},"statements":{"total":1263,"covered":149,"skipped":0,"pct":11.79},"branches":{"total":0,"covered":0,"skipped":0,"pct":100}}
-,"/work/frontend/src/screens/Register.tsx": {"lines":{"total":186,"covered":182,"skipped":0,"pct":97.84},"functions":{"total":6,"covered":6,"skipped":0,"pct":100},"statements":{"total":186,"covered":182,"skipped":0,"pct":97.84},"branches":{"total":29,"covered":24,"skipped":0,"pct":82.75}}
-,"/work/frontend/src/screens/SignIn.tsx": {"lines":{"total":185,"covered":176,"skipped":0,"pct":95.13},"functions":{"total":7,"covered":6,"skipped":0,"pct":85.71},"statements":{"total":185,"covered":176,"skipped":0,"pct":95.13},"branches":{"total":21,"covered":16,"skipped":0,"pct":76.19}}
+{
+  "total": {
+    "lines": { "total": 7696, "covered": 2637, "skipped": 0, "pct": 34.26 },
+    "statements": { "total": 7696, "covered": 2637, "skipped": 0, "pct": 34.26 },
+    "functions": { "total": 148, "covered": 57, "skipped": 0, "pct": 38.51 },
+    "branches": { "total": 266, "covered": 189, "skipped": 0, "pct": 71.05 },
+    "branchesTrue": { "total": 0, "covered": 0, "skipped": 0, "pct": 100 }
+  },
+  "/work/frontend/playwright.config.ts": {
+    "lines": { "total": 43, "covered": 0, "skipped": 0, "pct": 0 },
+    "functions": { "total": 1, "covered": 0, "skipped": 0, "pct": 0 },
+    "statements": { "total": 43, "covered": 0, "skipped": 0, "pct": 0 },
+    "branches": { "total": 1, "covered": 0, "skipped": 0, "pct": 0 }
+  },
+  "/work/frontend/e2e/support/admin.ts": {
+    "lines": { "total": 10, "covered": 0, "skipped": 0, "pct": 0 },
+    "functions": { "total": 1, "covered": 1, "skipped": 0, "pct": 100 },
+    "statements": { "total": 10, "covered": 0, "skipped": 0, "pct": 0 },
+    "branches": { "total": 1, "covered": 1, "skipped": 0, "pct": 100 }
+  },
+  "/work/frontend/e2e/support/api.ts": {
+    "lines": { "total": 45, "covered": 0, "skipped": 0, "pct": 0 },
+    "functions": { "total": 1, "covered": 0, "skipped": 0, "pct": 0 },
+    "statements": { "total": 45, "covered": 0, "skipped": 0, "pct": 0 },
+    "branches": { "total": 1, "covered": 0, "skipped": 0, "pct": 0 }
+  },
+  "/work/frontend/e2e/support/smoke.ts": {
+    "lines": { "total": 10, "covered": 0, "skipped": 0, "pct": 0 },
+    "functions": { "total": 1, "covered": 1, "skipped": 0, "pct": 100 },
+    "statements": { "total": 10, "covered": 0, "skipped": 0, "pct": 0 },
+    "branches": { "total": 1, "covered": 1, "skipped": 0, "pct": 100 }
+  },
+  "/work/frontend/src/App.tsx": {
+    "lines": { "total": 92, "covered": 78, "skipped": 0, "pct": 84.78 },
+    "functions": { "total": 5, "covered": 5, "skipped": 0, "pct": 100 },
+    "statements": { "total": 92, "covered": 78, "skipped": 0, "pct": 84.78 },
+    "branches": { "total": 11, "covered": 9, "skipped": 0, "pct": 81.81 }
+  },
+  "/work/frontend/src/main.tsx": {
+    "lines": { "total": 12, "covered": 0, "skipped": 0, "pct": 0 },
+    "functions": { "total": 1, "covered": 0, "skipped": 0, "pct": 0 },
+    "statements": { "total": 12, "covered": 0, "skipped": 0, "pct": 0 },
+    "branches": { "total": 1, "covered": 0, "skipped": 0, "pct": 0 }
+  },
+  "/work/frontend/src/lib/api.ts": {
+    "lines": { "total": 84, "covered": 76, "skipped": 0, "pct": 90.47 },
+    "functions": { "total": 11, "covered": 11, "skipped": 0, "pct": 100 },
+    "statements": { "total": 84, "covered": 76, "skipped": 0, "pct": 90.47 },
+    "branches": { "total": 32, "covered": 26, "skipped": 0, "pct": 81.25 }
+  },
+  "/work/frontend/src/lib/auth.tsx": {
+    "lines": { "total": 70, "covered": 69, "skipped": 0, "pct": 98.57 },
+    "functions": { "total": 5, "covered": 5, "skipped": 0, "pct": 100 },
+    "statements": { "total": 70, "covered": 69, "skipped": 0, "pct": 98.57 },
+    "branches": { "total": 31, "covered": 27, "skipped": 0, "pct": 87.09 }
+  },
+  "/work/frontend/src/lib/brand.ts": {
+    "lines": { "total": 10, "covered": 10, "skipped": 0, "pct": 100 },
+    "functions": { "total": 0, "covered": 0, "skipped": 0, "pct": 100 },
+    "statements": { "total": 10, "covered": 10, "skipped": 0, "pct": 100 },
+    "branches": { "total": 0, "covered": 0, "skipped": 0, "pct": 100 }
+  },
+  "/work/frontend/src/lib/icons.tsx": {
+    "lines": { "total": 136, "covered": 136, "skipped": 0, "pct": 100 },
+    "functions": { "total": 2, "covered": 2, "skipped": 0, "pct": 100 },
+    "statements": { "total": 136, "covered": 136, "skipped": 0, "pct": 100 },
+    "branches": { "total": 3, "covered": 3, "skipped": 0, "pct": 100 }
+  },
+  "/work/frontend/src/lib/navigate.ts": {
+    "lines": { "total": 22, "covered": 21, "skipped": 0, "pct": 95.45 },
+    "functions": { "total": 2, "covered": 2, "skipped": 0, "pct": 100 },
+    "statements": { "total": 22, "covered": 21, "skipped": 0, "pct": 95.45 },
+    "branches": { "total": 6, "covered": 4, "skipped": 0, "pct": 66.66 }
+  },
+  "/work/frontend/src/lib/ui.tsx": {
+    "lines": { "total": 271, "covered": 107, "skipped": 0, "pct": 39.48 },
+    "functions": { "total": 26, "covered": 6, "skipped": 0, "pct": 23.07 },
+    "statements": { "total": 271, "covered": 107, "skipped": 0, "pct": 39.48 },
+    "branches": { "total": 12, "covered": 7, "skipped": 0, "pct": 58.33 }
+  },
+  "/work/frontend/src/screens/Admin.tsx": {
+    "lines": { "total": 1591, "covered": 523, "skipped": 0, "pct": 32.87 },
+    "functions": { "total": 12, "covered": 0, "skipped": 0, "pct": 0 },
+    "statements": { "total": 1591, "covered": 523, "skipped": 0, "pct": 32.87 },
+    "branches": { "total": 0, "covered": 0, "skipped": 0, "pct": 100 }
+  },
+  "/work/frontend/src/screens/AdminUsers.tsx": {
+    "lines": { "total": 308, "covered": 292, "skipped": 0, "pct": 94.8 },
+    "functions": { "total": 12, "covered": 10, "skipped": 0, "pct": 83.33 },
+    "statements": { "total": 308, "covered": 292, "skipped": 0, "pct": 94.8 },
+    "branches": { "total": 55, "covered": 44, "skipped": 0, "pct": 80 }
+  },
+  "/work/frontend/src/screens/DoctorAvailability.tsx": {
+    "lines": { "total": 994, "covered": 58, "skipped": 0, "pct": 5.83 },
+    "functions": { "total": 12, "covered": 0, "skipped": 0, "pct": 0 },
+    "statements": { "total": 994, "covered": 58, "skipped": 0, "pct": 5.83 },
+    "branches": { "total": 0, "covered": 0, "skipped": 0, "pct": 100 }
+  },
+  "/work/frontend/src/screens/DoctorSchedule.tsx": {
+    "lines": { "total": 1195, "covered": 189, "skipped": 0, "pct": 15.81 },
+    "functions": { "total": 6, "covered": 0, "skipped": 0, "pct": 0 },
+    "statements": { "total": 1195, "covered": 189, "skipped": 0, "pct": 15.81 },
+    "branches": { "total": 0, "covered": 0, "skipped": 0, "pct": 100 }
+  },
+  "/work/frontend/src/screens/FindADoctor.tsx": {
+    "lines": { "total": 1169, "covered": 571, "skipped": 0, "pct": 48.84 },
+    "functions": { "total": 23, "covered": 2, "skipped": 0, "pct": 8.69 },
+    "statements": { "total": 1169, "covered": 571, "skipped": 0, "pct": 48.84 },
+    "branches": { "total": 61, "covered": 27, "skipped": 0, "pct": 44.26 }
+  },
+  "/work/frontend/src/screens/MyAppointments.tsx": {
+    "lines": { "total": 1263, "covered": 149, "skipped": 0, "pct": 11.79 },
+    "functions": { "total": 14, "covered": 0, "skipped": 0, "pct": 0 },
+    "statements": { "total": 1263, "covered": 149, "skipped": 0, "pct": 11.79 },
+    "branches": { "total": 0, "covered": 0, "skipped": 0, "pct": 100 }
+  },
+  "/work/frontend/src/screens/Register.tsx": {
+    "lines": { "total": 186, "covered": 182, "skipped": 0, "pct": 97.84 },
+    "functions": { "total": 6, "covered": 6, "skipped": 0, "pct": 100 },
+    "statements": { "total": 186, "covered": 182, "skipped": 0, "pct": 97.84 },
+    "branches": { "total": 29, "covered": 24, "skipped": 0, "pct": 82.75 }
+  },
+  "/work/frontend/src/screens/SignIn.tsx": {
+    "lines": { "total": 185, "covered": 176, "skipped": 0, "pct": 95.13 },
+    "functions": { "total": 7, "covered": 6, "skipped": 0, "pct": 85.71 },
+    "statements": { "total": 185, "covered": 176, "skipped": 0, "pct": 95.13 },
+    "branches": { "total": 21, "covered": 16, "skipped": 0, "pct": 76.19 }
+  }
 }
