@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session as DBSession
 from app.auth import current_user
 from app.database import get_db
 from app.models import CatalogTerm, User, doctor_specializations
+from app.routers.doctors import doctor_card
 
 router = APIRouter(prefix="/api", tags=["search"])
 
@@ -94,13 +95,11 @@ def search_doctors(
             .order_by(User.full_name.asc(), User.id.asc())
             .all()
         )
+        spec_names = {s.id: s.name for s in active_specs}
         for d in rows:
+            matched = sorted(doctor_specs[d.id] & active_spec_set)
             doctors.append(
-                {
-                    "id": d.id,
-                    "full_name": d.full_name,
-                    "specialization_ids": sorted(doctor_specs[d.id] & active_spec_set),
-                }
+                doctor_card(d, [{"id": sid, "name": spec_names[sid]} for sid in matched])
             )
 
     total = len(doctors)

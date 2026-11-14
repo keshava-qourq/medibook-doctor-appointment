@@ -1,4 +1,5 @@
 import { NavLink, Navigate, Outlet, Route, Routes, useNavigate } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import type { ReactNode } from "react";
 
@@ -8,6 +9,7 @@ import { AuthProvider, RequireRole, useAuth } from "@/lib/auth";
 import SignIn from "@/screens/SignIn";
 import Register from "@/screens/Register";
 import FindADoctor from "@/screens/FindADoctor";
+import DoctorProfile from "@/screens/DoctorProfile";
 import MyAppointments from "@/screens/MyAppointments";
 import DoctorSchedule from "@/screens/DoctorSchedule";
 import DoctorAvailability from "@/screens/DoctorAvailability";
@@ -99,13 +101,26 @@ function guarded(roles: Role[], element: ReactNode) {
   return <RequireRole roles={roles}>{element}</RequireRole>;
 }
 
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false, refetchOnWindowFocus: false } },
+});
+
 export default function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AppRoutes />
+    </QueryClientProvider>
+  );
+}
+
+function AppRoutes() {
   return (
     <AuthProvider>
       <Routes>
         <Route element={<AppShellLayout />}>
           <Route path="/search" element={guarded(["patient"], <FindADoctor />)} />
           <Route path="/find-a-doctor" element={guarded(["patient"], <FindADoctor />)} />
+          <Route path="/doctors/:doctorId" element={guarded(["patient"], <DoctorProfile />)} />
           <Route path="/my-appointments" element={guarded(["patient"], <MyAppointments />)} />
           <Route path="/profile" element={guarded(["patient"], <Profile />)} />
           <Route path="/my-profile" element={guarded(["patient"], <Profile />)} />

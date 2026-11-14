@@ -64,6 +64,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             conn.exec_driver_sql("ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(32)")
             conn.exec_driver_sql("ALTER TABLE users ADD COLUMN IF NOT EXISTS date_of_birth DATE")
             conn.exec_driver_sql("ALTER TABLE users ADD COLUMN IF NOT EXISTS gender VARCHAR(32)")
+            # Doctor directory fields are additive to an existing `users` table.
+            conn.exec_driver_sql("ALTER TABLE users ADD COLUMN IF NOT EXISTS qualifications TEXT")
+            conn.exec_driver_sql(
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS consultation_fee NUMERIC(10, 2)"
+            )
             # catalog_terms soft-delete flag is additive to an existing table.
             conn.exec_driver_sql(
                 "ALTER TABLE catalog_terms ADD COLUMN IF NOT EXISTS "
@@ -124,6 +129,7 @@ app.include_router(settings.public_router)
 app.include_router(settings.admin_router)
 app.include_router(search.router)
 app.include_router(doctors.router)
+app.include_router(doctors.public_router)
 
 
 @app.exception_handler(RequestValidationError)
