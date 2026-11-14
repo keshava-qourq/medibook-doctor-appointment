@@ -9,7 +9,6 @@
 
 **Delivered:**
 - US-002: Sign in, sign out and session expiry
-- US-005: Patient manages their own profile
 - US-006: Manage the clinic's specializations
 - US-007: Create and maintain doctor profiles
 - US-008: Configure clinic timezone and booking cutoff

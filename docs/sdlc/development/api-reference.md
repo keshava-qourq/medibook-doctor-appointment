@@ -11,14 +11,14 @@
 | POST | /api/admin/users | create_user | `backend/app/routers/admin_users.py:64` | — |
 | PATCH | /api/admin/users/{user_id} | update_user | `backend/app/routers/admin_users.py:135` | — |
 | POST | /api/admin/users/{user_id}/password | reset_password | `backend/app/routers/admin_users.py:162` | — |
-| GET | /api/appointments | list_appointments | `backend/app/routers/appointments.py:63` | — |
-| POST | /api/appointments | create_appointment | `backend/app/routers/appointments.py:111` | — |
-| GET | /api/appointments/{id} | read_appointment | `backend/app/routers/appointments.py:157` | — |
+| GET | /api/appointments | list_appointments | `backend/app/routers/appointments.py:99` | — |
+| POST | /api/appointments | create_appointment | `backend/app/routers/appointments.py:147` | — |
+| GET | /api/appointments/{id} | read_appointment | `backend/app/routers/appointments.py:220` | — |
 | POST | /api/auth/login | login | `backend/app/routers/auth.py:101` | Authenticate and open an additional session (AC-005, AC-006, AC-009). |
 | POST | /api/auth/logout | logout | `backend/app/routers/auth.py:114` | — |
 | GET | /api/auth/me | me | `backend/app/routers/auth.py:134` | The signed-in user's own profile. |
 | POST | /api/auth/register | register | `backend/app/routers/auth.py:67` | Create a patient account and open its first session (AC-001). |
-| GET | /api/consultations/{id} | read_consultation | `backend/app/routers/appointments.py:177` | Read one consultation the caller owns; 403 empty body otherwise. |
+| GET | /api/consultations/{id} | read_consultation | `backend/app/routers/appointments.py:240` | Read one consultation the caller owns; 403 empty body otherwise. |
 | GET | /api/doctors/me/exceptions | list_exceptions | `backend/app/routers/availability.py:386` | — |
 | POST | /api/doctors/me/exceptions | create_exception | `backend/app/routers/availability.py:402` | — |
 | DELETE | /api/doctors/me/exceptions/{id} | delete_exception | `backend/app/routers/availability.py:474` | — |
@@ -28,7 +28,7 @@
 | PATCH | /api/patients/me | update_me | `backend/app/routers/patients.py:39` | — |
 | POST | /api/patients/me/password | change_password | `backend/app/routers/patients.py:54` | — |
 | GET | /api/search/doctors | search_doctors | `backend/app/routers/search.py:57` | — |
-| GET | /health | health | `backend/app/main.py:167` | Liveness probe reporting the configured backing services. |
+| GET | /health | health | `backend/app/main.py:171` | Liveness probe reporting the configured backing services. |
 | GET | /owned-missing | owned_missing | `backend/tests/unit/test_auth_core.py:73` | — |
 | GET | /owned/{owner_id} | owned | `backend/tests/unit/test_auth_core.py:68` | — |
 | GET | /whoami | whoami | `backend/tests/unit/test_auth_core.py:58` | — |
@@ -69,5 +69,5 @@
 <!-- sdlc:auto:end drift -->
 
 <!-- sdlc:auto:start source -->
-Generated from commit `ca19136`
+Generated from commit `a9c0e53`
 <!-- sdlc:auto:end source -->

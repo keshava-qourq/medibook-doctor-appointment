@@ -3,9 +3,9 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-437 tests · Passed 400 · Failed 0 · Skipped 37 · Not run 0
+480 tests · Passed 436 · Failed 1 · Skipped 43 · Not run 0
 
-Acceptance criteria covered: 64/129 · passing: 61/129
+Acceptance criteria covered: 76/129 · passing: 72/129
 <!-- sdlc:auto:end summary -->
 
 <!-- sdlc:auto:start tests -->
@@ -447,7 +447,7 @@ Acceptance criteria covered: 64/129 · passing: 61/129
 | AC-027 | test_ac027_empty_or_missing_specialization_ids_is_422_and_writes_nothing[body1] | Integration | Passed | `backend/tests/unit/test_doctor_profile.py` |
 | AC-028 | test_ac028_inactive_doctor_is_absent_from_discovery_and_unbookable | Integration | Passed | `backend/tests/unit/test_doctor_profile.py` |
 | AC-029 | test_ac029_count_is_zero_when_the_doctor_stays_active_or_was_already_inactive | Integration | Passed | `backend/tests/unit/test_doctor_profile.py` |
-| AC-029 | test_ac029_deactivation_reports_the_count_of_future_booked_appointments | Integration | Passed | `backend/tests/unit/test_doctor_profile.py` |
+| AC-029 | test_ac029_deactivation_reports_the_count_of_future_booked_appointments | Integration | Failed | `backend/tests/unit/test_doctor_profile.py` |
 | AC-029, NFR-026 | test_ac029_nfr026_future_appointments_survive_deactivation_and_stay_readable | Integration | Passed | `backend/tests/unit/test_doctor_profile.py` |
 | — | test_ac_appointment_of_another_patient_is_403_empty_body | Integration | Passed | `backend/tests/unit/test_doctor_profile.py` |
 | — | test_ac_booking_is_patient_only_and_refuses_a_duplicate_slot_with_409 | Integration | Passed | `backend/tests/unit/test_doctor_profile.py` |
@@ -530,6 +530,66 @@ Acceptance criteria covered: 64/129 · passing: 61/129
 | AC-121 | test_ac121_every_instant_uses_one_iso8601_format_with_an_explicit_offset | Integration | Passed | `backend/tests/integration/test_language_timezone_acceptance.py` |
 | NFR-016 | test_nfr016_backups_and_pitr_are_infrastructure | Integration | Skipped | `backend/tests/integration/test_language_timezone_acceptance.py` |
 | NFR-017 | test_nfr017_sizing_is_infrastructure | Integration | Skipped | `backend/tests/integration/test_language_timezone_acceptance.py` |
+
+## Sprint 5
+
+### US-015: System generates discrete bookable slots that hold exactly one patient
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-057 | test_ac057_half_hour_day_with_a_break_offers_only_the_expected_slots | Integration | Passed | `backend/tests/integration/test_public_availability_acceptance.py` |
+| AC-058 | test_ac058_a_booked_slot_shows_as_unavailable_to_a_second_patient | Integration | Passed | `backend/tests/integration/test_public_availability_acceptance.py` |
+| AC-059 | test_ac059_an_elapsed_slot_is_absent_from_today | Integration | Passed | `backend/tests/integration/test_public_availability_acceptance.py` |
+| AC-060 | test_ac060_unavailable_exception_removes_every_slot_in_its_range | Integration | Passed | `backend/tests/integration/test_public_availability_acceptance.py` |
+| — | test_availability_requires_a_bearer_token_401_detail | Integration | Passed | `backend/tests/integration/test_public_availability_acceptance.py` |
+| NFR-016 | test_nfr016_backups_and_pitr_are_infrastructure | Integration | Skipped | `backend/tests/integration/test_public_availability_acceptance.py` |
+| NFR-017 | test_nfr017_sizing_is_infrastructure | Integration | Skipped | `backend/tests/integration/test_public_availability_acceptance.py` |
+
+### US-016: Patient views freshly refreshed slot availability
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-061 | PatientAvailability > [AC-061] fetches slots fresh on open and renders a taken slot as not bookable | Unit | Passed | `frontend/src/screens/PatientAvailability.test.tsx` |
+| AC-062 | PatientAvailability > [AC-062] a short refetch interval updates the list so a newly taken slot becomes unavailable | Unit | Passed | `frontend/src/screens/PatientAvailability.test.tsx` |
+| AC-063 | PatientAvailability > [AC-063] changing the date clears the previous slots and fetches fresh for the new date | Unit | Passed | `frontend/src/screens/PatientAvailability.test.tsx` |
+| AC-063 | PatientAvailability > [AC-063] changing the doctor clears the previous slots and fetches the new selection fresh | Unit | Passed | `frontend/src/screens/PatientAvailability.test.tsx` |
+| AC-063 | PatientAvailability > [AC-063] slot times are shown in the clinic timezone, never the device timezone | Unit | Passed | `frontend/src/screens/PatientAvailability.test.tsx` |
+| AC-064 | PatientAvailability > [AC-064] shows an explicit error and renders no bookable slot when availability cannot be fetched | Unit | Passed | `frontend/src/screens/PatientAvailability.test.tsx` |
+| NFR-023 | PatientAvailability > [NFR-023] prompts for a doctor and date before any fetch | Unit | Passed | `frontend/src/screens/PatientAvailability.test.tsx` |
+| AC-061 | test_ac061_a_slot_another_patient_just_booked_is_already_unavailable_on_fetch | Integration | Passed | `backend/tests/integration/test_availability_refresh_acceptance.py` |
+| AC-062 | test_ac062_a_refetch_reflects_a_slot_taken_in_the_meantime | Integration | Passed | `backend/tests/integration/test_availability_refresh_acceptance.py` |
+| AC-063 | test_ac063_each_fetch_returns_only_the_selected_date_range | Integration | Passed | `backend/tests/integration/test_availability_refresh_acceptance.py` |
+| AC-063 | test_ac063_each_fetch_returns_only_the_selected_doctor | Integration | Passed | `backend/tests/integration/test_availability_refresh_acceptance.py` |
+| AC-064 | test_ac064_an_unauthenticated_fetch_fails_and_returns_no_bookable_slots | Integration | Passed | `backend/tests/integration/test_availability_refresh_acceptance.py` |
+| AC-064 | test_ac064_an_unknown_doctor_yields_an_empty_list_with_nothing_bookable | Integration | Passed | `backend/tests/integration/test_availability_refresh_acceptance.py` |
+| NFR-015 | test_nfr015_availability_is_a_plain_polled_get_not_a_push_channel | Integration | Passed | `backend/tests/integration/test_availability_refresh_acceptance.py` |
+| NFR-015 | test_nfr015_booking_transaction_is_the_authoritative_guard_against_a_stale_list | Integration | Passed | `backend/tests/integration/test_availability_refresh_acceptance.py` |
+| NFR-016 | test_nfr016_backups_and_pitr_are_infrastructure | Integration | Skipped | `backend/tests/integration/test_availability_refresh_acceptance.py` |
+| NFR-017 | test_nfr017_sizing_is_infrastructure | Integration | Skipped | `backend/tests/integration/test_availability_refresh_acceptance.py` |
+
+### US-017: Patient books an appointment slot that can never be double-booked
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-065 | test_ac065_patient_books_an_open_slot_and_it_appears_with_the_clinic_details | Integration | Passed | `backend/tests/integration/test_booking_acceptance.py` |
+| AC-066 | test_ac066_second_booking_of_the_same_slot_is_slot_taken_and_only_one_exists | Integration | Passed | `backend/tests/integration/test_booking_acceptance.py` |
+| AC-067 | test_ac067_a_failed_booking_leaves_no_partial_row_and_the_slot_stays_bookable | Integration | Passed | `backend/tests/integration/test_booking_acceptance.py` |
+| AC-068 | test_ac068_same_patient_rebooking_is_duplicate_appointment_pointing_to_the_existing | Integration | Passed | `backend/tests/integration/test_booking_acceptance.py` |
+| AC-069 | test_ac069_confirmation_states_in_person_at_the_clinic_with_no_online_option | Integration | Passed | `backend/tests/integration/test_booking_acceptance.py` |
+| NFR-013 | test_nfr013_no_booking_or_appointment_response_carries_a_payment_field | Integration | Passed | `backend/tests/integration/test_booking_acceptance.py` |
+| NFR-014 | test_nfr014_two_bookings_for_one_slot_leave_exactly_one_and_no_partial_row | Integration | Passed | `backend/tests/integration/test_booking_acceptance.py` |
+| NFR-016 | test_nfr016_backups_and_pitr_are_infrastructure | Integration | Skipped | `backend/tests/integration/test_booking_acceptance.py` |
+| NFR-017 | test_nfr017_sizing_is_infrastructure | Integration | Skipped | `backend/tests/integration/test_booking_acceptance.py` |
+| AC-065 | test_ac065_booking_returns_full_confirmation_and_lists | Integration | Passed | `backend/tests/unit/test_appointment_booking.py` |
+| AC-065 | test_ac065_reason_is_optional | Integration | Passed | `backend/tests/unit/test_appointment_booking.py` |
+| AC-066 | test_ac066_second_booking_same_doctor_slot_is_slot_taken | Integration | Passed | `backend/tests/unit/test_appointment_booking.py` |
+| AC-067 | test_ac067_failed_booking_leaves_slot_open_to_another_patient | Integration | Passed | `backend/tests/unit/test_appointment_booking.py` |
+| AC-068 | test_ac068_same_patient_same_slot_is_duplicate_appointment | Integration | Passed | `backend/tests/unit/test_appointment_booking.py` |
+| AC-069 | test_ac069_confirmation_is_in_person_only | Integration | Passed | `backend/tests/unit/test_appointment_booking.py` |
+| — | test_cutoff_passed_within_booking_cutoff_hours | Integration | Passed | `backend/tests/unit/test_appointment_booking.py` |
+| — | test_missing_token_is_401_detail | Integration | Passed | `backend/tests/unit/test_appointment_booking.py` |
+| NFR-013 | test_nfr013_no_payment_field_in_request_or_response | Integration | Passed | `backend/tests/unit/test_appointment_booking.py` |
+| — | test_wrong_role_is_403_empty_body | Integration | Passed | `backend/tests/unit/test_appointment_booking.py` |
 
 ## Project setup
 
