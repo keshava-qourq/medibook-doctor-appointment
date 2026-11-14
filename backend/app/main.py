@@ -18,7 +18,17 @@ from fastapi.responses import JSONResponse, Response
 from app import models  # noqa: F401 -- imported so the tables register before create_all
 from app.database import Base, SessionLocal, engine
 from app.errors import EmptyBodyHTTPError
-from app.routers import admin_users, appointments, auth
+from app.routers import (
+    admin_users,
+    appointments,
+    auth,
+    doctors,
+    patients,
+    search,
+    settings,
+    specializations,
+)
+from app.routers.settings import get_or_create_settings
 from app.security import validate_session_idle_minutes
 from app.seed import seed_startup_users
 from app.services import configured_services
@@ -46,9 +56,25 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         with engine.begin() as conn:
             conn.exec_driver_sql("CREATE EXTENSION IF NOT EXISTS citext")
     Base.metadata.create_all(bind=engine)
+    if engine.dialect.name == "postgresql":
+        # The patient-profile columns are additive to an existing `users` table that
+        # predates them; create_all never alters a table that already exists, so add
+        # them idempotently and backward-compatibly here.
+        with engine.begin() as conn:
+            conn.exec_driver_sql("ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(32)")
+            conn.exec_driver_sql("ALTER TABLE users ADD COLUMN IF NOT EXISTS date_of_birth DATE")
+            conn.exec_driver_sql("ALTER TABLE users ADD COLUMN IF NOT EXISTS gender VARCHAR(32)")
+            # catalog_terms soft-delete flag is additive to an existing table.
+            conn.exec_driver_sql(
+                "ALTER TABLE catalog_terms ADD COLUMN IF NOT EXISTS "
+                "is_deleted BOOLEAN NOT NULL DEFAULT FALSE"
+            )
     db = SessionLocal()
     try:
         seed_startup_users(db)
+        # Seed the single clinic-settings row idempotently so the documented
+        # default (UTC, timezone_confirmed=false) is readable before any save.
+        get_or_create_settings(db)
     finally:
         db.close()
     yield
@@ -84,13 +110,25 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(admin_users.router, prefix="/api/admin", tags=["admin"])
 app.include_router(appointments.router)
+app.include_router(patients.router)
+app.include_router(specializations.public_router)
+app.include_router(specializations.admin_router)
+app.include_router(settings.public_router)
+app.include_router(settings.admin_router)
+app.include_router(search.router)
+app.include_router(doctors.router)
 
 
 @app.exception_handler(RequestValidationError)
 async def validation_error_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
     """Invalid input returns 422 listing each offending field, keyed by field name."""
     detail = [
-        {"field": str(err["loc"][-1]), "msg": err.get("msg", "invalid")} for err in exc.errors()
+        {
+            "field": str(err["loc"][-1]),
+            "msg": err.get("msg", "invalid"),
+            "message": err.get("msg", "invalid"),
+        }
+        for err in exc.errors()
     ]
     return JSONResponse(status_code=422, content={"detail": detail})
 

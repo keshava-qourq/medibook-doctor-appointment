@@ -5,9 +5,9 @@ the opaque bearer token issued at login, never the raw token.
 """
 
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 
-from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, String
+from sqlalchemy import Boolean, Column, Date, DateTime, Enum, ForeignKey, Integer, String, Table
 from sqlalchemy.dialects.postgresql import CITEXT
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import TypeDecorator
@@ -50,6 +50,8 @@ class User(Base):
     email: Mapped[str] = mapped_column(CIText(), unique=True, nullable=False, index=True)
     full_name: Mapped[str] = mapped_column(String(255), nullable=False)
     phone: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    date_of_birth: Mapped[date | None] = mapped_column(Date, nullable=True)
+    gender: Mapped[str | None] = mapped_column(String(32), nullable=True)
     role: Mapped[str] = mapped_column(Enum(*ROLES, name="user_role"), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     # Bcrypt hash only; no plain-text or reversible password is ever stored (NFR-001).
@@ -57,6 +59,77 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
 
     sessions: Mapped[list["Session"]] = relationship(back_populates="user")
+
+
+class Specialization(Base):
+    """A medical specialization. Name is case-insensitive unique (citext on
+    Postgres), stored as given. Soft-deactivated via `is_active`, never hard
+    deleted while referenced (NFR-026)."""
+
+    __tablename__ = "specializations"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid4)
+    name: Mapped[str] = mapped_column(CIText(), unique=True, nullable=False, index=True)
+    description: Mapped[str | None] = mapped_column(String, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+
+term_specializations = Table(
+    "term_specializations",
+    Base.metadata,
+    Column("term_id", String(36), ForeignKey("catalog_terms.id"), primary_key=True),
+    Column("specialization_id", String(36), ForeignKey("specializations.id"), primary_key=True),
+)
+
+
+class CatalogTerm(Base):
+    """A disease/symptom/specialization catalogue term mapped to one or more
+    specializations. Deactivating or deleting a specialization never removes the
+    term or its mapping (NFR-026)."""
+
+    __tablename__ = "catalog_terms"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid4)
+    term: Mapped[str] = mapped_column(CIText(), nullable=False, index=True)
+    entry_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    is_seeded: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # Soft-delete: a deleted term stops resolving and stops appearing in suggest,
+    # but the row stays so already-booked appointments that reference it are
+    # untouched (NFR-026).
+    is_deleted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+    specializations: Mapped[list["Specialization"]] = relationship(
+        secondary=term_specializations, lazy="selectin"
+    )
+
+
+doctor_specializations = Table(
+    "doctor_specializations",
+    Base.metadata,
+    Column("doctor_id", String(36), ForeignKey("users.id"), primary_key=True),
+    Column("specialization_id", String(36), ForeignKey("specializations.id"), primary_key=True),
+)
+
+
+class ClinicSettings(Base):
+    """The single clinic-wide settings row (a singleton, keyed by a fixed id).
+
+    The clinic timezone defaults to ``UTC`` with ``timezone_confirmed=False``
+    until an administrator saves settings; all date math (slot generation,
+    elapsed-slot filtering, cutoff, "today") resolves in this configured IANA
+    timezone. ``booking_cutoff_hours`` is exposed here; cutoff enforcement
+    itself lives in the appointments surface.
+    """
+
+    __tablename__ = "clinic_settings"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    timezone: Mapped[str] = mapped_column(String(64), nullable=False, default="UTC")
+    booking_cutoff_hours: Mapped[int] = mapped_column(Integer, nullable=False, default=24)
+    timezone_confirmed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
 
 
 class Session(Base):
@@ -77,4 +150,14 @@ class Session(Base):
     user: Mapped["User"] = relationship(back_populates="sessions")
 
 
-__all__ = ["Base", "User", "Session", "ROLES"]
+__all__ = [
+    "Base",
+    "User",
+    "Session",
+    "Specialization",
+    "CatalogTerm",
+    "ClinicSettings",
+    "term_specializations",
+    "doctor_specializations",
+    "ROLES",
+]

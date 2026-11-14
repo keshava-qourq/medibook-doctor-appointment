@@ -53,9 +53,7 @@ def _parse_idle_minutes(raw: str) -> int:
     try:
         value = int(raw)
     except ValueError as exc:
-        raise ValueError(
-            f"SESSION_IDLE_MINUTES must be a positive integer, got {raw!r}"
-        ) from exc
+        raise ValueError(f"SESSION_IDLE_MINUTES must be a positive integer, got {raw!r}") from exc
     if value <= 0:
         raise ValueError(f"SESSION_IDLE_MINUTES must be a positive integer, got {raw!r}")
     return value

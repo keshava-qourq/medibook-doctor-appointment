@@ -170,6 +170,28 @@ def test_ac011_password_reset_missing_user_is_404_empty_body_and_weak_is_422(
     assert weak.json()["password"] == "weak_password"
 
 
+def test_ac011_weak_reset_422_is_keyed_by_field_name_and_writes_nothing(
+    db_session: DBSession, app_client: TestClient
+):
+    """[AC-011] A weak reissued password is refused 422 with the body keyed by the
+    offending field name (``{"password": "weak_password"}``) and the stored hash is
+    unchanged."""
+    admin = _make_user(db_session)
+    target = _make_user(db_session, role="doctor")
+    original_hash = target.password_hash
+
+    resp = app_client.post(
+        f"/api/admin/users/{target.id}/password",
+        headers=_auth(db_session, admin),
+        json={"password": "short"},
+    )
+
+    assert resp.status_code == 422
+    assert resp.json() == {"password": "weak_password"}
+    db_session.refresh(target)
+    assert target.password_hash == original_hash
+
+
 def test_ac011_accepts_contract_new_password_field(db_session: DBSession, app_client: TestClient):
     """The API contract and the e2e client send the reset password as
     `new_password`; the endpoint must accept it (AC-011)."""
