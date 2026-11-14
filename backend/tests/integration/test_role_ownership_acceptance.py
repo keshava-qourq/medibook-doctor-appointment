@@ -61,8 +61,12 @@ def _patient_token(client: TestClient) -> str:
     password = _password()
     reg = client.post(
         "/api/auth/register",
-        json={"full_name": "Role Patient", "email": email, "phone": "+15551112222",
-              "password": password},
+        json={
+            "full_name": "Role Patient",
+            "email": email,
+            "phone": "+15551112222",
+            "password": password,
+        },
     )
     assert reg.status_code == 201, reg.text
     return reg.json()["token"]
@@ -74,8 +78,12 @@ def _doctor_token(client: TestClient, admin_token: str) -> tuple[str, str]:
     created = client.post(
         "/api/admin/users",
         headers=_bearer(admin_token),
-        json={"full_name": "Role Doctor", "email": email, "role": "doctor",
-              "initial_password": password},
+        json={
+            "full_name": "Role Doctor",
+            "email": email,
+            "role": "doctor",
+            "initial_password": password,
+        },
     )
     assert created.status_code == 201, created.text
     login = client.post("/api/auth/login", json={"email": email, "password": password})
@@ -105,8 +113,12 @@ def test_ac014_patient_calling_admin_api_is_403_empty_body(
     creating = client.post(
         "/api/admin/users",
         headers=_bearer(patient_token),
-        json={"full_name": "Ghost", "email": _email("ghost"), "role": "doctor",
-              "initial_password": _password()},
+        json={
+            "full_name": "Ghost",
+            "email": _email("ghost"),
+            "role": "doctor",
+            "initial_password": _password(),
+        },
     )
     assert creating.status_code == 403
     assert creating.content == b""
@@ -130,11 +142,7 @@ def test_ac015_patient_cannot_read_another_patients_record_is_403_empty_body(
     import pytest
 
     template = next(
-        (
-            t
-            for t in ("/api/appointments/{id}", "/api/consultations/{id}")
-            if _has_route(client, t)
-        ),
+        (t for t in ("/api/appointments/{id}", "/api/consultations/{id}") if _has_route(client, t)),
         None,
     )
     if template is None:
@@ -189,9 +197,7 @@ def test_ac016_doctor_cannot_read_another_doctors_record_is_403_empty_body(
 # -- AC-017: unauthenticated API calls return 401 with a {"detail"} body -------
 
 
-def test_ac017_no_token_api_call_is_401_with_detail_body(
-    client: TestClient, db_session: DBSession
-):
+def test_ac017_no_token_api_call_is_401_with_detail_body(client: TestClient, db_session: DBSession):
     admin_token = _admin_token(client, db_session)  # ensures the admin route is reachable
 
     me = client.get("/api/auth/me")
