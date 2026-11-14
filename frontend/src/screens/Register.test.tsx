@@ -3,15 +3,27 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { AuthProvider, RequireRole } from "@/lib/auth";
+
 import Register from "./Register";
 
 function renderScreen() {
   return render(
     <MemoryRouter initialEntries={["/register"]}>
-      <Routes>
-        <Route path="/register" element={<Register />} />
-        <Route path="/search" element={<p>search landing</p>} />
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          <Route path="/register" element={<Register />} />
+          <Route
+            path="/search"
+            element={
+              <RequireRole roles={["patient"]}>
+                <p>search landing</p>
+              </RequireRole>
+            }
+          />
+          <Route path="/sign-in" element={<p>sign-in screen</p>} />
+        </Routes>
+      </AuthProvider>
     </MemoryRouter>,
   );
 }
@@ -40,10 +52,18 @@ describe("Register", () => {
 
   it("[AC-001] stores the token and navigates to the landing path", async () => {
     const token = crypto.randomUUID();
-    fetchMock.mockReturnValue(reply(201, { token, landing: "/search", user: {} }));
+    const patient = { id: "p1", full_name: "Jane Doe", email: "jane@example.com", role: "patient" };
+    // The same app shell as production: the landing is guarded, and the guard re-reads
+    // /api/auth/me after navigating. Before the fix this bounced to /sign-in.
+    fetchMock.mockImplementation((url: string) =>
+      String(url).includes("/api/auth/me")
+        ? reply(200, patient)
+        : reply(201, { token, landing: "/search", user: patient }),
+    );
     renderScreen();
     await fill();
     expect(await screen.findByText("search landing")).toBeInTheDocument();
+    expect(screen.queryByText("sign-in screen")).not.toBeInTheDocument();
     expect(localStorage.getItem("session_token")).toBe(token);
     const [url, init] = fetchMock.mock.calls[0];
     expect(String(url)).toContain("/api/auth/register");
