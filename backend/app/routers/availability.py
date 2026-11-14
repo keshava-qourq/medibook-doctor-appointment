@@ -353,7 +353,15 @@ def _covered_appointments(
     end_minute: int | None,
     tz: ZoneInfo,
 ) -> list[tuple[Appointment, str]]:
-    """Live appointments of this doctor that fall inside the excepted period."""
+    """Live appointments of this doctor that fall inside the excepted period.
+
+    A full-day leave is signalled by both ``start_minute`` and ``end_minute``
+    being ``None`` (no times were given), and then every appointment on the day
+    is covered. When times are given, validation guarantees both are present and
+    parseable, so a half-open window ``[start, end)`` is always used and the
+    whole-day fallback cannot over-cancel from a partial/unparsed time.
+    """
+    whole_day = start_minute is None and end_minute is None
     rows = db.execute(
         select(Appointment, User.full_name)
         .join(User, User.id == Appointment.patient_id)
@@ -369,9 +377,8 @@ def _covered_appointments(
         if local.date() != day:
             continue
         minute = local.hour * 60 + local.minute
-        if start_minute is not None and end_minute is not None:
-            if not (start_minute <= minute < end_minute):
-                continue
+        if not whole_day and not (start_minute <= minute < end_minute):
+            continue
         covered.append((appointment, patient_name))
     return covered
 

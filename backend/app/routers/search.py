@@ -20,11 +20,18 @@ from app.routers.doctors import doctor_card
 router = APIRouter(prefix="/api", tags=["search"])
 
 
-def _doctor_spec_map(db: DBSession, spec_ids: list[str]) -> dict[str, set[str]]:
-    """Map each doctor id to the subset of ``spec_ids`` it is associated with."""
+def _doctor_spec_map(
+    db: DBSession, spec_ids: list[str], doctor_ids: list[str]
+) -> dict[str, set[str]]:
+    """Map each of ``doctor_ids`` to the subset of ``spec_ids`` it is associated with."""
+    if not doctor_ids:
+        return {}
     stmt = select(
         doctor_specializations.c.doctor_id, doctor_specializations.c.specialization_id
-    ).where(doctor_specializations.c.specialization_id.in_(spec_ids))
+    ).where(
+        doctor_specializations.c.specialization_id.in_(spec_ids),
+        doctor_specializations.c.doctor_id.in_(doctor_ids),
+    )
     out: dict[str, set[str]] = {}
     for doctor_id, specialization_id in db.execute(stmt):
         out.setdefault(doctor_id, set()).add(specialization_id)
@@ -35,17 +42,15 @@ def _page(
     doctors: list[dict[str, object]],
     specializations: list[dict[str, object]],
     resolution: str,
-    limit: int,
-    offset: int,
+    total: int,
 ) -> dict[str, object]:
     """The search response shape: a page of doctor cards plus how the term resolved."""
-    page = doctors[offset : offset + limit]
     return {
-        "items": page,
-        "total": len(doctors),
+        "items": doctors,
+        "total": total,
         "resolution": resolution,
         "specializations": specializations,
-        "doctors": page,
+        "doctors": doctors,
     }
 
 
@@ -72,37 +77,46 @@ def search_doctors(
         else None
     )
     if row is None:
-        return _page([], [], "no_match", limit, offset)
+        return _page([], [], "no_match", 0)
 
     # Only active specializations resolve; deactivated ones are excluded (AC-025).
     active_specs = [s for s in row.specializations if s.is_active]
     specializations = [{"id": s.id, "name": s.name} for s in active_specs]
     if not active_specs:
-        return _page([], specializations, "no_specialist_available", limit, offset)
+        return _page([], specializations, "no_specialist_available", 0)
 
     spec_ids = [s.id for s in active_specs]
-    doctor_specs = _doctor_spec_map(db, spec_ids)
     spec_names = {s.id: s.name for s in active_specs}
-    rows = (
+
+    # Count and page the active doctors of these specializations at the database
+    # level rather than loading the whole matching set into memory.
+    base = (
         db.query(User)
         .filter(
-            User.id.in_(list(doctor_specs)),
+            User.id.in_(
+                select(doctor_specializations.c.doctor_id)
+                .where(doctor_specializations.c.specialization_id.in_(spec_ids))
+                .distinct()
+            ),
             User.role == "doctor",
             User.is_active.is_(True),
             User.profile_active.is_(True),
         )
         .order_by(User.full_name.asc(), User.id.asc())
-        .all()
     )
+    total = base.count()
+    rows = base.offset(offset).limit(limit).all()
+
+    doctor_specs = _doctor_spec_map(db, spec_ids, [d.id for d in rows])
     doctors = [
         doctor_card(
             d,
-            [{"id": sid, "name": spec_names[sid]} for sid in sorted(doctor_specs[d.id])],
+            [{"id": sid, "name": spec_names[sid]} for sid in sorted(doctor_specs.get(d.id, ()))],
         )
         for d in rows
     ]
-    resolution = "matched" if doctors else "no_specialist_available"
-    return _page(doctors, specializations, resolution, limit, offset)
+    resolution = "matched" if total else "no_specialist_available"
+    return _page(doctors, specializations, resolution, total)
 
 
 __all__ = ["router"]

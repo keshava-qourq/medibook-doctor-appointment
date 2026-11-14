@@ -20,6 +20,10 @@ from app.models import User
 MIN_PASSWORD_LENGTH = 8
 DEFAULT_SESSION_IDLE_MINUTES = 30
 
+# The effective idle timeout, resolved once from the environment on first use so
+# every request reads the same validated value rather than re-reading os.getenv.
+_CACHED_IDLE_MINUTES: int | None = None
+
 
 class WeakPasswordError(ValueError):
     """A password shorter than `MIN_PASSWORD_LENGTH` characters."""
@@ -74,22 +78,28 @@ def validate_session_idle_minutes() -> int:
 def session_idle_minutes() -> int:
     """How long a session may sit idle before it expires.
 
-    Read from the ``SESSION_IDLE_MINUTES`` environment variable (default 30).
-    A missing or non-numeric value falls back to the default so a bad env var
-    can never turn an authenticated request into a 500; ``validate_session_idle_minutes``
-    is called at startup to reject such a value loudly instead.
+    Read once at process start from the ``SESSION_IDLE_MINUTES`` environment
+    variable (default 30) and cached, so the value a request sees is exactly the
+    one ``validate_session_idle_minutes`` checked at startup. Caching closes the
+    split-source trap of re-reading ``os.getenv`` on every request: an operator
+    changing the env value mid-run cannot silently take effect unvalidated; the
+    change applies only on the next restart, which re-runs startup validation.
 
     The architecture ultimately specifies this as an administrator-configurable
     ``clinic_settings`` column; until that table exists it is sourced from the
     environment, which keeps the default (30) and deployment overrides working.
     """
-    raw = os.getenv("SESSION_IDLE_MINUTES")
-    if raw is None:
-        return DEFAULT_SESSION_IDLE_MINUTES
-    try:
-        return _parse_idle_minutes(raw)
-    except ValueError:
-        return DEFAULT_SESSION_IDLE_MINUTES
+    global _CACHED_IDLE_MINUTES
+    if _CACHED_IDLE_MINUTES is None:
+        raw = os.getenv("SESSION_IDLE_MINUTES")
+        if raw is None:
+            _CACHED_IDLE_MINUTES = DEFAULT_SESSION_IDLE_MINUTES
+        else:
+            try:
+                _CACHED_IDLE_MINUTES = _parse_idle_minutes(raw)
+            except ValueError:
+                _CACHED_IDLE_MINUTES = DEFAULT_SESSION_IDLE_MINUTES
+    return _CACHED_IDLE_MINUTES
 
 
 def _hash_token(raw_token: str) -> str:

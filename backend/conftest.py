@@ -16,7 +16,7 @@ if bcrypt is not None:
     _gensalt = bcrypt.gensalt
 
     def _cheap_gensalt(rounds: int = 4, prefix: bytes = b"2b") -> bytes:
-        return _gensalt(4, prefix)
+        return _gensalt(rounds, prefix)
 
     bcrypt.gensalt = _cheap_gensalt
 

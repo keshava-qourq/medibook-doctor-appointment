@@ -75,24 +75,36 @@ def list_appointments(
     """
     settings = get_or_create_settings(db)
     tz = _zone(settings.timezone)
-    rows = (
-        db.query(Appointment)
-        .filter((Appointment.patient_id == user.id) | (Appointment.doctor_id == user.id))
-        .all()
-    )
+    party = (Appointment.patient_id == user.id) | (Appointment.doctor_id == user.id)
     now = datetime.now(UTC)
-    upcoming = sorted(
-        (r for r in rows if _as_aware(r.slot_start) > now), key=lambda r: _as_aware(r.slot_start)
+
+    # Pagination is pushed into the query: upcoming items (slot_start > now) come
+    # first ascending, then past items descending, and only one page is loaded.
+    upcoming_q = (
+        db.query(Appointment)
+        .filter(party, Appointment.slot_start > now)
+        .order_by(Appointment.slot_start.asc())
     )
-    past = sorted(
-        (r for r in rows if _as_aware(r.slot_start) <= now),
-        key=lambda r: _as_aware(r.slot_start),
-        reverse=True,
+    past_q = (
+        db.query(Appointment)
+        .filter(party, Appointment.slot_start <= now)
+        .order_by(Appointment.slot_start.desc())
     )
-    ordered = upcoming + past
+    upcoming_total = upcoming_q.count()
+    past_total = past_q.count()
+
+    rows: list[Appointment] = []
+    if offset < upcoming_total:
+        rows = upcoming_q.offset(offset).limit(limit).all()
+        remaining = limit - len(rows)
+        if remaining > 0:
+            rows += past_q.limit(remaining).all()
+    else:
+        rows = past_q.offset(offset - upcoming_total).limit(limit).all()
+
     return {
-        "items": [_out(r, tz, settings.timezone) for r in ordered[offset : offset + limit]],
-        "total": len(ordered),
+        "items": [_out(r, tz, settings.timezone) for r in rows],
+        "total": upcoming_total + past_total,
     }
 
 
@@ -106,8 +118,10 @@ def create_appointment(
     settings = get_or_create_settings(db)
     tz = _zone(settings.timezone)
     doctor = db.get(User, payload.doctor_id)
-    bookable = doctor is not None and doctor.is_active and doctor.profile_active
-    if not bookable or doctor.role != "doctor":
+    if doctor is None:
+        raise EmptyBodyHTTPError(403)
+    bookable = doctor.is_active and doctor.profile_active and doctor.role == "doctor"
+    if not bookable:
         raise EmptyBodyHTTPError(403)
 
     slot_start = _as_aware(payload.slot_start)
