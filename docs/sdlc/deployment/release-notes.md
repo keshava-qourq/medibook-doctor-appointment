@@ -12,7 +12,6 @@
 - US-002: Sign in, sign out and session expiry
 - US-003: Administrator creates doctor and administrator accounts
 - US-004: Role-based access enforcement across every screen and API call
-- US-005: Patient manages their own profile
 - US-FIX-1: Fix the scaffold's failing checks
 
 ## e2fdb4bbb9af — 2026-11-13

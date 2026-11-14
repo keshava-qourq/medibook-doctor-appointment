@@ -3,9 +3,9 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-103 tests · Passed 94 · Failed 1 · Skipped 8 · Not run 0
+231 tests · Passed 209 · Failed 0 · Skipped 22 · Not run 0
 
-Acceptance criteria covered: 17/129 · passing: 13/129
+Acceptance criteria covered: 37/129 · passing: 32/129
 <!-- sdlc:auto:end summary -->
 
 <!-- sdlc:auto:start tests -->
@@ -40,7 +40,8 @@ Acceptance criteria covered: 17/129 · passing: 13/129
 | AC-010 | test_ac010_creates_active_account_hashed_password_and_echoes_initial_password[doctor] | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
 | AC-011 | test_ac011_accepts_contract_new_password_field | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
 | AC-011 | test_ac011_new_password_replaces_old_and_revokes_every_session | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
-| AC-011 | test_ac011_password_reset_missing_user_is_404_empty_body_and_weak_is_422 | Integration | Failed | `backend/tests/unit/test_admin_users.py` |
+| AC-011 | test_ac011_password_reset_missing_user_is_404_empty_body_and_weak_is_422 | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
+| AC-011 | test_ac011_weak_reset_422_is_keyed_by_field_name_and_writes_nothing | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
 | AC-012 | test_ac012_duplicate_email_case_insensitive_is_409_and_creates_nothing | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
 | AC-013 | test_ac013_non_admin_caller_gets_403_empty_body_and_creates_nothing | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
 | AC-013 | test_ac013_unauthenticated_caller_gets_401 | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
@@ -130,6 +131,160 @@ Acceptance criteria covered: 17/129 · passing: 13/129
 | AC-014, NFR-003 | [AC-014][NFR-003] a patient visiting an admin URL directly is denied the admin screen | E2E | Passed | `frontend/e2e/role-access.spec.ts` |
 | AC-017 | [AC-017] a no-token API call returns 401 and does not leak data | E2E | Passed | `frontend/e2e/role-access.spec.ts` |
 | AC-017, NFR-003 | [AC-017][NFR-003] an unauthenticated visitor to a protected route is redirected to sign-in | E2E | Passed | `frontend/e2e/role-access.spec.ts` |
+
+## Sprint 2
+
+### US-005: Patient manages their own profile
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-018 | test_ac018_patient_reads_own_profile_fields | Integration | Passed | `backend/tests/integration/test_patient_profile_acceptance.py` |
+| AC-018 | test_ac018_reading_profile_without_a_token_is_401 | Integration | Passed | `backend/tests/integration/test_patient_profile_acceptance.py` |
+| AC-019 | test_ac019_update_profile_persists_and_is_reflected_on_fresh_get | Integration | Passed | `backend/tests/integration/test_patient_profile_acceptance.py` |
+| AC-020 | test_ac020_password_change_succeeds_old_fails_new_logs_in | Integration | Passed | `backend/tests/integration/test_patient_profile_acceptance.py` |
+| AC-020 | test_ac020_weak_new_password_is_rejected_422_and_original_still_logs_in | Integration | Passed | `backend/tests/integration/test_patient_profile_acceptance.py` |
+| AC-021 | test_ac021_wrong_current_password_rejected_and_original_still_logs_in | Integration | Passed | `backend/tests/integration/test_patient_profile_acceptance.py` |
+| NFR-001 | test_nfr001_changed_password_stored_only_as_bcrypt_hash | Integration | Passed | `backend/tests/integration/test_patient_profile_acceptance.py` |
+| NFR-022 | test_nfr022_invalid_profile_update_is_422_keyed_by_field_and_writes_nothing | Integration | Passed | `backend/tests/integration/test_patient_profile_acceptance.py` |
+| AC-018 | test_ac018_get_me_returns_profile_fields | Integration | Passed | `backend/tests/unit/test_patients.py` |
+| AC-018 | test_ac018_get_me_without_token_is_401 | Integration | Passed | `backend/tests/unit/test_patients.py` |
+| AC-019 | test_ac019_patch_me_does_not_mutate_email | Integration | Passed | `backend/tests/unit/test_patients.py` |
+| AC-019 | test_ac019_patch_me_updates_fields_and_persists | Integration | Passed | `backend/tests/unit/test_patients.py` |
+| AC-020 | test_ac020_new_hash_is_bcrypt_and_not_plaintext | Integration | Passed | `backend/tests/unit/test_patients.py` |
+| AC-020 | test_ac020_password_change_with_correct_current_replaces_hash | Integration | Passed | `backend/tests/unit/test_patients.py` |
+| AC-021 | test_ac021_wrong_current_password_is_422_field_and_writes_nothing | Integration | Passed | `backend/tests/unit/test_patients.py` |
+| NFR-022 | test_nfr022_invalid_patch_lists_offending_field_and_writes_nothing | Integration | Passed | `backend/tests/unit/test_patients.py` |
+| — | test_non_patient_role_is_403_empty_body | Integration | Passed | `backend/tests/unit/test_patients.py` |
+| — | test_weak_new_password_is_422_weak_password | Integration | Passed | `backend/tests/unit/test_patients.py` |
+| AC-018 | [AC-018] a registered, signed-in patient reads their stored profile fields | E2E | Passed | `frontend/e2e/patient-profile.spec.ts` |
+| AC-019 | [AC-019] updating name/phone/dob/gender persists and is reflected on a fresh GET | E2E | Passed | `frontend/e2e/patient-profile.spec.ts` |
+| AC-020 | [AC-020] changing password with correct current + valid new succeeds; old fails, new logs in | E2E | Passed | `frontend/e2e/patient-profile.spec.ts` |
+| AC-021 | [AC-021] a wrong current password is rejected and the original password still logs in | E2E | Passed | `frontend/e2e/patient-profile.spec.ts` |
+
+### US-006: Manage the clinic's specializations
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-022 | test_ac022_admin_creates_specialization_and_it_appears_in_the_list | Integration | Passed | `backend/tests/integration/test_specialization_acceptance.py` |
+| AC-023 | test_ac023_duplicate_name_case_insensitive_is_409_and_creates_nothing | Integration | Passed | `backend/tests/integration/test_specialization_acceptance.py` |
+| AC-024 | test_ac024_delete_referenced_is_refused_with_counts_then_deactivation_succeeds | Integration | Passed | `backend/tests/integration/test_specialization_acceptance.py` |
+| AC-025 | test_ac025_deactivated_drops_from_active_listing_but_references_remain_viewable | Integration | Passed | `backend/tests/integration/test_specialization_acceptance.py` |
+| NFR-016 | test_nfr016_backups_and_pitr_are_infrastructure | Integration | Skipped | `backend/tests/integration/test_specialization_acceptance.py` |
+| NFR-017 | test_nfr017_sizing_is_infrastructure | Integration | Skipped | `backend/tests/integration/test_specialization_acceptance.py` |
+| NFR-026 | test_nfr026_deactivated_specialization_and_its_references_are_preserved_not_deleted | Integration | Passed | `backend/tests/integration/test_specialization_acceptance.py` |
+| AC-022 | test_ac022_create_saves_and_appears_in_listing | Integration | Passed | `backend/tests/unit/test_specializations.py` |
+| AC-022 | test_ac022_create_without_description_saves | Integration | Passed | `backend/tests/unit/test_specializations.py` |
+| AC-023 | test_ac023_case_insensitive_duplicate_is_409_and_writes_nothing | Integration | Passed | `backend/tests/unit/test_specializations.py` |
+| AC-024 | test_ac024_catalog_term_maps_specialization_and_is_listed | Integration | Passed | `backend/tests/unit/test_specializations.py` |
+| AC-024 | test_ac024_delete_missing_is_404_empty_body | Integration | Passed | `backend/tests/unit/test_specializations.py` |
+| AC-024 | test_ac024_delete_referenced_is_409_with_counts_and_deactivation_allowed | Integration | Passed | `backend/tests/unit/test_specializations.py` |
+| AC-024 | test_ac024_delete_unreferenced_is_204 | Integration | Passed | `backend/tests/unit/test_specializations.py` |
+| AC-025 | test_ac025_deactivated_excluded_from_active_listing | Integration | Passed | `backend/tests/unit/test_specializations.py` |
+| AC-025 | test_ac025_mapping_survives_specialization_deactivation | Integration | Passed | `backend/tests/unit/test_specializations.py` |
+| — | test_catalog_terms_require_admin_role | Integration | Passed | `backend/tests/unit/test_specializations.py` |
+| — | test_create_requires_admin_role | Integration | Passed | `backend/tests/unit/test_specializations.py` |
+| — | test_list_returns_items_total_and_paginates | Integration | Passed | `backend/tests/unit/test_specializations.py` |
+| — | test_listing_requires_authentication | Integration | Passed | `backend/tests/unit/test_specializations.py` |
+| — | test_name_stored_as_given | Integration | Passed | `backend/tests/unit/test_specializations.py` |
+| — | test_patch_missing_is_404_empty_body | Integration | Passed | `backend/tests/unit/test_specializations.py` |
+| — | test_patch_rename_to_existing_is_409 | Integration | Passed | `backend/tests/unit/test_specializations.py` |
+| AC-022 | [AC-022] an admin creates a specialization and it appears in the list | E2E | Passed | `frontend/e2e/specializations.spec.ts` |
+| AC-023 | [AC-023] a duplicate name (case-insensitive) is rejected 409 duplicate_name and no second row is written | E2E | Passed | `frontend/e2e/specializations.spec.ts` |
+| AC-024, NFR-026 | [AC-024][NFR-026] deleting a referenced specialization is refused with counts, and deactivation succeeds instead | E2E | Passed | `frontend/e2e/specializations.spec.ts` |
+| AC-025, NFR-026 | [AC-025][NFR-026] a deactivated specialization drops from active listing while prior references remain viewable | E2E | Passed | `frontend/e2e/specializations.spec.ts` |
+
+### US-008: Configure clinic timezone and booking cutoff
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-030 | test_ac030_admin_saves_timezone_and_get_reflects_it_confirmed | Integration | Passed | `backend/tests/integration/test_settings_acceptance.py` |
+| AC-030 | test_ac030_non_admin_cannot_write_settings_is_403_empty_body | Integration | Passed | `backend/tests/integration/test_settings_acceptance.py` |
+| AC-031 | test_ac031_cutoff_change_is_returned_immediately | Integration | Passed | `backend/tests/integration/test_settings_acceptance.py` |
+| AC-032 | test_ac032_invalid_cutoff_is_422_and_prior_value_unchanged | Integration | Passed | `backend/tests/integration/test_settings_acceptance.py` |
+| AC-033 | test_ac033_default_state_is_utc_unconfirmed | Integration | Passed | `backend/tests/integration/test_settings_acceptance.py` |
+| NFR-016 | test_nfr016_backups_and_pitr_are_infrastructure | Integration | Skipped | `backend/tests/integration/test_settings_acceptance.py` |
+| NFR-017 | test_nfr017_sizing_is_infrastructure | Integration | Skipped | `backend/tests/integration/test_settings_acceptance.py` |
+| NFR-020 | test_nfr020_timezone_is_labelled_in_the_settings_payload | Integration | Passed | `backend/tests/integration/test_settings_acceptance.py` |
+| NFR-022 | test_nfr022_invalid_settings_save_is_422_keyed_by_field_and_writes_nothing | Integration | Passed | `backend/tests/integration/test_settings_acceptance.py` |
+| AC-030 | test_ac030_put_valid_timezone_saves_confirms_and_is_read_back | Integration | Passed | `backend/tests/unit/test_settings.py` |
+| AC-030 | test_ac030_unknown_timezone_is_422_and_nothing_written | Integration | Passed | `backend/tests/unit/test_settings.py` |
+| AC-031 | test_ac031_booking_cutoff_takes_effect_immediately | Integration | Passed | `backend/tests/unit/test_settings.py` |
+| AC-032 | test_ac032_negative_cutoff_is_422_and_previous_cutoff_stays | Integration | Passed | `backend/tests/unit/test_settings.py` |
+| AC-032 | test_ac032_non_numeric_cutoff_is_422_and_previous_cutoff_stays | Integration | Passed | `backend/tests/unit/test_settings.py` |
+| AC-033 | test_ac033_defaults_to_utc_unconfirmed_before_any_save | Integration | Passed | `backend/tests/unit/test_settings.py` |
+| — | test_get_settings_requires_authentication | Integration | Passed | `backend/tests/unit/test_settings.py` |
+| — | test_put_settings_requires_admin_role | Integration | Passed | `backend/tests/unit/test_settings.py` |
+| — | test_put_settings_requires_authentication | Integration | Passed | `backend/tests/unit/test_settings.py` |
+| AC-030 | [AC-030] an admin saves a timezone and GET /api/settings reflects it with timezone_confirmed=true | E2E | Passed | `frontend/e2e/clinic-settings.spec.ts` |
+| AC-031 | [AC-031] changing booking_cutoff_hours returns the new value immediately | E2E | Passed | `frontend/e2e/clinic-settings.spec.ts` |
+| AC-032, NFR-022 | [AC-032][NFR-022] a negative or non-numeric cutoff is rejected 422 and the prior value is unchanged | E2E | Passed | `frontend/e2e/clinic-settings.spec.ts` |
+| AC-033 | [AC-033] the default state before any save is timezone=UTC with timezone_confirmed=false | E2E | Passed | `frontend/e2e/clinic-settings.spec.ts` |
+
+### US-010: Administrator edits the disease-to-specialization mapping
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-037 | test_ac037_new_term_resolves_to_its_linked_specializations | Integration | Passed | `backend/tests/integration/test_catalog_search_acceptance.py` |
+| AC-038 | test_ac038_editing_a_term_to_remove_all_specializations_is_rejected | Integration | Passed | `backend/tests/integration/test_catalog_search_acceptance.py` |
+| AC-038 | test_ac038_term_without_specialization_is_rejected_422_specialization_required | Integration | Passed | `backend/tests/integration/test_catalog_search_acceptance.py` |
+| AC-039 | test_ac039_term_mapped_to_two_specializations_returns_doctors_from_both | Integration | Passed | `backend/tests/integration/test_catalog_search_acceptance.py` |
+| AC-040 | test_ac040_deleted_term_disappears_from_suggest_and_no_longer_resolves | Integration | Passed | `backend/tests/integration/test_catalog_search_acceptance.py` |
+| AC-040, NFR-026 | test_ac040_nfr026_deleting_a_term_is_soft_and_history_remains_viewable | Integration | Passed | `backend/tests/integration/test_catalog_search_acceptance.py` |
+| NFR-012 | test_nfr012_suggest_is_deterministic_substring_not_fuzzy | Integration | Passed | `backend/tests/integration/test_catalog_search_acceptance.py` |
+| NFR-012 | test_nfr012_unknown_term_resolves_to_no_match_never_invented | Integration | Passed | `backend/tests/integration/test_catalog_search_acceptance.py` |
+| NFR-016 | test_nfr016_backups_and_pitr_are_infrastructure | Integration | Skipped | `backend/tests/integration/test_catalog_search_acceptance.py` |
+| NFR-017 | test_nfr017_sizing_is_infrastructure | Integration | Skipped | `backend/tests/integration/test_catalog_search_acceptance.py` |
+| AC-037 | test_ac037_create_saves_and_resolves_to_specializations | Integration | Passed | `backend/tests/unit/test_catalog.py` |
+| AC-038 | test_ac038_empty_specialization_list_is_422_keyed_on_field | Integration | Passed | `backend/tests/unit/test_catalog.py` |
+| AC-040 | test_ac040_delete_missing_is_404_empty_body | Integration | Passed | `backend/tests/unit/test_catalog.py` |
+| AC-040 | test_ac040_delete_soft_deletes_and_term_stops_resolving_and_suggesting | Integration | Passed | `backend/tests/unit/test_catalog.py` |
+| — | test_catalog_terms_require_admin_role | Integration | Passed | `backend/tests/unit/test_catalog.py` |
+| — | test_create_links_only_active_specializations | Integration | Passed | `backend/tests/unit/test_catalog.py` |
+| — | test_duplicate_term_case_insensitive_is_409 | Integration | Passed | `backend/tests/unit/test_catalog.py` |
+| — | test_list_returns_items_total_and_paginates | Integration | Passed | `backend/tests/unit/test_catalog.py` |
+| — | test_put_missing_is_404_empty_body | Integration | Passed | `backend/tests/unit/test_catalog.py` |
+| — | test_put_updates_specializations_and_empty_list_is_422 | Integration | Passed | `backend/tests/unit/test_catalog.py` |
+| — | test_suggest_matches_case_insensitive_substring | Integration | Passed | `backend/tests/unit/test_catalog.py` |
+| — | test_suggest_requires_authentication | Integration | Passed | `backend/tests/unit/test_catalog.py` |
+| — | test_suggest_returns_empty_for_short_query | Integration | Passed | `backend/tests/unit/test_catalog.py` |
+| AC-039 | test_ac039_linking_doctor_lets_search_resolve_to_it | Integration | Passed | `backend/tests/unit/test_doctors.py` |
+| — | test_relinking_doctor_replaces_prior_specializations | Integration | Passed | `backend/tests/unit/test_doctors.py` |
+| — | test_update_missing_doctor_is_404_empty_body | Integration | Passed | `backend/tests/unit/test_doctors.py` |
+| — | test_update_requires_admin_role | Integration | Passed | `backend/tests/unit/test_doctors.py` |
+| AC-039 | test_ac039_term_mapped_to_two_specializations_returns_doctors_from_both | Integration | Passed | `backend/tests/unit/test_search.py` |
+| AC-040 | test_ac040_deleted_term_no_longer_resolves | Integration | Passed | `backend/tests/unit/test_search.py` |
+| — | test_deactivated_specialization_is_excluded_from_results | Integration | Passed | `backend/tests/unit/test_search.py` |
+| — | test_inactive_doctor_is_excluded_from_results | Integration | Passed | `backend/tests/unit/test_search.py` |
+| NFR-012 | test_nfr012_unknown_term_resolves_to_no_match | Integration | Passed | `backend/tests/unit/test_search.py` |
+| — | test_results_paginated_items_total | Integration | Passed | `backend/tests/unit/test_search.py` |
+| — | test_search_requires_authentication | Integration | Passed | `backend/tests/unit/test_search.py` |
+| AC-037 | [AC-037] an admin adds a term linked to active specializations and a patient search immediately resolves to them | E2E | Passed | `frontend/e2e/catalog-search.spec.ts` |
+| AC-038, NFR-022 | [AC-038][NFR-022] saving a term with no specialization is rejected with the required-specialization message | E2E | Passed | `frontend/e2e/catalog-search.spec.ts` |
+| AC-039 | [AC-039] a term mapped to two specializations returns active doctors from both | E2E | Passed | `frontend/e2e/catalog-search.spec.ts` |
+| AC-040, NFR-026 | [AC-040][NFR-026] a deleted term disappears from suggest and no longer resolves, while prior references are untouched | E2E | Passed | `frontend/e2e/catalog-search.spec.ts` |
+| NFR-012 | [NFR-012] resolution is deterministic text matching: a misspelling is not fuzzy-matched and an unknown term is never invented | E2E | Passed | `frontend/e2e/catalog-search.spec.ts` |
+| NFR-016 | [NFR-016] clinic data is held in a managed database with automated backups and point-in-time recovery | E2E | Skipped | `frontend/e2e/catalog-search.spec.ts` |
+| NFR-017 | [NFR-017] the system is sized for one small clinic (10-50 doctors, a few thousand patients) | E2E | Skipped | `frontend/e2e/catalog-search.spec.ts` |
+
+### US-031: Health data protected in transit and at rest
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-122, NFR-005 | test_ac122_nfr005_deployment_declares_tls_in_transit_with_http_redirected_to_https | Integration | Passed | `backend/tests/integration/test_health_data_protection_acceptance.py` |
+| AC-123, NFR-006 | test_ac123_nfr006_deployment_declares_encryption_at_rest_for_the_clinic_database | Integration | Passed | `backend/tests/integration/test_health_data_protection_acceptance.py` |
+| AC-124, NFR-001 | test_ac124_nfr001_stored_user_records_hold_only_bcrypt_hashes_for_every_path | Integration | Passed | `backend/tests/integration/test_health_data_protection_acceptance.py` |
+| AC-124 | test_ac124_no_read_endpoint_returns_password_material | Integration | Passed | `backend/tests/integration/test_health_data_protection_acceptance.py` |
+| AC-125, NFR-007 | test_ac125_nfr007_a_server_side_failure_does_not_echo_the_request_credentials | Integration | Passed | `backend/tests/integration/test_health_data_protection_acceptance.py` |
+| AC-125, NFR-007 | test_ac125_nfr007_clinical_content_never_appears_in_an_error_or_log | Integration | Passed | `backend/tests/integration/test_health_data_protection_acceptance.py` |
+| AC-125, NFR-007 | test_ac125_nfr007_triggered_errors_leak_no_password_or_token_in_body_or_logs | Integration | Passed | `backend/tests/integration/test_health_data_protection_acceptance.py` |
+| NFR-016 | test_nfr016_backups_and_pitr_are_infrastructure | Integration | Skipped | `backend/tests/integration/test_health_data_protection_acceptance.py` |
+| NFR-017 | test_nfr017_sizing_is_infrastructure | Integration | Skipped | `backend/tests/integration/test_health_data_protection_acceptance.py` |
+| AC-122, NFR-005 | [AC-122][NFR-005] all application traffic travels over TLS and an unencrypted request is redirected to HTTPS | E2E | Skipped | `frontend/e2e/health-data-protection.spec.ts` |
+| AC-123, NFR-006 | [AC-123][NFR-006] patient, appointment and consultation data is held in a database with encryption at rest enabled | E2E | Skipped | `frontend/e2e/health-data-protection.spec.ts` |
+| AC-125, NFR-007 | [AC-125][NFR-007] a failed sign-in shows a generic message on screen and never echoes the password | E2E | Passed | `frontend/e2e/health-data-protection.spec.ts` |
+| AC-125, NFR-007 | [AC-125][NFR-007] a refused API call returns no credential or clinical content in its body | E2E | Passed | `frontend/e2e/health-data-protection.spec.ts` |
+| NFR-016 | [NFR-016] clinic data is held in a managed database with automated backups and point-in-time recovery | E2E | Skipped | `frontend/e2e/health-data-protection.spec.ts` |
+| NFR-017 | [NFR-017] the system is sized for one small clinic (10-50 doctors, a few thousand patients) | E2E | Skipped | `frontend/e2e/health-data-protection.spec.ts` |
 
 ## Project setup
 

@@ -6,18 +6,21 @@
 | Method | Path | Handler | Source | Summary |
 |---|---|---|---|---|
 | GET | /admin-only | admin_only | `backend/tests/unit/test_auth_core.py:64` | — |
-| GET | /api/admin/users | list_users | `backend/app/routers/admin_users.py:111` | — |
-| POST | /api/admin/users | create_user | `backend/app/routers/admin_users.py:58` | — |
-| PATCH | /api/admin/users/{user_id} | update_user | `backend/app/routers/admin_users.py:123` | — |
-| POST | /api/admin/users/{user_id}/password | reset_password | `backend/app/routers/admin_users.py:150` | — |
-| POST | /api/auth/login | login | `backend/app/routers/auth.py:83` | Authenticate and open an additional session (AC-005, AC-006, AC-009). |
-| POST | /api/auth/logout | logout | `backend/app/routers/auth.py:96` | — |
-| GET | /api/auth/me | me | `backend/app/routers/auth.py:113` | The signed-in user's own profile. |
-| POST | /api/auth/register | register | `backend/app/routers/auth.py:49` | Create a patient account and open its first session (AC-001). |
-| GET | /health | health | `backend/app/main.py:93` | Liveness probe, and the only route here that is not a stub. |
+| GET | /api/admin/users | list_users | `backend/app/routers/admin_users.py:123` | — |
+| POST | /api/admin/users | create_user | `backend/app/routers/admin_users.py:64` | — |
+| PATCH | /api/admin/users/{user_id} | update_user | `backend/app/routers/admin_users.py:135` | — |
+| POST | /api/admin/users/{user_id}/password | reset_password | `backend/app/routers/admin_users.py:162` | — |
+| GET | /api/appointments/{id} | read_appointment | `backend/app/routers/appointments.py:21` | Read one appointment the caller owns; 403 empty body otherwise. |
+| POST | /api/auth/login | login | `backend/app/routers/auth.py:101` | Authenticate and open an additional session (AC-005, AC-006, AC-009). |
+| POST | /api/auth/logout | logout | `backend/app/routers/auth.py:114` | — |
+| GET | /api/auth/me | me | `backend/app/routers/auth.py:134` | The signed-in user's own profile. |
+| POST | /api/auth/register | register | `backend/app/routers/auth.py:67` | Create a patient account and open its first session (AC-001). |
+| GET | /api/consultations/{id} | read_consultation | `backend/app/routers/appointments.py:29` | Read one consultation the caller owns; 403 empty body otherwise. |
+| GET | /health | health | `backend/app/main.py:105` | Liveness probe reporting the configured backing services. |
 | GET | /owned-missing | owned_missing | `backend/tests/unit/test_auth_core.py:73` | — |
 | GET | /owned/{owner_id} | owned | `backend/tests/unit/test_auth_core.py:68` | — |
 | GET | /whoami | whoami | `backend/tests/unit/test_auth_core.py:58` | — |
+| GET | /whoami | whoami | `backend/tests/unit/test_auth_idle_timeout.py:55` | — |
 <!-- sdlc:auto:end endpoints -->
 
 <!-- sdlc:auto:start drift -->
@@ -29,10 +32,8 @@
 - GET /api/admin/audit-log
 - GET /api/admin/catalog-terms
 - GET /api/appointments
-- GET /api/appointments/{id}
 - GET /api/catalog/suggest
 - GET /api/consultations
-- GET /api/consultations/{id}
 - GET /api/doctors
 - GET /api/doctors/me/exceptions
 - GET /api/doctors/me/weekly-availability
@@ -68,5 +69,5 @@
 <!-- sdlc:auto:end drift -->
 
 <!-- sdlc:auto:start source -->
-Generated from commit `2e82597`
+Generated from commit `805092a`
 <!-- sdlc:auto:end source -->

@@ -3,41 +3,65 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start narrative -->
-### DEV-US-001 · approved · source: dev:US-001
+### DEV-US-005 · draft · source: dev:US-005
 
-Patient self-registration with email and password. Delivered successfully with a commit.
+Ticket US-005 (Patient manages their own profile) did not complete. The development run reports status = failed with no commit recorded. No delivered code is associated with this ticket.
 
-Ticket US-001: Patient self-registration with email and password. Status: delivered. Commit: 9b85c26e48097d91ca6e832adccdfbaa71d75361.
+- Ticket: US-005 — Patient manages their own profile
+- Outcome: failed
+- Commit: none recorded
+- Implication: patient profile self-management is not evidenced as built in this development run; it remains open work.
+- Input provides no failure reason, owner, date, retry plan, or linked defect. Not documented here because it was not stated.
 
-**Related:** US-001
+**Related:** US-005
 
-### DEV-US-002 · draft · source: dev:US-002
+### DEV-US-006 · approved · source: dev:US-006
 
-Sign in, sign out and session expiry. Ticket failed; no commit was produced.
+Ticket US-006 (Manage the clinic's specializations) was delivered. Work is captured under a single commit. No defects or follow-ups were reported in the input.
 
-Ticket US-002: Sign in, sign out and session expiry. Status: failed. Commit: none. No further failure detail was provided in the input.
+- Ticket: US-006 — Manage the clinic's specializations
+- Outcome: delivered
+- Commit: b0b69f8ab9514f7dfa572d2979aec6d83203c70d
+- Scope of this ticket supports administrator management of the specialization list used elsewhere in the system.
+- Input gives no reviewer, date, test evidence, or deployment reference for this ticket.
 
-**Related:** US-002
+**Related:** US-006
 
-### DEV-US-003 · approved · source: dev:US-003
+### DEV-US-008 · approved · source: dev:US-008
 
-Administrator creates doctor and administrator accounts. Delivered successfully with a commit.
+Ticket US-008 (Configure clinic timezone and booking cutoff) was delivered. Work is captured under a single commit. No defects or follow-ups were reported in the input.
 
-Ticket US-003: Administrator creates doctor and administrator accounts. Status: delivered. Commit: 25f475932365a3e8109162b6ea2c2dd1ca8ecebd.
+- Ticket: US-008 — Configure clinic timezone and booking cutoff
+- Outcome: delivered
+- Commit: 56e7c31b0f27faaf24402070ed05e7be0e739939
+- Scope of this ticket covers clinic-level configuration of timezone and the booking cutoff setting applied to appointment scheduling.
+- Input gives no reviewer, date, test evidence, or deployment reference for this ticket.
 
-**Related:** US-003
+**Related:** US-008
 
-### DEV-US-004 · approved · source: dev:US-004
+### DEV-US-010 · approved · source: dev:US-010
 
-Role-based access enforcement across every screen and API call. Delivered successfully with a commit.
+Ticket US-010 (Administrator edits the disease-to-specialization mapping) was delivered. Work is captured under a single commit. It is linked to the specialization management work delivered under US-006, which supplies the specializations being mapped.
 
-Ticket US-004: Role-based access enforcement across every screen and API call. Status: delivered. Commit: 16be884a74e3f57e1ef05a002fa2440e87da117c.
+- Ticket: US-010 — Administrator edits the disease-to-specialization mapping
+- Outcome: delivered
+- Commit: e28536ff7383c671babf8c6d22c7d19e2e1fc18e
+- Scope of this ticket covers administrator editing of the predefined disease-to-specialization mappings used to route patients to relevant doctors (no AI/ML involved, per project scope).
+- Relationship to US-006 is inferred from the specialization data both tickets act on; the input does not state an explicit dependency.
+- Input gives no reviewer, date, test evidence, or deployment reference for this ticket.
 
-**Related:** US-004
+**Related:** US-010, US-006
 
-### DEV-US-FIX-1 · draft · source: dev:US-FIX-1
+### DEV-US-031 · approved · source: dev:US-031
 
-Fix the scaffold's failing checks. Ticket failed; no commit was produced.
+Ticket US-031 (Health data protected in transit and at rest) was delivered. Work is captured under a single commit. This is the non-functional security/privacy item for protection of patient health data.
 
-Ticket US-FIX-1: Fix the scaffold's failing checks. Status: failed. Commit: none. No further failure detail was provided in the input.
+- Ticket: US-031 — Health data protected in transit and at rest
+- Outcome: delivered
+- Commit: adb8f7c61996c6a2a491fb68ad8d2ea2b45a27aa
+- Scope of this ticket covers protection of health data both in transit and at rest.
+- The input does not state which specific mechanisms, algorithms, key management approach, or configuration were used; those are deliberately not documented here. Any credentials or keys involved are to be referenced only as placeholders such as <encryption-key> until the implementing team supplies verified detail.
+- No verification/audit evidence for this control was supplied in the development input; it should be confirmed in testing.
+
+**Related:** US-031
 <!-- sdlc:auto:end narrative -->
