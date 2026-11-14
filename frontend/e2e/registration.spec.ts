@@ -10,6 +10,21 @@ import {
 } from "./support/api";
 import { adminCredentials } from "./support/admin";
 
+async function countAccounts(
+  api: Awaited<ReturnType<typeof apiContext>>,
+  email: string,
+): Promise<number> {
+  const admin = adminCredentials();
+  const adminLogin = await loginApi(api, admin.email, admin.password);
+  expect(adminLogin.ok()).toBeTruthy();
+  const { token: adminToken } = await adminLogin.json();
+  const users = await api.get("/api/admin/users?limit=100", { headers: bearer(adminToken) });
+  const body = await users.json();
+  return (body.items as Array<{ email: string }>).filter(
+    (u) => u.email.toLowerCase() === email.toLowerCase(),
+  ).length;
+}
+
 test("[AC-001] registers a new patient and lands on the doctor search screen", async ({ page }) => {
   await page.goto("/sign-in");
   await page.getByRole("tab", { name: /register as patient/i }).click();
@@ -111,4 +126,47 @@ test("[AC-003][NFR-022] invalid registration input is flagged inline per field a
 
   await expect(page.locator("#at-reg-name")).toHaveValue(typedName);
   await expect(page.locator("#at-reg-email")).toHaveValue(typedEmail);
+});
+
+test("[AC-004][NFR-014] a rejected registration leaves no usable account, so the same email can be newly registered once the details are valid", async ({
+  page,
+}) => {
+  const api = await apiContext();
+  const email = uniqueEmail("rejected");
+
+  await page.goto("/sign-in");
+  await page.getByRole("tab", { name: /register as patient/i }).click();
+
+  // First attempt is rejected: a password that is too short. The form must not submit, so
+  // nothing reaches the API and no account can be written.
+  await page.locator("#at-reg-name").fill("Rejected Then Valid");
+  await page.locator("#at-reg-email").fill(email);
+  await page.locator("#at-reg-phone").fill("+15559990000");
+  await page.locator("#at-reg-password").fill("short");
+
+  const rejectedCall = page
+    .waitForResponse((r) => r.url().includes("/api/auth/register"), { timeout: 2000 })
+    .catch(() => null);
+  await page.getByRole("button", { name: /create account/i }).click();
+  expect(await rejectedCall, "the rejected attempt must not reach the API").toBeNull();
+  await expect(page.getByText(/8 characters|weak password/i)).toBeVisible();
+
+  // No account exists for that email after the rejected attempt.
+  expect(await countAccounts(api, email), "a rejected attempt must leave no account").toBe(0);
+
+  // The same email can now be registered once the details are valid.
+  await page.locator("#at-reg-password").fill(generatedPassword());
+  const [response] = await Promise.all([
+    page.waitForResponse(
+      (r) => r.url().includes("/api/auth/register") && r.request().method() === "POST",
+    ),
+    page.getByRole("button", { name: /create account/i }).click(),
+  ]);
+  expect(response.status(), "the valid retry must succeed with 201").toBe(201);
+  await expect(page).toHaveURL(/find-a-doctor|\/search/);
+
+  expect(await countAccounts(api, email), "exactly one account must exist after the valid retry").toBe(
+    1,
+  );
+  await api.dispose();
 });

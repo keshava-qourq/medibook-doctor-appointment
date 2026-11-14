@@ -27,10 +27,6 @@ export default function Screen() {
   const [tab, setTab] = React.useState("signin");
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
-  const [fullName, setFullName] = React.useState("");
-  const [regEmail, setRegEmail] = React.useState("");
-  const [phone, setPhone] = React.useState("");
-  const [regPassword, setRegPassword] = React.useState("");
   const pill = {
     borderRadius: 999,
     border: 0,
