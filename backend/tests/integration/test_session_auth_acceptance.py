@@ -79,9 +79,7 @@ def _register_patient(client: TestClient) -> tuple[str, str, str, str]:
     return email, password, reg.json()["token"], reg.json()["user"]["id"]
 
 
-def _create_staff(
-    client: TestClient, admin_token: str, role: str
-) -> tuple[str, str, str]:
+def _create_staff(client: TestClient, admin_token: str, role: str) -> tuple[str, str, str]:
     """Create a doctor/admin through /api/admin/users; return (email, password, id)."""
     email = _email(role)
     password = _password()
