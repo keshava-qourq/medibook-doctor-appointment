@@ -3,6 +3,16 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start releases -->
+## a9c0e5366029 — 2026-11-14
+
+**Commit:** `a9c0e53`
+
+**Delivered:**
+- US-005: Patient manages their own profile
+- US-015: System generates discrete bookable slots that hold exactly one patient
+- US-016: Patient views freshly refreshed slot availability
+- US-017: Patient books an appointment slot that can never be double-booked
+
 ## ca19136f7624 — 2026-11-14
 
 **Commit:** `ca19136`
