@@ -358,9 +358,7 @@ def test_ac058_a_booked_slot_shows_as_unavailable_to_a_second_patient(
 # -- AC-059 -------------------------------------------------------------------
 
 
-def test_ac059_an_elapsed_slot_is_absent_from_today(
-    client: TestClient, db_session: DBSession
-):
+def test_ac059_an_elapsed_slot_is_absent_from_today(client: TestClient, db_session: DBSession):
     """[AC-059] For today, every offered slot starts strictly after the current
     clinic-timezone time: a slot whose start has already passed is absent entirely,
     not merely marked unavailable."""
@@ -445,17 +443,14 @@ def test_ac060_unavailable_exception_removes_every_slot_in_its_range(
 
     # The afternoon outside the range is untouched.
     assert any(
-        _local(s["slot_start"]).hour * 60 + _local(s["slot_start"]).minute >= 14 * 60
-        for s in items
+        _local(s["slot_start"]).hour * 60 + _local(s["slot_start"]).minute >= 14 * 60 for s in items
     ), "only the excepted range is withdrawn"
 
 
 # -- Authentication: the endpoint is behind the Bearer token ------------------
 
 
-def test_availability_requires_a_bearer_token_401_detail(
-    client: TestClient, db_session: DBSession
-):
+def test_availability_requires_a_bearer_token_401_detail(client: TestClient, db_session: DBSession):
     """[AC-057][AC-058][AC-059][AC-060] The public availability endpoint is behind the
     Bearer token like every other endpoint: a request with no token is 401 with a
     {detail} body and never discloses a doctor's slots."""
