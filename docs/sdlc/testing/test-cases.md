@@ -3,9 +3,9 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-67 tests · Passed 57 · Failed 5 · Skipped 5 · Not run 0
+103 tests · Passed 95 · Failed 0 · Skipped 8 · Not run 0
 
-Acceptance criteria covered: 14/129 · passing: 8/129
+Acceptance criteria covered: 17/129 · passing: 14/129
 <!-- sdlc:auto:end summary -->
 
 <!-- sdlc:auto:start tests -->
@@ -19,7 +19,6 @@ Acceptance criteria covered: 14/129 · passing: 8/129
 | AC-006 | auth wiring > [AC-006] a failed sign-in shows the API message and stores no token | Unit | Passed | `frontend/src/App.test.tsx` |
 | AC-007 | auth wiring > [AC-007] sign out calls logout, clears the token and returns to sign-in | Unit | Passed | `frontend/src/App.test.tsx` |
 | AC-008 | auth wiring > [AC-008] a 401 from the API clears the token and routes to sign-in | Unit | Passed | `frontend/src/App.test.tsx` |
-| AC-014 | auth wiring > [AC-014] a doctor is redirected away from a patient-only route | Unit | Passed | `frontend/src/App.test.tsx` |
 | AC-014 | auth wiring > [AC-014] a patient is redirected away from the admin console | Unit | Passed | `frontend/src/App.test.tsx` |
 | AC-017 | auth wiring > [AC-017] an unauthenticated visitor to a protected route is sent to sign-in | Unit | Passed | `frontend/src/App.test.tsx` |
 | AC-010 | AdminUsers > [AC-010] a 403 shows an access message | Unit | Passed | `frontend/src/screens/AdminUsers.test.tsx` |
@@ -32,8 +31,14 @@ Acceptance criteria covered: 14/129 · passing: 8/129
 | AC-002 | Register > [AC-002] shows email already registered on 409 and keeps the form | Unit | Passed | `frontend/src/screens/Register.test.tsx` |
 | AC-003 | Register > [AC-003] flags empty, malformed and short fields client-side without calling the API | Unit | Passed | `frontend/src/screens/Register.test.tsx` |
 | AC-003 | Register > [AC-003] shows server 422 field errors inline and preserves values | Unit | Passed | `frontend/src/screens/Register.test.tsx` |
+| AC-001 | SignIn register tab > [AC-001] register tab calls the API, stores the token and navigates to the landing | Unit | Passed | `frontend/src/screens/SignIn.test.tsx` |
+| AC-002 | SignIn register tab > [AC-002] register tab shows email already registered on 409 and does not navigate | Unit | Passed | `frontend/src/screens/SignIn.test.tsx` |
+| AC-003 | SignIn register tab > [AC-003] register tab flags invalid fields client-side without calling the API | Unit | Passed | `frontend/src/screens/SignIn.test.tsx` |
+| AC-003 | SignIn register tab > [AC-003] register tab shows server 422 field errors inline and preserves values | Unit | Passed | `frontend/src/screens/SignIn.test.tsx` |
+| AC-010 | test_ac010_accepts_contract_initial_password_field | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
 | AC-010 | test_ac010_creates_active_account_hashed_password_and_echoes_initial_password[admin] | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
 | AC-010 | test_ac010_creates_active_account_hashed_password_and_echoes_initial_password[doctor] | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
+| AC-011 | test_ac011_accepts_contract_new_password_field | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
 | AC-011 | test_ac011_new_password_replaces_old_and_revokes_every_session | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
 | AC-011 | test_ac011_password_reset_missing_user_is_404_empty_body_and_weak_is_422 | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
 | AC-012 | test_ac012_duplicate_email_case_insensitive_is_409_and_creates_nothing | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
@@ -64,26 +69,72 @@ Acceptance criteria covered: 14/129 · passing: 8/129
 | AC-006, AC-007 | test_ac006_ac007_login_generic_failure_and_logout_revokes_one | Integration | Passed | `backend/tests/unit/test_auth_endpoints.py` |
 | AC-009 | test_ac009_inactive_login_refused | Integration | Passed | `backend/tests/unit/test_auth_endpoints.py` |
 | — | test_ac_me_returns_profile_for_valid_token_and_401_without | Integration | Passed | `backend/tests/unit/test_auth_endpoints.py` |
-| AC-001 | [AC-001] registers a new patient and lands on the doctor search screen | E2E | Failed | `frontend/e2e/registration.spec.ts` |
-| AC-002 | [AC-002] duplicate email registration shows the already-registered message and creates no second account | E2E | Failed | `frontend/e2e/registration.spec.ts` |
+| AC-001 | [AC-001] registers a new patient and lands on the doctor search screen | E2E | Passed | `frontend/e2e/registration.spec.ts` |
+| AC-002 | [AC-002] duplicate email registration shows the already-registered message and creates no second account | E2E | Passed | `frontend/e2e/registration.spec.ts` |
 | AC-003, NFR-022 | [AC-003][NFR-022] invalid registration input is flagged inline per field and preserves typed values | E2E | Passed | `frontend/e2e/registration.spec.ts` |
+| AC-004, NFR-014 | [AC-004][NFR-014] a rejected registration leaves no usable account, so the same email can be newly registered once the details are valid | E2E | Passed | `frontend/e2e/registration.spec.ts` |
 | AC-007 | [AC-007] sign-out ends the session and the back button does not show cached protected content | E2E | Skipped | `frontend/e2e/session.spec.ts` |
 | AC-009 | [AC-009] a deactivated account is forced back to sign-in and refused re-login with an inactive message | E2E | Skipped | `frontend/e2e/session.spec.ts` |
 | NFR-002 | [NFR-002] an administrator password reset revokes the user's current session | E2E | Skipped | `frontend/e2e/session.spec.ts` |
 | NFR-003 | [NFR-003] a patient cannot reach the admin console | E2E | Skipped | `frontend/e2e/session.spec.ts` |
 | NFR-003 | [NFR-003] an unauthenticated visitor to a protected route is sent to sign-in | E2E | Skipped | `frontend/e2e/session.spec.ts` |
 | AC-005 | [AC-005] admin sign-in reaches the admin dashboard | E2E | Passed | `frontend/e2e/sign-in.spec.ts` |
-| AC-005 | [AC-005] doctor sign-in reaches their schedule | E2E | Failed | `frontend/e2e/sign-in.spec.ts` |
-| AC-005 | [AC-005] patient sign-in reaches the doctor search screen | E2E | Failed | `frontend/e2e/sign-in.spec.ts` |
-| AC-006, NFR-004 | [AC-006][NFR-004] a wrong password shows one generic message and creates no session | E2E | Failed | `frontend/e2e/sign-in.spec.ts` |
+| AC-005 | [AC-005] doctor sign-in reaches their schedule | E2E | Passed | `frontend/e2e/sign-in.spec.ts` |
+| AC-005 | [AC-005] patient sign-in reaches the doctor search screen | E2E | Passed | `frontend/e2e/sign-in.spec.ts` |
+| AC-006, NFR-004 | [AC-006][NFR-004] a wrong password shows one generic message and creates no session | E2E | Passed | `frontend/e2e/sign-in.spec.ts` |
 | — | [seed] the seeded admin and smoke patient can sign in with their fixed credentials | E2E | Passed | `frontend/e2e/sign-in.spec.ts` |
+
+### US-002: Sign in, sign out and session expiry
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-008 | test_ac008_last_seen_and_expires_slide_forward_on_each_authenticated_call | Integration | Passed | `backend/tests/unit/test_auth_idle_timeout.py` |
+| AC-008 | test_ac008_request_after_idle_timeout_rejected_401_requires_relogin | Integration | Passed | `backend/tests/unit/test_auth_idle_timeout.py` |
+| NFR-016 | [NFR-016] clinic data is held in a managed database with automated backups and point-in-time recovery | E2E | Skipped | `frontend/e2e/nfr-infrastructure.spec.ts` |
+| NFR-017 | [NFR-017] the system is sized for one small clinic (10-50 doctors, a few thousand patients) | E2E | Skipped | `frontend/e2e/nfr-infrastructure.spec.ts` |
+| AC-007, NFR-002 | [AC-007][NFR-002] sign-out ends the session and the back button does not show cached protected content | E2E | Passed | `frontend/e2e/session-lifecycle.spec.ts` |
+| AC-008, NFR-002 | [AC-008][NFR-002] a signed-in session ends after the configured period of inactivity | E2E | Skipped | `frontend/e2e/session-lifecycle.spec.ts` |
+| AC-009, NFR-002 | [AC-009][NFR-002] a deactivated account is forced back to sign-in and refused re-login as inactive | E2E | Passed | `frontend/e2e/session-lifecycle.spec.ts` |
+| NFR-002 | [NFR-002] an administrator password reset revokes the user's current session | E2E | Passed | `frontend/e2e/session-lifecycle.spec.ts` |
+
+### US-003: Administrator creates doctor and administrator accounts
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-010 | test_ac010_admin_can_create_another_admin | Integration | Passed | `backend/tests/integration/test_admin_user_acceptance.py` |
+| AC-010 | test_ac010_admin_creates_doctor_password_echoed_once_and_doctor_can_sign_in | Integration | Passed | `backend/tests/integration/test_admin_user_acceptance.py` |
+| AC-011 | test_ac011_reissued_password_replaces_old_and_revokes_sessions | Integration | Passed | `backend/tests/integration/test_admin_user_acceptance.py` |
+| AC-011 | test_ac011_weak_reissued_password_is_rejected | Integration | Passed | `backend/tests/integration/test_admin_user_acceptance.py` |
+| AC-012 | test_ac012_duplicate_email_case_insensitive_is_409_and_creates_nothing | Integration | Passed | `backend/tests/integration/test_admin_user_acceptance.py` |
+| AC-013 | test_ac013_non_admin_create_is_403_empty_body_and_creates_nothing | Integration | Passed | `backend/tests/integration/test_admin_user_acceptance.py` |
+| AC-013 | test_ac013_unauthenticated_create_is_401_and_creates_nothing | Integration | Passed | `backend/tests/integration/test_admin_user_acceptance.py` |
+| NFR-001 | test_nfr001_admin_issued_password_stored_only_as_bcrypt_hash | Integration | Passed | `backend/tests/integration/test_admin_user_acceptance.py` |
+| NFR-001 | test_nfr001_reissued_password_stored_only_as_bcrypt_hash | Integration | Passed | `backend/tests/integration/test_admin_user_acceptance.py` |
+| NFR-001 | test_nfr001_self_registration_password_stored_only_as_bcrypt_hash | Integration | Passed | `backend/tests/integration/test_admin_user_acceptance.py` |
+| NFR-002 | test_nfr002_deactivation_revokes_sessions_and_blocks_further_action | Integration | Passed | `backend/tests/integration/test_admin_user_acceptance.py` |
+| NFR-022 | test_nfr022_invalid_create_is_422_lists_offending_fields_and_writes_nothing | Integration | Passed | `backend/tests/integration/test_admin_user_acceptance.py` |
+| NFR-016 | test_nfr016_clinic_database_declares_automated_backups_and_pitr | Integration | Passed | `backend/tests/integration/test_nfr_infrastructure.py` |
+| NFR-017 | test_nfr017_deployment_is_sized_for_one_small_clinic | Integration | Passed | `backend/tests/integration/test_nfr_infrastructure.py` |
+
+### US-004: Role-based access enforcement across every screen and API call
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-014, AC-016 | test_ac014_ac016_role_and_ownership_failures_are_identical_403_empty_bodies | Integration | Passed | `backend/tests/integration/test_role_ownership_acceptance.py` |
+| AC-014 | test_ac014_patient_calling_admin_api_is_403_empty_body | Integration | Passed | `backend/tests/integration/test_role_ownership_acceptance.py` |
+| AC-015 | test_ac015_patient_cannot_read_another_patients_record_is_403_empty_body | Integration | Passed | `backend/tests/integration/test_role_ownership_acceptance.py` |
+| AC-016 | test_ac016_doctor_cannot_read_another_doctors_record_is_403_empty_body | Integration | Passed | `backend/tests/integration/test_role_ownership_acceptance.py` |
+| AC-017 | test_ac017_no_token_api_call_is_401_with_detail_body | Integration | Passed | `backend/tests/integration/test_role_ownership_acceptance.py` |
+| AC-014, NFR-003 | [AC-014][NFR-003] a doctor visiting the admin URL directly is denied the admin screen | E2E | Passed | `frontend/e2e/role-access.spec.ts` |
+| AC-014, NFR-003 | [AC-014][NFR-003] a patient visiting a doctor URL directly is denied the doctor screen | E2E | Passed | `frontend/e2e/role-access.spec.ts` |
+| AC-014, NFR-003 | [AC-014][NFR-003] a patient visiting an admin URL directly is denied the admin screen | E2E | Passed | `frontend/e2e/role-access.spec.ts` |
+| AC-017 | [AC-017] a no-token API call returns 401 and does not leak data | E2E | Passed | `frontend/e2e/role-access.spec.ts` |
+| AC-017, NFR-003 | [AC-017][NFR-003] an unauthenticated visitor to a protected route is redirected to sign-in | E2E | Passed | `frontend/e2e/role-access.spec.ts` |
 
 ## Project setup
 
 | Criteria | Test | Level | Result | File |
 |---|---|---|---|---|
-| AC-001 | SignIn register tab > [AC-001] posts the register tab to /api/auth/register and lands the patient | Unit | Passed | `frontend/src/screens/SignIn.test.tsx` |
-| AC-003 | SignIn register tab > [AC-003] flags invalid register-tab fields inline without calling the API | Unit | Passed | `frontend/src/screens/SignIn.test.tsx` |
 | — | test_health_reports_ok | Integration | Passed | `backend/tests/integration/test_health.py` |
 | — | test_the_openapi_document_builds | Integration | Passed | `backend/tests/integration/test_health.py` |
 | — | the app loads | E2E | Passed | `frontend/e2e/example.spec.ts` |

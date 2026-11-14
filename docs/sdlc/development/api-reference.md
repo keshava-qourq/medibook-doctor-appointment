@@ -5,7 +5,19 @@
 <!-- sdlc:auto:start endpoints -->
 | Method | Path | Handler | Source | Summary |
 |---|---|---|---|---|
-| GET | /health | health | `backend/app/main.py:58` | Liveness probe, and the only route here that is not a stub. |
+| GET | /admin-only | admin_only | `backend/tests/unit/test_auth_core.py:64` | — |
+| GET | /api/admin/users | list_users | `backend/app/routers/admin_users.py:111` | — |
+| POST | /api/admin/users | create_user | `backend/app/routers/admin_users.py:58` | — |
+| PATCH | /api/admin/users/{user_id} | update_user | `backend/app/routers/admin_users.py:123` | — |
+| POST | /api/admin/users/{user_id}/password | reset_password | `backend/app/routers/admin_users.py:150` | — |
+| POST | /api/auth/login | login | `backend/app/routers/auth.py:83` | Authenticate and open an additional session (AC-005, AC-006, AC-009). |
+| POST | /api/auth/logout | logout | `backend/app/routers/auth.py:96` | — |
+| GET | /api/auth/me | me | `backend/app/routers/auth.py:113` | The signed-in user's own profile. |
+| POST | /api/auth/register | register | `backend/app/routers/auth.py:49` | Create a patient account and open its first session (AC-001). |
+| GET | /health | health | `backend/app/main.py:93` | Liveness probe, and the only route here that is not a stub. |
+| GET | /owned-missing | owned_missing | `backend/tests/unit/test_auth_core.py:73` | — |
+| GET | /owned/{owner_id} | owned | `backend/tests/unit/test_auth_core.py:68` | — |
+| GET | /whoami | whoami | `backend/tests/unit/test_auth_core.py:58` | — |
 <!-- sdlc:auto:end endpoints -->
 
 <!-- sdlc:auto:start drift -->
@@ -16,10 +28,8 @@
 - DELETE /api/doctors/me/exceptions/{id}
 - GET /api/admin/audit-log
 - GET /api/admin/catalog-terms
-- GET /api/admin/users
 - GET /api/appointments
 - GET /api/appointments/{id}
-- GET /api/auth/me
 - GET /api/catalog/suggest
 - GET /api/consultations
 - GET /api/consultations/{id}
@@ -33,20 +43,14 @@
 - GET /api/settings
 - GET /api/specializations
 - PATCH /api/admin/specializations/{id}
-- PATCH /api/admin/users/{user_id}
 - PATCH /api/appointments/{id}/status
 - PATCH /api/patients/me
 - POST /api/admin/catalog-terms
 - POST /api/admin/specializations
-- POST /api/admin/users
-- POST /api/admin/users/{user_id}/password
 - POST /api/appointments
 - POST /api/appointments/{id}/cancel
 - POST /api/appointments/{id}/consultation
 - POST /api/appointments/{id}/reschedule
-- POST /api/auth/login
-- POST /api/auth/logout
-- POST /api/auth/register
 - POST /api/doctors/me/exceptions
 - POST /api/patients/me/password
 - PUT /api/admin/catalog-terms/{id}
@@ -54,8 +58,15 @@
 - PUT /api/admin/settings
 - PUT /api/consultations/{id}
 - PUT /api/doctors/me/weekly-availability
+
+**Code only:**
+
+- GET /admin-only
+- GET /owned-missing
+- GET /owned/{owner_id}
+- GET /whoami
 <!-- sdlc:auto:end drift -->
 
 <!-- sdlc:auto:start source -->
-Generated from commit `e2fdb4b`
+Generated from commit `2e82597`
 <!-- sdlc:auto:end source -->
