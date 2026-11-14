@@ -3,9 +3,9 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-344 tests · Passed 313 · Failed 0 · Skipped 31 · Not run 0
+437 tests · Passed 400 · Failed 0 · Skipped 37 · Not run 0
 
-Acceptance criteria covered: 48/129 · passing: 45/129
+Acceptance criteria covered: 64/129 · passing: 61/129
 <!-- sdlc:auto:end summary -->
 
 <!-- sdlc:auto:start tests -->
@@ -420,6 +420,116 @@ Acceptance criteria covered: 48/129 · passing: 45/129
 | AC-048 | [AC-048] a doctor deactivated after the results load shows 'no longer available' and the patient returns to the list | E2E | Passed | `frontend/e2e/doctor-search.spec.ts` |
 | NFR-016 | [NFR-016] clinic data is held in a managed database with automated backups and point-in-time recovery | E2E | Skipped | `frontend/e2e/doctor-search.spec.ts` |
 | NFR-017 | [NFR-017] the system is sized for one small clinic (10-50 doctors, a few thousand patients) | E2E | Skipped | `frontend/e2e/doctor-search.spec.ts` |
+
+## Sprint 4
+
+### US-007: Create and maintain doctor profiles
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-026 | AdminDoctorProfile > [AC-026] saves the whole profile with PUT and shows the saved values back | Unit | Passed | `frontend/src/screens/AdminDoctorProfile.test.tsx` |
+| AC-027 | AdminDoctorProfile > [AC-027] saving with no specialization shows an inline error and keeps what was typed | Unit | Passed | `frontend/src/screens/AdminDoctorProfile.test.tsx` |
+| AC-029 | AdminDoctorProfile > [AC-029] deactivating shows the affected future appointment count and that nothing is cancelled | Unit | Passed | `frontend/src/screens/AdminDoctorProfile.test.tsx` |
+| NFR-013 | AdminDoctorProfile > [NFR-013] the fee is informational, payable at the clinic, with no payment control | Unit | Passed | `frontend/src/screens/AdminDoctorProfile.test.tsx` |
+| NFR-022 | AdminDoctorProfile > [NFR-022] a 422 from the API maps to the same inline specialization error | Unit | Passed | `frontend/src/screens/AdminDoctorProfile.test.tsx` |
+| AC-026 | test_ac026_doctor_profile_edit_is_admin_only_and_needs_a_token | Integration | Passed | `backend/tests/integration/test_doctor_profile_admin_acceptance.py` |
+| AC-026, NFR-013 | test_ac026_nfr013_admin_saves_full_doctor_profile_and_a_fresh_get_returns_it | Integration | Passed | `backend/tests/integration/test_doctor_profile_admin_acceptance.py` |
+| AC-027 | test_ac027_a_missing_specialization_list_is_refused_the_same_way | Integration | Passed | `backend/tests/integration/test_doctor_profile_admin_acceptance.py` |
+| AC-027 | test_ac027_empty_specialization_list_is_422_and_the_saved_profile_is_unchanged | Integration | Passed | `backend/tests/integration/test_doctor_profile_admin_acceptance.py` |
+| AC-028 | test_ac028_deactivated_doctor_leaves_the_lists_and_cannot_be_booked | Integration | Passed | `backend/tests/integration/test_doctor_profile_admin_acceptance.py` |
+| AC-029 | test_ac029_affected_future_appointments_counts_only_future_booked_appointments | Integration | Passed | `backend/tests/integration/test_doctor_profile_admin_acceptance.py` |
+| AC-029, NFR-026 | test_ac029_nfr026_deactivation_reports_future_appointments_and_history_survives | Integration | Passed | `backend/tests/integration/test_doctor_profile_admin_acceptance.py` |
+| NFR-013 | test_nfr013_no_response_in_the_doctor_profile_journey_offers_a_payment_surface | Integration | Passed | `backend/tests/integration/test_doctor_profile_admin_acceptance.py` |
+| NFR-016 | test_nfr016_backups_and_pitr_are_infrastructure | Integration | Skipped | `backend/tests/integration/test_doctor_profile_admin_acceptance.py` |
+| NFR-017 | test_nfr017_sizing_is_infrastructure | Integration | Skipped | `backend/tests/integration/test_doctor_profile_admin_acceptance.py` |
+| AC-026 | test_ac026_put_persists_every_profile_field_and_reads_back_on_the_cards | Integration | Passed | `backend/tests/unit/test_doctor_profile.py` |
+| AC-027 | test_ac027_empty_or_missing_specialization_ids_is_422_and_writes_nothing[body0] | Integration | Passed | `backend/tests/unit/test_doctor_profile.py` |
+| AC-027 | test_ac027_empty_or_missing_specialization_ids_is_422_and_writes_nothing[body1] | Integration | Passed | `backend/tests/unit/test_doctor_profile.py` |
+| AC-028 | test_ac028_inactive_doctor_is_absent_from_discovery_and_unbookable | Integration | Passed | `backend/tests/unit/test_doctor_profile.py` |
+| AC-029 | test_ac029_count_is_zero_when_the_doctor_stays_active_or_was_already_inactive | Integration | Passed | `backend/tests/unit/test_doctor_profile.py` |
+| AC-029 | test_ac029_deactivation_reports_the_count_of_future_booked_appointments | Integration | Passed | `backend/tests/unit/test_doctor_profile.py` |
+| AC-029, NFR-026 | test_ac029_nfr026_future_appointments_survive_deactivation_and_stay_readable | Integration | Passed | `backend/tests/unit/test_doctor_profile.py` |
+| — | test_ac_appointment_of_another_patient_is_403_empty_body | Integration | Passed | `backend/tests/unit/test_doctor_profile.py` |
+| — | test_ac_booking_is_patient_only_and_refuses_a_duplicate_slot_with_409 | Integration | Passed | `backend/tests/unit/test_doctor_profile.py` |
+| NFR-013 | test_nfr013_no_doctor_or_appointment_payload_carries_a_payment_field | Integration | Passed | `backend/tests/unit/test_doctor_profile.py` |
+
+### US-013: Doctor defines a weekly recurring availability pattern
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-049 | DoctorAvailability > [AC-049] loads the seven-day week labelled with the clinic timezone and saves it with PUT | Unit | Passed | `frontend/src/screens/DoctorAvailability.test.tsx` |
+| AC-050 | DoctorAvailability > [AC-050] an end time not after the start is rejected inline on that day, nothing is sent and what was typed is kept | Unit | Passed | `frontend/src/screens/DoctorAvailability.test.tsx` |
+| AC-051 | DoctorAvailability > [AC-051] two overlapping breaks on one day are refused with the overlap message | Unit | Passed | `frontend/src/screens/DoctorAvailability.test.tsx` |
+| AC-052 | DoctorAvailability > [AC-052] affected appointments returned by the PUT are listed as preserved, not cancelled | Unit | Passed | `frontend/src/screens/DoctorAvailability.test.tsx` |
+| AC-053, AC-054 | DoctorAvailability > [AC-053][AC-054] a 409 lists the booked appointments and only an explicit confirm re-posts and reports the cancellations | Unit | Passed | `frontend/src/screens/DoctorAvailability.test.tsx` |
+| AC-055 | DoctorAvailability > [AC-055] an extra-hours window is posted and listed | Unit | Passed | `frontend/src/screens/DoctorAvailability.test.tsx` |
+| AC-056 | DoctorAvailability > [AC-056] a past exception date is refused inline with the today-or-future message | Unit | Passed | `frontend/src/screens/DoctorAvailability.test.tsx` |
+| AC-057 | DoctorAvailability > [AC-057] no sample data, no payment control and no language selector appear | Unit | Passed | `frontend/src/screens/DoctorAvailability.test.tsx` |
+| AC-049 | test_ac049_doctor_saves_a_full_weekly_pattern_and_a_fresh_get_returns_it | Integration | Passed | `backend/tests/integration/test_doctor_availability_acceptance.py` |
+| AC-049 | test_ac049_weekly_availability_is_doctor_only_and_needs_a_token | Integration | Passed | `backend/tests/integration/test_doctor_availability_acceptance.py` |
+| AC-050 | test_ac050_end_time_equal_to_start_time_is_refused_too | Integration | Passed | `backend/tests/integration/test_doctor_availability_acceptance.py` |
+| AC-050, NFR-022 | test_ac050_nfr022_invalid_day_is_422_naming_day_and_field_and_writes_nothing[break_outside_working_hours-bad_day2-days[2].breaks[0].start_time] | Integration | Passed | `backend/tests/integration/test_doctor_availability_acceptance.py` |
+| AC-050, NFR-022 | test_ac050_nfr022_invalid_day_is_422_naming_day_and_field_and_writes_nothing[end_before_start-bad_day0-days[2].end_time] | Integration | Passed | `backend/tests/integration/test_doctor_availability_acceptance.py` |
+| AC-050, NFR-022 | test_ac050_nfr022_invalid_day_is_422_naming_day_and_field_and_writes_nothing[slot_minutes_not_positive-bad_day1-days[2].slot_minutes] | Integration | Passed | `backend/tests/integration/test_doctor_availability_acceptance.py` |
+| AC-051 | test_ac051_two_overlapping_breaks_on_one_day_are_422_and_write_nothing | Integration | Passed | `backend/tests/integration/test_doctor_availability_acceptance.py` |
+| AC-052 | test_ac052_moving_hours_away_from_a_booked_appointment_reports_it_and_keeps_it | Integration | Passed | `backend/tests/integration/test_doctor_availability_acceptance.py` |
+| AC-053, AC-056 | test_ac053_ac056_an_exception_belongs_to_its_doctor_alone | Integration | Passed | `backend/tests/integration/test_doctor_availability_acceptance.py` |
+| AC-053 | test_ac053_an_unavailable_exception_removes_every_slot_in_its_range | Integration | Passed | `backend/tests/integration/test_doctor_availability_acceptance.py` |
+| AC-054 | test_ac054_unavailable_over_a_booking_needs_confirmation_then_cancels_with_the_reason | Integration | Passed | `backend/tests/integration/test_doctor_availability_acceptance.py` |
+| AC-055 | test_ac055_extra_hours_on_a_non_working_date_produce_bookable_slots | Integration | Passed | `backend/tests/integration/test_doctor_availability_acceptance.py` |
+| AC-056 | test_ac056_an_exception_dated_before_today_in_the_clinic_timezone_is_422_on_date | Integration | Passed | `backend/tests/integration/test_doctor_availability_acceptance.py` |
+| AC-056 | test_ac056_the_past_date_check_follows_the_configured_clinic_timezone | Integration | Passed | `backend/tests/integration/test_doctor_availability_acceptance.py` |
+| NFR-016 | test_nfr016_backups_and_pitr_are_infrastructure | Integration | Skipped | `backend/tests/integration/test_doctor_availability_acceptance.py` |
+| NFR-017 | test_nfr017_sizing_is_infrastructure | Integration | Skipped | `backend/tests/integration/test_doctor_availability_acceptance.py` |
+| AC-053 | test_ac053_unavailable_exception_removes_every_slot_in_its_period | Integration | Passed | `backend/tests/unit/test_availability_exceptions.py` |
+| AC-054 | test_ac054_default_cancellation_reason_when_none_is_given | Integration | Passed | `backend/tests/unit/test_availability_exceptions.py` |
+| AC-054 | test_ac054_unavailable_over_a_booking_needs_confirmation_then_cancels | Integration | Passed | `backend/tests/unit/test_availability_exceptions.py` |
+| AC-055 | test_ac055_extra_hours_outside_the_pattern_produce_bookable_slots | Integration | Passed | `backend/tests/unit/test_availability_exceptions.py` |
+| AC-056 | test_ac056_a_past_date_is_422_on_date_and_writes_nothing | Integration | Passed | `backend/tests/unit/test_availability_exceptions.py` |
+| AC-056 | test_ac056_an_invalid_kind_or_time_range_is_422_and_writes_nothing | Integration | Passed | `backend/tests/unit/test_availability_exceptions.py` |
+| AC-056 | test_ac056_the_past_date_check_follows_the_clinic_timezone | Integration | Passed | `backend/tests/unit/test_availability_exceptions.py` |
+| — | test_ac_availability_excludes_breaks_and_marks_booked_slots_unavailable | Integration | Passed | `backend/tests/unit/test_availability_exceptions.py` |
+| — | test_ac_availability_excludes_elapsed_slots_and_an_inactive_doctor | Integration | Passed | `backend/tests/unit/test_availability_exceptions.py` |
+| — | test_ac_exceptions_are_doctor_only | Integration | Passed | `backend/tests/unit/test_availability_exceptions.py` |
+| — | test_ac_list_and_delete_exceptions_are_per_doctor | Integration | Passed | `backend/tests/unit/test_availability_exceptions.py` |
+| — | test_ac_table_doctor_availability_exceptions_exists | Integration | Passed | `backend/tests/unit/test_availability_exceptions.py` |
+| AC-049 | test_ac049_no_token_is_401 | Integration | Passed | `backend/tests/unit/test_weekly_availability.py` |
+| AC-049 | test_ac049_other_roles_are_403_with_an_empty_body[admin] | Integration | Passed | `backend/tests/unit/test_weekly_availability.py` |
+| AC-049 | test_ac049_other_roles_are_403_with_an_empty_body[patient] | Integration | Passed | `backend/tests/unit/test_weekly_availability.py` |
+| AC-049 | test_ac049_put_replaces_the_whole_pattern_and_get_reads_it_back | Integration | Passed | `backend/tests/unit/test_weekly_availability.py` |
+| AC-049 | test_ac049_tables_exist_and_get_returns_seven_days_with_timezone | Integration | Passed | `backend/tests/unit/test_weekly_availability.py` |
+| AC-050 | test_ac050_invalid_day_is_422_naming_the_field_and_writes_nothing[override0-days[2].end_time] | Integration | Passed | `backend/tests/unit/test_weekly_availability.py` |
+| AC-050 | test_ac050_invalid_day_is_422_naming_the_field_and_writes_nothing[override1-days[2].slot_minutes] | Integration | Passed | `backend/tests/unit/test_weekly_availability.py` |
+| AC-050 | test_ac050_invalid_day_is_422_naming_the_field_and_writes_nothing[override2-days[2].breaks] | Integration | Passed | `backend/tests/unit/test_weekly_availability.py` |
+| AC-051 | test_ac051_overlapping_breaks_are_422_on_that_days_breaks_field | Integration | Passed | `backend/tests/unit/test_weekly_availability.py` |
+| AC-052 | test_ac052_booking_outside_new_hours_is_reported_and_preserved | Integration | Passed | `backend/tests/unit/test_weekly_availability.py` |
+| AC-052 | test_ac052_booking_still_inside_the_new_hours_is_not_reported | Integration | Passed | `backend/tests/unit/test_weekly_availability.py` |
+
+### US-030: Single language and single clinic timezone throughout
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-120 | clinicTime formatters > [AC-120] a bare clinic wall-clock value keeps its wall-clock time | Unit | Passed | `frontend/src/lib/clinicTime.test.ts` |
+| AC-120 | clinicTime formatters > [AC-120] an instant given with another offset is shown in the clinic timezone | Unit | Passed | `frontend/src/lib/clinicTime.test.ts` |
+| AC-120 | clinicTime formatters > [AC-120] defaults to UTC while the timezone is unconfirmed | Unit | Passed | `frontend/src/lib/clinicTime.test.ts` |
+| AC-120 | clinicTime formatters > [AC-120] reads the clinic timezone from GET /api/settings | Unit | Passed | `frontend/src/lib/clinicTime.test.ts` |
+| AC-120 | clinicTime formatters > [AC-120] renders in the clinic timezone even when the device timezone differs | Unit | Passed | `frontend/src/lib/clinicTime.test.ts` |
+| AC-121 | clinicTime formatters > [AC-121] uses the one documented format for date, time and date-time | Unit | Passed | `frontend/src/lib/clinicTime.test.ts` |
+| AC-119 | DoctorSchedule timezone label > [AC-119] shows no language selector | Unit | Passed | `frontend/src/screens/DoctorSchedule.test.tsx` |
+| AC-119, AC-120 | DoctorSchedule timezone label > [AC-119][AC-120] labels the schedule with the clinic timezone from settings | Unit | Passed | `frontend/src/screens/DoctorSchedule.test.tsx` |
+| AC-119 | MyAppointments timezone label > [AC-119] shows no language selector | Unit | Passed | `frontend/src/screens/MyAppointments.test.tsx` |
+| AC-119, AC-120 | MyAppointments timezone label > [AC-119][AC-120] labels all times with the clinic timezone from settings | Unit | Passed | `frontend/src/screens/MyAppointments.test.tsx` |
+| AC-119 | test_ac119_an_accept_language_header_changes_no_message | Integration | Passed | `backend/tests/integration/test_language_timezone_acceptance.py` |
+| AC-119 | test_ac119_an_unauthenticated_refusal_is_the_same_english_message_for_everyone | Integration | Passed | `backend/tests/integration/test_language_timezone_acceptance.py` |
+| AC-119 | test_ac119_no_endpoint_offers_or_requires_a_language_choice | Integration | Passed | `backend/tests/integration/test_language_timezone_acceptance.py` |
+| AC-120, NFR-020 | test_ac120_nfr020_a_booked_appointment_is_returned_in_the_clinic_timezone | Integration | Passed | `backend/tests/integration/test_language_timezone_acceptance.py` |
+| AC-120, NFR-020 | test_ac120_nfr020_changing_the_clinic_timezone_moves_every_time_with_it | Integration | Passed | `backend/tests/integration/test_language_timezone_acceptance.py` |
+| AC-120, NFR-020 | test_ac120_nfr020_slot_times_are_in_the_clinic_timezone_and_labelled_with_it | Integration | Passed | `backend/tests/integration/test_language_timezone_acceptance.py` |
+| AC-120, NFR-020 | test_ac120_nfr020_the_device_timezone_never_changes_the_times_shown | Integration | Passed | `backend/tests/integration/test_language_timezone_acceptance.py` |
+| AC-121 | test_ac121_clock_times_use_one_consistent_hh_mm_format | Integration | Passed | `backend/tests/integration/test_language_timezone_acceptance.py` |
+| AC-121 | test_ac121_every_instant_uses_one_iso8601_format_with_an_explicit_offset | Integration | Passed | `backend/tests/integration/test_language_timezone_acceptance.py` |
+| NFR-016 | test_nfr016_backups_and_pitr_are_infrastructure | Integration | Skipped | `backend/tests/integration/test_language_timezone_acceptance.py` |
+| NFR-017 | test_nfr017_sizing_is_infrastructure | Integration | Skipped | `backend/tests/integration/test_language_timezone_acceptance.py` |
 
 ## Project setup
 

@@ -7,7 +7,7 @@ Develop a web-based healthcare appointment management application where patients
 
 The application must use predefined disease-to-specialization mappings to help patients find relevant doctors, without using AI, LLMs, or machine learning. It should prevent double bookings and display real-time appointment availability. **No payment gateway or online payment functionality is required.**
 
-**Documentation version:** v14
+**Documentation version:** v15
 <!-- sdlc:auto:end overview -->
 
 ## Contents
@@ -18,7 +18,7 @@ The application must use predefined disease-to-specialization mappings to help p
 | [Requirements](requirements/README.md) | v1 approved |
 | [Architecture](architecture/README.md) | 44 entries |
 | [Planning](planning/README.md) | 16 entries |
-| [Development](development/README.md) | 6 entries |
+| [Development](development/README.md) | 4 entries |
 | [Testing](testing/README.md) | 0 entries |
 | [Deployment](deployment/README.md) | 1 entry |
 | [Maintenance](maintenance/README.md) | 0 entries |
@@ -27,12 +27,12 @@ The application must use predefined disease-to-specialization mappings to help p
 | [Decisions (ADRs)](architecture/adr/README.md) | 4 decisions |
 | [Sprint plan](development/sprint-plan.md) | 8 sprints |
 | [Developer guide](development/developer-guide.md) | generated |
-| [API reference](development/api-reference.md) | 21 routes |
+| [API reference](development/api-reference.md) | 28 routes |
 | [Test report](testing/test-report.md) | not run yet |
-| [Tests](testing/test-cases.md) | 344 tests |
+| [Tests](testing/test-cases.md) | 437 tests |
 | [Deployment guide](deployment/deployment-guide.md) | deployed |
 | [Runbook](deployment/runbook.md) | deployed |
 | [Release notes](deployment/release-notes.md) | 2 releases |
 | [Traceability matrix](traceability-matrix.md) | 32 requirements |
-| [Changelog](CHANGELOG.md) | 14 versions |
+| [Changelog](CHANGELOG.md) | 15 versions |
 <!-- sdlc:auto:end contents -->
