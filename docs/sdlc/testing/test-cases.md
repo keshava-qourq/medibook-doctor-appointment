@@ -3,9 +3,9 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-103 tests · Passed 95 · Failed 0 · Skipped 8 · Not run 0
+103 tests · Passed 94 · Failed 1 · Skipped 8 · Not run 0
 
-Acceptance criteria covered: 17/129 · passing: 14/129
+Acceptance criteria covered: 17/129 · passing: 13/129
 <!-- sdlc:auto:end summary -->
 
 <!-- sdlc:auto:start tests -->
@@ -40,7 +40,7 @@ Acceptance criteria covered: 17/129 · passing: 14/129
 | AC-010 | test_ac010_creates_active_account_hashed_password_and_echoes_initial_password[doctor] | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
 | AC-011 | test_ac011_accepts_contract_new_password_field | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
 | AC-011 | test_ac011_new_password_replaces_old_and_revokes_every_session | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
-| AC-011 | test_ac011_password_reset_missing_user_is_404_empty_body_and_weak_is_422 | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
+| AC-011 | test_ac011_password_reset_missing_user_is_404_empty_body_and_weak_is_422 | Integration | Failed | `backend/tests/unit/test_admin_users.py` |
 | AC-012 | test_ac012_duplicate_email_case_insensitive_is_409_and_creates_nothing | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
 | AC-013 | test_ac013_non_admin_caller_gets_403_empty_body_and_creates_nothing | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
 | AC-013 | test_ac013_unauthenticated_caller_gets_401 | Integration | Passed | `backend/tests/unit/test_admin_users.py` |
