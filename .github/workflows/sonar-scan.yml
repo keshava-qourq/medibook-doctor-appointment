@@ -1,0 +1,30 @@
+# Managed by AI SDLC. Runs the project's SonarQube scan. The token is a
+# repository secret (SONAR_TOKEN), written by the platform or added by the user;
+# it is never committed here.
+name: SonarQube scan
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  sonar:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: sonarsource/sonarqube-scan-action@v4
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - uses: sonarsource/sonarqube-quality-gate-action@v1
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      # Print the scanner's report-task.txt so the backend can read the ceTaskId
+      # from the job log and wait for Sonar to finish before it reads the measures.
+      - name: Report analysis task
+        if: always()
+        shell: bash
+        run: cat .scannerwork/report-task.txt || true
